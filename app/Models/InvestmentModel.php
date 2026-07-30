@@ -120,6 +120,7 @@ class InvestmentModel extends Model
             'total_fees'         => round($totalFees, 2),
             'total_tax'          => round($totalTax, 2),
             'total_net_profit'   => round($totalNetProfit, 2),
+            'base_currency'      => $taxRates['base_currency'] ?? 'INR',
         ];
     }
 }

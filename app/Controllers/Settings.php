@@ -99,4 +99,26 @@ class Settings extends BaseController
 
         return redirect()->to('/settings')->with('success', 'Password changed successfully.');
     }
+
+    public function updateBaseCurrency()
+    {
+        $userId = current_user_id();
+        $model = new UserModel();
+
+        $currency = strtoupper(trim($this->request->getPost('base_currency')));
+        $validCurrencies = ['INR', 'USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'SGD'];
+
+        if (!in_array($currency, $validCurrencies, true)) {
+            return redirect()->back()->with('error', 'Invalid currency code.');
+        }
+
+        $model->update($userId, ['base_currency' => $currency]);
+
+        $session = session();
+        $user = $session->get('user');
+        $user['base_currency'] = $currency;
+        $session->set('user', $user);
+
+        return redirect()->to('/settings')->with('success', 'Base currency updated to ' . $currency . '.');
+    }
 }

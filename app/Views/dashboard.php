@@ -36,7 +36,7 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-400 text-sm mb-1">Total Invested</p>
-                    <p id="dashInvested" class="text-3xl font-bold text-white"><?= format_price($portfolio['total_invested']) ?></p>
+                    <p id="dashInvested" class="text-3xl font-bold text-white"><?= format_price_dual($portfolio['total_invested'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
                 </div>
                 <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
                     <i class="fas fa-coins text-purple-400 text-xl"></i>
@@ -49,7 +49,7 @@
                 <div>
                     <p class="text-gray-400 text-sm mb-1">Net P/L</p>
                     <p id="dashNetPL" class="text-3xl font-bold <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                        <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_net_profit']) ?>
+                        <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($portfolio['total_net_profit'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?>
                     </p>
                 </div>
                 <div id="dashNetIcon" class="w-12 h-12 <?= $portfolio['total_net_profit'] >= 0 ? 'bg-green-900/30' : 'bg-red-900/30' ?> rounded-lg flex items-center justify-center">
@@ -84,33 +84,37 @@
                 </thead>
                 <tbody>
                     <?php foreach ($investmentDetails as $inv): ?>
-                    <?php $dashInv = [
-                        'id' => (int) $inv['stock_id'],
-                        'shares' => (float) $inv['shares'],
-                        'buyPrice' => (float) $inv['buy_price'],
-                        'invested' => (float) $inv['total_invested'],
-                        'buyDate' => $inv['buy_date'] ?? date('Y-m-d'),
-                    ]; ?>
+                    <?php 
+                        $currency = $inv['currency'] ?? 'INR';
+                        $baseCurrency = $inv['base_currency'] ?? 'INR';
+                        $dashInv = [
+                            'id' => (int) $inv['stock_id'],
+                            'shares' => (float) $inv['shares'],
+                            'buyPrice' => (float) $inv['buy_price'],
+                            'invested' => (float) $inv['total_invested'],
+                            'buyDate' => $inv['buy_date'] ?? date('Y-m-d'),
+                        ];
+                    ?>
                     <tr class="dash-inv-row border-b border-gray-700/50 hover:bg-navy/50" data-inv='<?= json_encode($dashInv) ?>'>
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
-                        <td class="px-6 py-4 text-gray-300 dash-bp"><?= format_price($inv['buy_price']) ?></td>
-                        <td class="px-6 py-4 text-gray-300 dash-cp"><?= format_price($inv['current_price']) ?></td>
+                        <td class="px-6 py-4 text-gray-300 dash-bp"><?= format_price_dual($inv['buy_price'] ?? 0, $currency, $baseCurrency) ?></td>
+                        <td class="px-6 py-4 text-gray-300 dash-cp"><?= format_price_dual($inv['current_price'] ?? 0, $currency, $baseCurrency) ?></td>
                         <td class="px-6 py-4 text-gray-300"><?= (int) $inv['shares'] ?></td>
-                        <td class="px-6 py-4 text-gray-300 dash-invested"><?= format_price($inv['total_invested']) ?></td>
-                        <td class="px-6 py-4 text-gray-300 dash-value"><?= format_price($inv['current_value']) ?></td>
+                        <td class="px-6 py-4 text-gray-300 dash-invested"><?= format_price_dual($inv['total_invested'] ?? 0, $currency, $baseCurrency) ?></td>
+                        <td class="px-6 py-4 text-gray-300 dash-value"><?= format_price_dual($inv['current_value'] ?? 0, $currency, $baseCurrency) ?></td>
                         <td class="px-6 py-4 dash-pl <?= $inv['gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                            <span class="dash-gross"><?= $inv['gross_profit'] >= 0 ? '+' : '' ?><?= format_price($inv['gross_profit']) ?></span>
+                            <span class="dash-gross"><?= $inv['gross_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($inv['gross_profit'] ?? 0, $currency, $baseCurrency) ?></span>
                             <div class="text-xs dash-gpct <?= $inv['gross_profit_pct'] >= 0 ? 'text-green-500' : 'text-red-500' ?>">
                                 <?= $inv['gross_profit_pct'] >= 0 ? '+' : '' ?><?= $inv['gross_profit_pct'] ?>%
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-orange-400 text-sm dash-fees"><?= format_price($inv['total_fees']) ?></td>
-                        <td class="px-6 py-4 text-yellow-400 text-sm dash-tax"><?= format_price($inv['total_tax']) ?></td>
+                        <td class="px-6 py-4 text-orange-400 text-sm dash-fees"><?= format_price_dual($inv['total_fees'] ?? 0, $currency, $baseCurrency) ?></td>
+                        <td class="px-6 py-4 text-yellow-400 text-sm dash-tax"><?= format_price_dual($inv['total_tax'] ?? 0, $currency, $baseCurrency) ?></td>
                         <td class="px-6 py-4 dash-net <?= $inv['net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?> font-semibold">
-                            <span class="dash-net-val"><?= $inv['net_profit'] >= 0 ? '+' : '' ?><?= format_price($inv['net_profit']) ?></span>
+                            <span class="dash-net-val"><?= $inv['net_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($inv['net_profit'] ?? 0, $currency, $baseCurrency) ?></span>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -122,34 +126,37 @@
 
     <?php if (!empty($investmentDetails)): ?>
     <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-8" id="dashSummary">
-        <h2 class="text-white font-bold text-lg mb-4">Portfolio Summary</h2>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-white font-bold text-lg">Portfolio Summary</h2>
+            <span class="text-gray-400 text-xs">Base Currency: <?= esc($portfolio['base_currency'] ?? 'INR') ?></span>
+        </div>
         <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
             <div class="text-center p-4 bg-navy rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Invested</p>
-                <p id="dashSumInvested" class="text-white font-bold"><?= format_price($portfolio['total_invested']) ?></p>
+                <p id="dashSumInvested" class="text-white font-bold"><?= format_price_dual($portfolio['total_invested'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
             <div class="text-center p-4 bg-navy rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Current Value</p>
-                <p id="dashSumValue" class="text-white font-bold"><?= format_price($portfolio['total_current_value']) ?></p>
+                <p id="dashSumValue" class="text-white font-bold"><?= format_price_dual($portfolio['total_current_value'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
             <div class="text-center p-4 bg-navy rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Gross P/L</p>
                 <p id="dashSumGross" class="font-bold <?= $portfolio['total_gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                    <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_gross_profit']) ?>
+                    <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($portfolio['total_gross_profit'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?>
                 </p>
             </div>
             <div class="text-center p-4 bg-navy rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Fees</p>
-                <p id="dashSumFees" class="text-orange-400 font-bold"><?= format_price($portfolio['total_fees'] ?? 0) ?></p>
+                <p id="dashSumFees" class="text-orange-400 font-bold"><?= format_price_dual($portfolio['total_fees'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
             <div class="text-center p-4 bg-navy rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Tax</p>
-                <p id="dashSumTax" class="text-yellow-400 font-bold"><?= format_price($portfolio['total_tax']) ?></p>
+                <p id="dashSumTax" class="text-yellow-400 font-bold"><?= format_price_dual($portfolio['total_tax'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
             <div class="text-center p-4 bg-navy rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Net P/L</p>
                 <p id="dashSumNet" class="font-bold <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                    <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_net_profit']) ?>
+                    <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($portfolio['total_net_profit'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?>
                 </p>
             </div>
             <div class="text-center p-4 bg-navy rounded-lg">
@@ -209,7 +216,25 @@
         'fee_rates' => $taxRates['fee_rates'] ?? [],
     ]) ?>;
 
-    function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    var BASE_CURRENCY = '<?= esc($portfolio['base_currency'] ?? 'INR') ?>';
+    var CURRENCY_SYMBOLS = {
+        'INR': '₹', 'USD': '$', 'EUR': '€', 'GBP': '£',
+        'JPY': '¥', 'AUD': 'A$', 'CAD': 'C$', 'CHF': 'CHF ',
+        'CNY': '¥', 'SGD': 'S$'
+    };
+
+    function formatPrice(v, currency) {
+        currency = currency || BASE_CURRENCY;
+        var sym = CURRENCY_SYMBOLS[currency] || (currency + ' ');
+        return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatPriceDual(v, nativeCurrency) {
+        if (!nativeCurrency || nativeCurrency === BASE_CURRENCY) return formatPrice(v, BASE_CURRENCY);
+        // Note: JS cannot do real-time FX conversion, so we show native only here
+        // Server-side rendered values have both native and converted
+        return formatPrice(v, nativeCurrency);
+    }
 
     function calcFees(amount) {
         var r = TAX_CFG.fee_rates || {};
@@ -300,13 +325,15 @@
             var net = row.querySelector('.dash-net');
             var netVal = row.querySelector('.dash-net-val');
 
-            if (cp) cp.textContent = formatPrice(livePrice);
-            if (val) val.textContent = formatPrice(currentValue);
-            if (gross) gross.textContent = (grossProfit >= 0 ? '+' : '') + formatPrice(grossProfit);
+            var nativeCurrency = inv.currency || 'INR';
+
+            if (cp) cp.textContent = formatPrice(livePrice, nativeCurrency);
+            if (val) val.textContent = formatPrice(currentValue, nativeCurrency);
+            if (gross) gross.textContent = (grossProfit >= 0 ? '+' : '') + formatPrice(grossProfit, nativeCurrency);
             if (gpct) gpct.textContent = (grossPct >= 0 ? '+' : '') + grossPct.toFixed(2) + '%';
-            if (feesEl) feesEl.textContent = formatPrice(fees);
-            if (taxEl) taxEl.textContent = formatPrice(tax);
-            if (netVal) netVal.textContent = (netProfit >= 0 ? '+' : '') + formatPrice(netProfit);
+            if (feesEl) feesEl.textContent = formatPrice(fees, nativeCurrency);
+            if (taxEl) taxEl.textContent = formatPrice(tax, nativeCurrency);
+            if (netVal) netVal.textContent = (netProfit >= 0 ? '+' : '') + formatPrice(netProfit, nativeCurrency);
 
             if (grossProfit >= 0) {
                 if (pl) pl.className = 'px-6 py-4 dash-pl text-green-400';
@@ -324,8 +351,8 @@
         var dIcon = document.getElementById('dashNetIcon');
         var dLink = document.getElementById('dashNetLink');
 
-        if (dInv) dInv.textContent = formatPrice(totalInvested);
-        if (dNet) { dNet.textContent = (totalNet >= 0 ? '+' : '') + formatPrice(totalNet); dNet.className = 'text-3xl font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
+        if (dInv) dInv.textContent = formatPrice(totalInvested, BASE_CURRENCY);
+        if (dNet) { dNet.textContent = (totalNet >= 0 ? '+' : '') + formatPrice(totalNet, BASE_CURRENCY); dNet.className = 'text-3xl font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
         if (dIcon) { dIcon.className = 'w-12 h-12 ' + (totalNet >= 0 ? 'bg-green-900/30' : 'bg-red-900/30') + ' rounded-lg flex items-center justify-center'; dIcon.querySelector('i').className = 'fas fa-chart-line ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400') + ' text-xl'; }
         if (dLink) { dLink.className = (totalNet >= 0 ? 'text-green-400' : 'text-red-400') + ' text-sm mt-2 inline-block'; }
 
@@ -336,11 +363,11 @@
         var sn = document.getElementById('dashSumNet');
         var sr = document.getElementById('dashSumReturn');
 
-        if (sv) sv.textContent = formatPrice(totalValue);
-        if (sg) { sg.textContent = (totalGross >= 0 ? '+' : '') + formatPrice(totalGross); sg.className = 'font-bold ' + (totalGross >= 0 ? 'text-green-400' : 'text-red-400'); }
-        if (sf) sf.textContent = formatPrice(totalFees);
-        if (st) st.textContent = formatPrice(totalTax);
-        if (sn) { sn.textContent = (totalNet >= 0 ? '+' : '') + formatPrice(totalNet); sn.className = 'font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
+        if (sv) sv.textContent = formatPrice(totalValue, BASE_CURRENCY);
+        if (sg) { sg.textContent = (totalGross >= 0 ? '+' : '') + formatPrice(totalGross, BASE_CURRENCY); sg.className = 'font-bold ' + (totalGross >= 0 ? 'text-green-400' : 'text-red-400'); }
+        if (sf) sf.textContent = formatPrice(totalFees, BASE_CURRENCY);
+        if (st) st.textContent = formatPrice(totalTax, BASE_CURRENCY);
+        if (sn) { sn.textContent = (totalNet >= 0 ? '+' : '') + formatPrice(totalNet, BASE_CURRENCY); sn.className = 'font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
         if (sr) { sr.textContent = (totalInvested > 0 ? ((totalNet / totalInvested) * 100).toFixed(2) : 0) + '%'; sr.className = 'font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
     }
 

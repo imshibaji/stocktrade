@@ -62,6 +62,7 @@ class Stocks extends BaseController
         $symbol = strtoupper(trim($this->request->getPost('symbol')));
         $name = trim($this->request->getPost('name'));
         $sector = trim($this->request->getPost('sector'));
+        $exchange = strtoupper(trim($this->request->getPost('exchange') ?? 'NSE'));
         $price = (float) $this->request->getPost('price');
 
         if (empty($symbol) || empty($name) || empty($sector) || $price <= 0) {
@@ -80,6 +81,7 @@ class Stocks extends BaseController
             'symbol'         => $symbol,
             'name'           => $name,
             'sector'         => $sector,
+            'exchange'       => $exchange,
             'current_price'  => $price,
             'previous_close' => round($price * 0.99, 2),
             'market_cap'     => null,
@@ -158,8 +160,9 @@ class Stocks extends BaseController
         }
 
         $yahoo = new YahooFinanceService();
+        $exchange = $stock['exchange'] ?? 'NSE';
         try {
-            $quote = $yahoo->getQuote($stock['symbol']);
+            $quote = $yahoo->getQuote($stock['symbol'], $exchange);
             if ($quote) {
                 $data = $yahoo->quoteToArray($quote);
                 if (($data['regularMarketPrice'] ?? null) !== null) {

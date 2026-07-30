@@ -111,6 +111,35 @@
         </form>
     </div>
 
+    <div class="bg-navy2 rounded-xl border border-gray-700 p-8 mb-6">
+        <h2 class="text-white font-bold text-lg mb-6 flex items-center">
+            <i class="fas fa-globe text-gold mr-2"></i>Base Currency
+        </h2>
+
+        <form action="/settings/update-base-currency" method="post">
+            <?= csrf_field() ?>
+            <div class="mb-4">
+                <label class="block text-gray-300 mb-2 text-sm">Default Display Currency</label>
+                <select name="base_currency" class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none">
+                    <option value="INR" <?= ($user['base_currency'] ?? 'INR') === 'INR' ? 'selected' : '' ?>>INR - Indian Rupee</option>
+                    <option value="USD" <?= ($user['base_currency'] ?? 'INR') === 'USD' ? 'selected' : '' ?>>USD - US Dollar</option>
+                    <option value="EUR" <?= ($user['base_currency'] ?? 'INR') === 'EUR' ? 'selected' : '' ?>>EUR - Euro</option>
+                    <option value="GBP" <?= ($user['base_currency'] ?? 'INR') === 'GBP' ? 'selected' : '' ?>>GBP - British Pound</option>
+                    <option value="JPY" <?= ($user['base_currency'] ?? 'INR') === 'JPY' ? 'selected' : '' ?>>JPY - Japanese Yen</option>
+                    <option value="AUD" <?= ($user['base_currency'] ?? 'INR') === 'AUD' ? 'selected' : '' ?>>AUD - Australian Dollar</option>
+                    <option value="CAD" <?= ($user['base_currency'] ?? 'INR') === 'CAD' ? 'selected' : '' ?>>CAD - Canadian Dollar</option>
+                    <option value="CHF" <?= ($user['base_currency'] ?? 'INR') === 'CHF' ? 'selected' : '' ?>>CHF - Swiss Franc</option>
+                    <option value="CNY" <?= ($user['base_currency'] ?? 'INR') === 'CNY' ? 'selected' : '' ?>>CNY - Chinese Yuan</option>
+                    <option value="SGD" <?= ($user['base_currency'] ?? 'INR') === 'SGD' ? 'selected' : '' ?>>SGD - Singapore Dollar</option>
+                </select>
+                <p class="text-gray-500 text-xs mt-1">All portfolio values and P/L will be displayed in this currency. Exchange rates fetched live from Yahoo Finance.</p>
+            </div>
+            <button type="submit" class="bg-gold hover:bg-gold2 text-navy font-semibold px-6 py-3 rounded-lg text-sm transition">
+                <i class="fas fa-save mr-2"></i>Save Base Currency
+            </button>
+        </form>
+    </div>
+
     <div class="bg-navy2 rounded-xl border border-gray-700 p-8">
         <h2 class="text-white font-bold text-lg mb-6 flex items-center">
             <i class="fas fa-lock text-gold mr-2"></i>Change Password

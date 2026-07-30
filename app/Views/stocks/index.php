@@ -31,12 +31,21 @@
     <div id="addStockForm" class="hidden bg-navy2 rounded-xl border border-gray-700 p-6 mb-6">
         <h3 class="text-lg font-semibold text-white mb-4">Add New Stock</h3>
         <form id="addStockFormEl" onsubmit="return false;">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Symbol *</label>
                     <input type="text" id="addSymbol" placeholder="e.g. RELIANCE"
                         class="w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-gold focus:outline-none uppercase">
                     <p id="addSymbolStatus" class="text-xs mt-1 hidden"></p>
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-sm mb-1">Exchange</label>
+                    <select id="addExchange"
+                        class="w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-gold focus:outline-none">
+                        <option value="NSE" selected>NSE</option>
+                        <option value="BSE">BSE</option>
+                        <option value="GLOBAL">GLOBAL</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Name</label>
@@ -58,7 +67,7 @@
                 <button type="button" onclick="toggleAddForm()" class="px-4 py-2 rounded-lg bg-navy border border-gray-600 text-gray-300 hover:text-white transition">
                     Cancel
                 </button>
-                <button type="button" id="addSubmitBtn" class="px-6 py-2 rounded-lg bg-gold hover:bg-gold2 text-navy font-semibold transition" disabled onclick="window.importStockFromForm()">
+                <button type="button" id="addSubmitBtn" class="px-6 py-2 rounded-lg bg-gold hover:bg-gold2 text-navy font-semibold transition disabled opacity-50 cursor-not-allowed" disabled onclick="window.importStockFromForm()">
                     <i class="fas fa-plus mr-1"></i> Add Stock
                 </button>
             </div>
@@ -184,7 +193,8 @@
 
         if (s.from_yahoo) {
             var sym = escHtml(s.symbol);
-            return '<div class="stock-card bg-navy2 rounded-xl p-6 border border-gray-700 hover:border-gold transition relative group opacity-80" onclick="importStock(\'' + sym + '\')" style="cursor:pointer">' +
+            var exch = escHtml(s.exchange || 'NSE');
+            return '<div class="stock-card bg-navy2 rounded-xl p-6 border border-gray-700 hover:border-gold transition relative group opacity-80" onclick="importStock(\'' + sym + '\', \'' + exch + '\')" style="cursor:pointer">' +
                 '<div class="flex justify-between items-start mb-3">' +
                 '<div>' +
                 '<h3 class="text-white font-bold text-lg">' + sym + '</h3>' +
@@ -237,9 +247,9 @@
         return d.innerHTML;
     }
 
-    window.importStock = function(sym) {
+    window.importStock = function(sym, exchange) {
         if (!confirm('Import "' + sym + '" from Yahoo Finance?')) return;
-        var body = CSRF_NAME + '=' + encodeURIComponent(CSRF_HASH) + '&symbol=' + encodeURIComponent(sym);
+        var body = CSRF_NAME + '=' + encodeURIComponent(CSRF_HASH) + '&symbol=' + encodeURIComponent(sym) + '&exchange=' + encodeURIComponent(exchange);
         var cards = document.querySelectorAll('.stock-card');
         cards.forEach(function(c) {
             if (c.textContent.indexOf(sym) >= 0) {
@@ -403,6 +413,7 @@
 
     window.lookupSymbol = function() {
         var sym = document.getElementById('addSymbol').value.trim().toUpperCase();
+        var exchange = document.getElementById('addExchange').value;
         var status = document.getElementById('addSymbolStatus');
         var nameEl = document.getElementById('addName');
         var sectorEl = document.getElementById('addSector');
@@ -420,7 +431,7 @@
         status.textContent = 'Looking up...';
         status.classList.remove('hidden');
 
-        fetch('/api/search?q=' + encodeURIComponent(sym))
+        fetch('/api/search?q=' + encodeURIComponent(sym) + '&exchange=' + encodeURIComponent(exchange))
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var match = null;
@@ -452,7 +463,7 @@
                 } else {
                     status.className = 'text-xs mt-1 text-gray-400';
                     status.textContent = 'Fetching live price...';
-                    fetch('/api/quote/' + encodeURIComponent(sym))
+                    fetch('/api/quote/' + encodeURIComponent(sym) + '?exchange=' + encodeURIComponent(exchange))
                         .then(function(r) { return r.json(); })
                         .then(function(q) {
                             if (q.price && q.price > 0) {
@@ -484,6 +495,7 @@
 
     window.importStockFromForm = function() {
         var sym = document.getElementById('addSymbol').value.trim().toUpperCase();
+        var exchange = document.getElementById('addExchange').value;
         var btn = document.getElementById('addSubmitBtn');
         var status = document.getElementById('addSymbolStatus');
         if (!sym) return;
@@ -492,7 +504,7 @@
         status.className = 'text-xs mt-1 text-gray-400';
         status.textContent = 'Fetching all data from Yahoo Finance live API...';
         status.classList.remove('hidden');
-        var body = CSRF_NAME + '=' + encodeURIComponent(CSRF_HASH) + '&symbol=' + encodeURIComponent(sym);
+        var body = CSRF_NAME + '=' + encodeURIComponent(CSRF_HASH) + '&symbol=' + encodeURIComponent(sym) + '&exchange=' + encodeURIComponent(exchange);
         fetch('/api/stocks/import', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
             .then(function(r) { return r.json(); })
             .then(function(d) {

@@ -57,17 +57,39 @@ class YahooFinanceService
         );
     }
 
-    public static function toYahooSymbol(string $symbol): string
+    public static function toYahooSymbol(string $symbol, string $exchange = 'NSE'): string
     {
+        $symbol = strtoupper(trim($symbol));
+        $exchange = strtoupper(trim($exchange));
+        if (str_ends_with($symbol, '.NS') || str_ends_with($symbol, '.BO')) {
+            return $symbol;
+        }
+        if ($exchange === 'BSE') {
+            return $symbol . '.BO';
+        }
+        if ($exchange === 'GLOBAL') {
+            return $symbol;
+        }
         return $symbol . '.NS';
     }
 
     public static function fromYahooSymbol(string $yahooSymbol): string
     {
-        if (str_ends_with($yahooSymbol, '.NS')) {
-            return substr($yahooSymbol, 0, -3);
+        $symbol = trim($yahooSymbol);
+        if (str_ends_with($symbol, '.NS')) {
+            return substr($symbol, 0, -3);
         }
-        return $yahooSymbol;
+        if (str_ends_with($symbol, '.BO')) {
+            return substr($symbol, 0, -3);
+        }
+        return $symbol;
+    }
+
+    public static function detectExchange(string $symbol): string
+    {
+        if (str_ends_with($symbol, '.NS')) return 'NSE';
+        if (str_ends_with($symbol, '.BO')) return 'BSE';
+        return 'GLOBAL';
     }
 
     public function search(string $query): array
@@ -75,19 +97,19 @@ class YahooFinanceService
         return $this->client->search($query);
     }
 
-    public function getHistoricalData(string $symbol, string $interval, \DateTimeInterface $start, \DateTimeInterface $end): array
+    public function getHistoricalData(string $symbol, string $interval, \DateTimeInterface $start, \DateTimeInterface $end, string $exchange = 'NSE'): array
     {
-        return $this->client->getHistoricalQuoteData($symbol, $interval, $start, $end);
+        return $this->client->getHistoricalQuoteData(self::toYahooSymbol($symbol, $exchange), $interval, $start, $end);
     }
 
-    public function getDividends(string $symbol, \DateTimeInterface $start, \DateTimeInterface $end): array
+    public function getDividends(string $symbol, \DateTimeInterface $start, \DateTimeInterface $end, string $exchange = 'NSE'): array
     {
-        return $this->client->getHistoricalDividendData($symbol, $start, $end);
+        return $this->client->getHistoricalDividendData(self::toYahooSymbol($symbol, $exchange), $start, $end);
     }
 
-    public function getSplits(string $symbol, \DateTimeInterface $start, \DateTimeInterface $end): array
+    public function getSplits(string $symbol, \DateTimeInterface $start, \DateTimeInterface $end, string $exchange = 'NSE'): array
     {
-        return $this->client->getHistoricalSplitData($symbol, $start, $end);
+        return $this->client->getHistoricalSplitData(self::toYahooSymbol($symbol, $exchange), $start, $end);
     }
 
     public function getExchangeRate(string $from, string $to): ?Quote
@@ -95,15 +117,15 @@ class YahooFinanceService
         return $this->client->getExchangeRate($from, $to);
     }
 
-    public function getOptions(string $symbol): array
+    public function getOptions(string $symbol, string $exchange = 'NSE'): array
     {
-        return $this->client->getOptionChain($symbol);
+        return $this->client->getOptionChain(self::toYahooSymbol($symbol, $exchange));
     }
 
-    public function getSummary(string $symbol, array $modules = []): array
+    public function getSummary(string $symbol, string $exchange = 'NSE', array $modules = []): array
     {
         try {
-            $results = $this->client->getStockSummary(self::toYahooSymbol($symbol), $modules);
+            $results = $this->client->getStockSummary(self::toYahooSymbol($symbol, $exchange), $modules);
             return $results[0] ?? [];
         } catch (\Throwable $e) {
             log_message('error', "Yahoo summary error for {$symbol}: " . $e->getMessage());
@@ -111,18 +133,18 @@ class YahooFinanceService
         }
     }
 
-    public function getQuote(string $symbol): ?Quote
+    public function getQuote(string $symbol, string $exchange = 'NSE'): ?Quote
     {
-        $quotes = $this->getQuotesFromChartApi([$symbol]);
+        $quotes = $this->getQuotesFromChartApi([$symbol], $exchange);
         return $quotes[0] ?? null;
     }
 
-    public function getQuotes(array $symbols): array
+    public function getQuotes(array $symbols, string $exchange = 'NSE'): array
     {
-        return $this->getQuotesFromChartApi($symbols);
+        return $this->getQuotesFromChartApi($symbols, $exchange);
     }
 
-    public function getQuotesFromChartApi(array $symbols): array
+    public function getQuotesFromChartApi(array $symbols, string $exchange = 'NSE'): array
     {
         $results = [];
         $client = new \GuzzleHttp\Client([
@@ -132,7 +154,7 @@ class YahooFinanceService
 
         $requests = [];
         foreach ($symbols as $sym) {
-            $yahooSym = self::toYahooSymbol($sym);
+            $yahooSym = self::toYahooSymbol($sym, $exchange);
             $requests[$sym] = $client->getAsync(
                 "https://query1.finance.yahoo.com/v8/finance/chart/{$yahooSym}?interval=1d&range=5d"
             );
@@ -211,7 +233,7 @@ class YahooFinanceService
         return $out;
     }
 
-    public function fetchQuotesBySymbols(array $symbols): array
+    public function fetchQuotesBySymbols(array $symbols, string $exchange = 'NSE'): array
     {
         if (empty($symbols)) return [];
 
@@ -231,7 +253,7 @@ class YahooFinanceService
         if ($allCached) return $fromCache;
 
         try {
-            $quotes = $this->getQuotes($symbols);
+            $quotes = $this->getQuotes($symbols, $exchange);
             $results = [];
 
             foreach ($quotes as $quote) {
@@ -253,7 +275,7 @@ class YahooFinanceService
         }
     }
 
-    public function fetchAndUpdateStocks(): array
+    public function fetchAndUpdateStocks(string $exchange = 'NSE'): array
     {
         $stockModel = model('App\Models\StockModel');
         $allStocks = $stockModel->findAll();
@@ -266,7 +288,7 @@ class YahooFinanceService
         if (empty($symbols)) return [];
 
         try {
-            $liveQuotes = $this->fetchQuotesBySymbols($symbols);
+            $liveQuotes = $this->fetchQuotesBySymbols($symbols, $exchange);
         } catch (\Throwable $e) {
             log_message('error', 'Yahoo Finance fetchAndUpdateStocks error: ' . $e->getMessage());
             return [];
@@ -298,11 +320,11 @@ class YahooFinanceService
         return $updated;
     }
 
-    public function enrichStocks(array $stocks): array
+    public function enrichStocks(array $stocks, string $exchange = 'NSE'): array
     {
         if (empty($stocks)) return $stocks;
         $symbols = array_column($stocks, 'symbol');
-        $quotes = $this->fetchQuotesBySymbols($symbols);
+        $quotes = $this->fetchQuotesBySymbols($symbols, $exchange);
         foreach ($stocks as &$stock) {
             $sym = $stock['symbol'];
             $q = $quotes[$sym] ?? null;
@@ -333,7 +355,7 @@ class YahooFinanceService
         file_put_contents($path, json_encode($data), LOCK_EX);
     }
 
-    public function getQuoteSummary(string $symbol): array
+    public function getQuoteSummary(string $symbol, string $exchange = 'NSE'): array
     {
         $cache = self::readSummaryCache();
         $now = time();
@@ -346,7 +368,7 @@ class YahooFinanceService
         $data = [];
 
         try {
-            $result = $this->getSummary($symbol, [
+            $result = $this->getSummary($symbol, $exchange, [
                 'summaryProfile', 'summaryDetail', 'defaultKeyStatistics',
                 'financialData', 'calendarEvents', 'price', 'quoteType'
             ]);

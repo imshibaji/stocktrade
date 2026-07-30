@@ -66,6 +66,7 @@ class Api extends BaseController
     public function search()
     {
         $query = $this->request->getGet('q');
+        $exchange = strtoupper(trim($this->request->getGet('exchange') ?? 'NSE'));
         if (!$query || trim($query) === '') {
             return $this->response->setJSON(['results' => [], 'query' => '']);
         }
@@ -76,7 +77,7 @@ class Api extends BaseController
         if (empty($results) && preg_match('/^[A-Za-z0-9.]{1,15}$/', trim($query))) {
             $symbol = strtoupper(trim($query));
             $yahoo = new YahooFinanceService();
-            $quote = $yahoo->getQuote($symbol);
+            $quote = $yahoo->getQuote($symbol, $exchange);
             if ($quote) {
                 $d = $yahoo->quoteToArray($quote);
                 $results[] = [
@@ -87,6 +88,7 @@ class Api extends BaseController
                     'current_price'  => $d['regularMarketPrice'],
                     'previous_close' => $d['regularMarketPreviousClose'],
                     'from_yahoo'     => true,
+                    'exchange'       => $exchange,
                 ];
             }
         }
@@ -98,6 +100,7 @@ class Api extends BaseController
                 'symbol' => $s['symbol'],
                 'name'   => $s['name'],
                 'sector' => $s['sector'],
+                'exchange' => $s['exchange'] ?? $exchange,
                 'price'  => $s['current_price'] ? (float) $s['current_price'] : null,
                 'change' => null,
                 'change_percent' => null,
@@ -144,6 +147,7 @@ class Api extends BaseController
     public function importStock()
     {
         $symbol = strtoupper(trim($this->request->getPost('symbol')));
+        $exchange = strtoupper(trim($this->request->getPost('exchange') ?? 'NSE'));
         if (!$symbol) {
             return $this->response->setJSON([
                 'success' => false,
@@ -164,7 +168,7 @@ class Api extends BaseController
 
         $yahoo = new YahooFinanceService();
 
-        $quote = $yahoo->getQuote($symbol);
+        $quote = $yahoo->getQuote($symbol, $exchange);
         if (!$quote) {
             return $this->response->setJSON([
                 'success' => false,
@@ -189,6 +193,7 @@ class Api extends BaseController
             'symbol'         => $symbol,
             'name'           => $name,
             'sector'         => $sector,
+            'exchange'       => $exchange,
             'current_price'  => $d['regularMarketPrice'],
             'previous_close' => $d['regularMarketPreviousClose'] ?? round($price * 0.99, 2),
             'market_cap'     => $d['marketCap'],
@@ -279,11 +284,11 @@ class Api extends BaseController
 
         $yahoo = new YahooFinanceService();
 
-        $quotes = $yahoo->getQuotesFromChartApi([$symbol]);
+        $quotes = $yahoo->getQuotesFromChartApi([$symbol], 'GLOBAL');
         $quote = $quotes[0] ?? null;
         $d = $quote ? $yahoo->quoteToArray($quote) : [];
 
-        $summary = $yahoo->getQuoteSummary($symbol);
+        $summary = $yahoo->getQuoteSummary($symbol, 'GLOBAL');
 
         $price = $summary['regular_market_price'] ?? ($d['regularMarketPrice'] ?? null);
         $prevClose = $summary['previous_close'] ?? ($d['regularMarketPreviousClose'] ?? null);
@@ -428,7 +433,7 @@ class Api extends BaseController
 
         try {
             $client = $this->getClient();
-            $results = $client->search($queryInput, region: "IN");
+            $results = $client->search($queryInput, region: "GLOBAL");
 
             return $this->response->setStatusCode(200)->setJSON($results);
         } catch (\Exception $e) {

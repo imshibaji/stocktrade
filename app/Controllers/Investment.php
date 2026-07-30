@@ -19,12 +19,22 @@ class Investment extends BaseController
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
             'fee_rates' => $user,
+            'base_currency' => $user['base_currency'] ?? 'INR',
         ];
 
         $investments = $investmentModel->getUserInvestments($userId);
         $portfolio = $investmentModel->getPortfolioSummary($userId, $taxRates);
         $stocks = $stockModel->findAll();
         $stocks = (new YahooFinanceService())->enrichStocks($stocks);
+
+        $stockCurrencyMap = [];
+        foreach ($stocks as $s) {
+            $stockCurrencyMap[$s['id']] = $s['currency'] ?? 'INR';
+        }
+        foreach ($investments as &$inv) {
+            $inv['currency'] = $stockCurrencyMap[$inv['stock_id']] ?? 'INR';
+        }
+        unset($inv);
 
         $data = [
             'title'       => 'My Investments - StockTrade Tips',
@@ -274,6 +284,7 @@ class Investment extends BaseController
     {
         $userId = current_user_id();
         $investmentModel = new InvestmentModel();
+        $stockModel = new StockModel();
         $user = current_user();
 
         $taxRates = [
@@ -283,6 +294,15 @@ class Investment extends BaseController
         ];
 
         $portfolio = $investmentModel->getPortfolioSummary($userId, $taxRates);
+
+        $stocks = $stockModel->findAll();
+        $stocks = (new YahooFinanceService())->enrichStocks($stocks);
+
+        $stockCurrencyMap = [];
+        foreach ($stocks as $s) {
+            $stockCurrencyMap[$s['id']] = $s['currency'] ?? 'INR';
+        }
+        $portfolio['base_currency'] = $user['base_currency'] ?? 'INR';
 
         $data = [
             'title'     => 'Portfolio Summary - StockTrade Tips',
@@ -371,6 +391,8 @@ class Investment extends BaseController
         $userId = current_user_id();
         $txModel = new \App\Models\SellTransactionModel();
         $transactions = $txModel->getUserTransactions($userId);
+        $user = current_user();
+        $baseCurrency = $user['base_currency'] ?? 'INR';
 
         $totalGross = 0;
         $totalSellValue = 0;
@@ -396,6 +418,7 @@ class Investment extends BaseController
             'totalFees'     => $totalFees,
             'totalTax'      => $totalTax,
             'totalNet'      => $totalNet,
+            'baseCurrency'  => $baseCurrency,
         ];
 
         return view('templates/header', $data)
