@@ -24,9 +24,6 @@
                         <i class="fas fa-chart-line text-gold text-2xl"></i>
                         <span class="text-xl font-bold text-gold hidden sm:inline">StockTrade<span class="text-white">Tips</span></span>
                     </a>
-                    <span id="navMarketBadge" class="hidden md:inline text-xs px-2 py-1 rounded-full border border-gray-600 text-gray-400">
-                        <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>
-                    </span>
                 </div>
 
                 <!-- Center: Search bar (desktop) -->
@@ -190,7 +187,14 @@
                                 }
                                 h += '<div class="flex justify-between items-center px-4 py-3 hover:bg-navy border-b border-gray-700/50 last:border-0">' +
                                     '<div class="min-w-0 flex-1"><span class="text-white text-sm font-semibold">' + eh(s.symbol) + '</span> <span class="text-gray-500 text-xs truncate">' + eh(s.name) + '</span></div>' +
-                                    '<div class="text-right ml-3"><span class="text-white text-sm">' + ps + '</span> ' + cs + '</div></div>';
+                                    '<div class="text-right ml-3 flex items-center space-x-2">' +
+                                    '<div><span class="text-white text-sm">' + ps + '</span> ' + cs + '</div>';
+                                if (s.from_yahoo) {
+                                    h += '<button onclick="importStock(\'' + eh(s.symbol) + '\', \'' + eh(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-gold text-navy font-semibold hover:bg-gold2 transition whitespace-nowrap">+ Add</button>';
+                                } else {
+                                    h += '<a href="/stocks/' + s.id + '" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
+                                }
+                                h += '</div></div>';
                             });
                             sd.innerHTML = h;
                             sd.classList.remove('hidden');
@@ -287,19 +291,18 @@
         return d.innerHTML;
     }
 
-    function importStock(sym) {
-        var body = '<?= csrf_token() ?>=' + encodeURIComponent('<?= csrf_hash() ?>') + '&symbol=' + encodeURIComponent(sym);
-        var btn = document.querySelector('[data-import="' + sym + '"]');
-        if (!btn) return;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    window.importStock = function(sym, exchange) {
+        exchange = exchange || 'NSE';
+        var body = '<?= csrf_token() ?>=' + encodeURIComponent('<?= csrf_hash() ?>') + '&symbol=' + encodeURIComponent(sym) + '&exchange=' + encodeURIComponent(exchange);
+        var btns = document.querySelectorAll('[data-import="' + sym + '"]');
+        btns.forEach(function(btn) { if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; } });
         fetch('/api/stocks/import', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
             .then(function(r){ return r.json(); })
             .then(function(d){
-                if (d.success) { window.location.href = '/watchlist'; }
-                else { alert(d.message); btn.disabled = false; btn.innerHTML = '+ Add'; }
+                if (d.success) { window.location.reload(); }
+                else { alert(d.message); btns.forEach(function(btn) { if (btn) { btn.disabled = false; btn.innerHTML = '+ Add'; } }); }
             })
-            .catch(function(){ alert('Failed to import.'); if(btn){btn.disabled=false;btn.innerHTML='+ Add';} });
+            .catch(function(){ alert('Failed to import.'); btns.forEach(function(btn) { if (btn) { btn.disabled = false; btn.innerHTML = '+ Add'; } }); });
     }
 
     searchInput.addEventListener('input', function() {
@@ -328,7 +331,14 @@
                             '<span class="text-white text-sm font-semibold">' + escHtml(s.symbol) + '</span> ' +
                             '<span class="text-gray-500 text-xs truncate">' + escHtml(s.name) + '</span>' +
                             '</div>' +
-                            '<div class="text-right ml-3"><span class="text-white text-sm">' + priceStr + '</span> ' + changeStr + '</div>' +
+                            '<div class="text-right ml-3 flex items-center space-x-2">' +
+                            '<div><span class="text-white text-sm">' + priceStr + '</span> ' + changeStr + '</div>';
+                        if (s.from_yahoo) {
+                            html += '<button data-import="' + escHtml(s.symbol) + '" onclick="importStock(\'' + escHtml(s.symbol) + '\', \'' + escHtml(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-gold text-navy font-semibold hover:bg-gold2 transition whitespace-nowrap">+ Add</button>';
+                        } else {
+                            html += '<a href="/stocks/' + s.id + '" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
+                        }
+                        html += '</div>' +
                             '</div>';
                     });
                     searchDropdown.innerHTML = html;

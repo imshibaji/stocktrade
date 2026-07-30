@@ -12,42 +12,61 @@ class Api extends BaseController
         $this->response->setHeader('Cache-Control', "public, max-age={$ttl}, s-maxage={$ttl}");
     }
 
-    public function livePrices()
+    public function index()
     {
-        $this->setApiCache(5);
-        $stockModel = new StockModel();
-        $stocks = $stockModel->select('id, symbol, name, exchange, current_price, previous_close')->findAll();
-
-        $currencySymbols = ['INR' => '₹', 'USD' => '$', 'EUR' => '€', 'GBP' => '£', 'JPY' => '¥', 'AUD' => 'A$', 'CAD' => 'C$', 'CHF' => 'CHF ', 'CNY' => '¥', 'SGD' => 'S$'];
-
-        $result = [];
-        foreach ($stocks as $stock) {
-            $exchange = $stock['exchange'] ?? 'NSE';
-            $currency = in_array($exchange, ['NSE', 'BSE']) ? 'INR' : 'USD';
-            $price = (float) $stock['current_price'];
-            $previous = (float) $stock['previous_close'];
-            $change = $price - $previous;
-            $changePercent = $previous > 0 ? ($change / $previous) * 100 : 0;
-
-            $result[] = [
-                'id'             => (int) $stock['id'],
-                'symbol'         => $stock['symbol'],
-                'name'           => $stock['name'],
-                'exchange'       => $exchange,
-                'currency'       => $currency,
-                'currency_symbol'=> $currencySymbols[$currency] ?? $currency . ' ',
-                'current_price'  => round($price, 2),
-                'price'          => round($price, 2),
-                'previous_close' => round($previous, 2),
-                'change'         => round($change, 2),
-                'change_percent' => round($changePercent, 2),
-            ];
-        }
-
         return $this->response->setJSON([
-            'market'  => market_status(),
-            'stocks'  => $result,
-            'updated' => date('H:i:s'),
+            'app_name' => 'Trade API',
+            'status'   => 'OK',
+            'version'  => '1.0.0',
+            'timestamp' => time(),
+            'search' => [
+                'url'   => '/api/search/recltd',
+                'query' => 'RECLTD',
+            ],
+            'quote' => [
+                'url'      => '/api/quote/pfc/nse',
+                'symbol'   => 'PFC',
+                'exchange' => 'NSE',
+            ],
+            'quotes' => [
+                'url'      => '/api/quotes/pfc,pnb/nse',
+                'symbol'   => 'PFC,PNB',
+                'exchange' => 'NSE',
+            ],
+            'historical' => [
+                'url'      => '/api/historical/pfc/nse/14 days',
+                'symbol'   => 'PFC',
+                'exchange' => 'NSE',
+                'time'     => '14 days',
+            ],
+            'dividends' => [
+                'url'      => '/api/dividends/pfc/nse/5 years',
+                'symbol'   => 'PFC',
+                'exchange' => 'NSE',
+                'time'     => '5 years',
+            ],
+            'splits' => [
+                'url'      => '/api/splits/pfc/nse/5 years',
+                'symbol'   => 'PFC',
+                'exchange' => 'NSE',
+                'time'     => '5 years',
+            ],
+            'option' => [
+                'url'      => '/api/options/pfc/nse',
+                'symbol'   => 'PFC',
+                'exchange' => 'NSE',
+            ],
+            'exchange_url' => [
+                'url'  => '/api/exchange/usd/inr',
+                'from' => 'USD',
+                'to'   => 'INR',
+            ],
+            'summary' => [
+                'url'      => '/api/summary/pfc/nse?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend',
+                'symbol'   => 'PFC',
+                'exchange' => 'NSE',
+                'modules'  => 'summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend',
+            ],
         ]);
     }
 
@@ -63,7 +82,37 @@ class Api extends BaseController
         $stockModel = new StockModel();
         $results = $stockModel->searchWithYahooFallback($query, 20);
 
-        if (empty($results) && preg_match('/^[A-Za-z0-9.]{1,15}$/', trim($query))) {
+        $yahooResultsNoPrice = [];
+        foreach ($results as $s) {
+            if (!empty($s['from_yahoo']) && empty($s['current_price'])) {
+                $yahooResultsNoPrice[] = $s;
+            }
+        }
+
+        if (!empty($yahooResultsNoPrice) && preg_match('/^[A-Za-z0-9.\-]{1,15}$/', trim($query))) {
+            $symbol = strtoupper(trim($yahooResultsNoPrice[0]['symbol']));
+            $exch = $yahooResultsNoPrice[0]['exchange'] ?? $exchange;
+            $yahoo = new YahooFinanceService();
+            try {
+                $quote = $yahoo->getQuote($symbol, $exch);
+                if ($quote) {
+                    $d = $yahoo->quoteToArray($quote);
+                    foreach ($results as &$r) {
+                        if (!empty($r['from_yahoo']) && strtoupper($r['symbol']) === $symbol) {
+                            $r['current_price'] = $d['regularMarketPrice'] ?? null;
+                            $r['previous_close'] = $d['regularMarketPreviousClose'] ?? null;
+                            $r['name'] = $d['longName'] ?? $d['shortName'] ?? $r['name'];
+                            break;
+                        }
+                    }
+                    unset($r);
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'Yahoo quote enrich error: ' . $e->getMessage());
+            }
+        }
+
+        if (empty($results) && preg_match('/^[A-Za-z0-9.\-]{1,15}$/', trim($query))) {
             $symbol = strtoupper(trim($query));
             $yahoo = new YahooFinanceService();
             $quote = $yahoo->getQuote($symbol, $exchange);
@@ -112,27 +161,6 @@ class Api extends BaseController
         ]);
     }
 
-    public function syncPrices()
-    {
-        $yahoo = new YahooFinanceService();
-
-        try {
-            $updated = $yahoo->fetchAndUpdateStocks();
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Stock prices synced from Yahoo Finance',
-                'count'   => count($updated),
-                'updated' => date('H:i:s'),
-            ]);
-        } catch (\Throwable $e) {
-            log_message('error', 'Yahoo sync error: ' . $e->getMessage());
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Sync failed: ' . $e->getMessage(),
-            ])->setStatusCode(500);
-        }
-    }
-
     public function importStock()
     {
         $symbol = strtoupper(trim($this->request->getPost('symbol')));
@@ -178,6 +206,7 @@ class Api extends BaseController
             ])->setStatusCode(400);
         }
 
+        $now = date('Y-m-d H:i:s');
         $stockId = $stockModel->insert([
             'symbol'         => $symbol,
             'name'           => $name,
@@ -192,15 +221,19 @@ class Api extends BaseController
             'week_52_low'    => $d['fiftyTwoWeekLow'],
             'dividend_yield' => $d['trailingAnnualDividendYield'],
             'beta'           => null,
+            'created_at'     => $now,
+            'updated_at'     => $now,
         ]);
 
         generate_price_history($stockId, $price);
         generate_predictions($stockId, $price);
 
+        $now = date('Y-m-d H:i:s');
         $watchlistModel = new \App\Models\WatchlistModel();
         $watchlistModel->insert([
-            'user_id'  => current_user_id(),
-            'stock_id' => $stockId,
+            'user_id'    => current_user_id(),
+            'stock_id'   => $stockId,
+            'created_at' => $now,
         ]);
 
         return $this->response->setJSON([
@@ -210,6 +243,51 @@ class Api extends BaseController
             'symbol'     => $symbol,
             'name'       => $name,
             'watchlisted' => true,
+        ]);
+    }
+
+    public function refreshStock()
+    {
+        $id = (int) $this->request->getPost('id');
+        if (!$id) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Stock ID required.'])->setStatusCode(400);
+        }
+
+        $stockModel = new StockModel();
+        $stock = $stockModel->find($id);
+        if (!$stock) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Stock not found.'])->setStatusCode(404);
+        }
+
+        $yahoo = new YahooFinanceService();
+        $quote = $yahoo->getQuote($stock['symbol'], $stock['exchange']);
+        if (!$quote) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Could not fetch data from Yahoo Finance.'])->setStatusCode(404);
+        }
+
+        $d = $yahoo->quoteToArray($quote);
+
+        $now = date('Y-m-d H:i:s');
+        $update = [
+            'name'           => $d['longName'] ?? $d['shortName'] ?? $stock['name'],
+            'current_price'  => $d['regularMarketPrice'] ?? $stock['current_price'],
+            'previous_close' => $d['regularMarketPreviousClose'] ?? $stock['previous_close'],
+            'market_cap'     => $d['marketCap'] ?? $stock['market_cap'],
+            'avg_volume'     => $d['averageDailyVolume3Month'] ?? $stock['avg_volume'],
+            'pe_ratio'       => $d['trailingPE'] ?? $stock['pe_ratio'],
+            'week_52_high'   => $d['fiftyTwoWeekHigh'] ?? $stock['week_52_high'],
+            'week_52_low'    => $d['fiftyTwoWeekLow'] ?? $stock['week_52_low'],
+            'dividend_yield' => $d['trailingAnnualDividendYield'] ?? $stock['dividend_yield'],
+            'beta'           => $d['beta'] ?? $stock['beta'],
+            'updated_at'     => $now,
+        ];
+
+        $stockModel->update($id, $update);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => $stock['symbol'] . ' updated from Yahoo Finance.',
+            'stock'   => $stockModel->find($id),
         ]);
     }
 
@@ -230,7 +308,8 @@ class Api extends BaseController
         $quote = $yahoo->getQuote($symbol, $exchange);
         $d = $quote ? $yahoo->quoteToArray($quote) : [];
 
-        $summary = $yahoo->getQuoteSummary($symbol, $exchange);
+        $summary = $yahoo->getSummary($symbol, $exchange);
+        $summaryData = $summary['summaryProfile'] ?? [];
 
         $rp = $d['regularMarketPrice'] ?? null;
         $pc = $d['regularMarketPreviousClose'] ?? null;
@@ -238,74 +317,15 @@ class Api extends BaseController
         $chgPct = $d['regularMarketChangePercent'] ?? ($pc > 0 && $chg !== null ? ($chg / $pc) * 100 : null);
 
         $data = array_merge($d, [
-            'sector'                   => $summary['sector'] ?? $d['sector'] ?? '',
-            'industry'                 => $summary['industry'] ?? $d['sector'] ?? null,
-            'current_price'            => $rp,
-            'previous_close'           => $pc,
-            'open'                     => $d['regularMarketOpen'] ?? $summary['open'] ?? null,
-            'day_high'                 => $d['regularMarketDayHigh'] ?? $summary['day_high'] ?? null,
-            'day_low'                  => $d['regularMarketDayLow'] ?? $summary['day_low'] ?? null,
-            'volume'                   => $d['regularMarketVolume'] ?? $summary['volume'] ?? null,
-            'change'                   => $chg,
-            'change_percent'           => $chgPct,
+            'sector'         => $summaryData['sector'] ?? $d['sector'] ?? '',
+            'industry'       => $summaryData['industry'] ?? $d['sector'] ?? null,
+            'current_price'  => $rp,
+            'previous_close' => $pc,
+            'change'         => $chg,
+            'change_percent' => $chgPct,
         ]);
         $data['symbol'] = $symbol;
         return $this->response->setJSON(YahooFinanceService::cleanQuoteData($data));
-    }
-
-    public function tickPrice($id = null, $exchange = 'GLOBAL')
-    {
-        $this->setApiCache(5);
-        if (!$id) {
-            return $this->response->setJSON(['error' => 'Stock ID required'])->setStatusCode(400);
-        }
-
-        $stockModel = new StockModel();
-        $stock = $stockModel->find((int) $id);
-
-        if (!$stock) {
-            return $this->response->setJSON(['error' => 'Stock not found'])->setStatusCode(404);
-        }
-
-        $yahoo = new YahooFinanceService();
-        $extra = [];
-
-        try {
-            $quote = $yahoo->getQuote($stock['symbol'], $exchange);
-            if ($quote) {
-                $data = $yahoo->quoteToArray($quote);
-                $price = (float) ($data['regularMarketPrice'] ?? $stock['current_price']);
-                $previous = (float) ($data['regularMarketPreviousClose'] ?? $stock['previous_close']);
-                $extra = [
-                    'open'       => $data['regularMarketOpen'],
-                    'day_high'   => $data['regularMarketDayHigh'],
-                    'day_low'    => $data['regularMarketDayLow'],
-                    'volume'     => $data['regularMarketVolume'],
-                    'bid'        => $data['bid'],
-                    'ask'        => $data['ask'],
-                    'avg_volume' => $data['averageDailyVolume3Month'],
-                ];
-            } else {
-                $price = (float) $stock['current_price'];
-                $previous = (float) $stock['previous_close'];
-            }
-        } catch (\Throwable $e) {
-            log_message('error', 'Yahoo Finance tick error: ' . $e->getMessage());
-            $price = (float) $stock['current_price'];
-            $previous = (float) $stock['previous_close'];
-        }
-
-        $change = $price - $previous;
-        $changePercent = $previous > 0 ? ($change / $previous) * 100 : 0;
-
-        return $this->response->setJSON(array_merge([
-            'market'         => $yahoo->getMarketInfo(),
-            'current_price'  => round($price, 2),
-            'previous_close' => round($previous, 2),
-            'change'         => round($change, 2),
-            'change_percent' => round($changePercent, 2),
-            'updated'        => date('H:i:s'),
-        ], $extra));
     }
 
     public function getSearch(string $query)
@@ -314,10 +334,28 @@ class Api extends BaseController
         $queryInput = strtoupper(trim($query));
 
         try {
-            $yahoo = new YahooFinanceService(true);
-            $results = $yahoo->search($queryInput, 'GLOBAL');
+            $yahoo = new YahooFinanceService();
+            $results = $yahoo->getSearch($queryInput);
 
-            return $this->response->setStatusCode(200)->setJSON($results);
+            $mapped = array_map(function ($r) {
+                $arr = [];
+                $ref = new \ReflectionClass($r);
+                foreach ($ref->getMethods(\ReflectionMethod::IS_PUBLIC) as $m) {
+                    $name = $m->getName();
+                    if (str_starts_with($name, 'get')) {
+                        $key = lcfirst(substr($name, 3));
+                        try {
+                            $v = $m->invoke($r);
+                            $arr[$key] = $v instanceof \DateTimeInterface ? $v->format(\DateTime::ATOM) : $v;
+                        } catch (\Throwable) {
+                            continue;
+                        }
+                    }
+                }
+                return $arr;
+            }, $results);
+
+            return $this->response->setStatusCode(200)->setJSON($mapped);
         } catch (\Exception $e) {
             return $this->response->setStatusCode(500)->setJSON([
                 "error"   => "Search failed",
@@ -384,7 +422,7 @@ class Api extends BaseController
             $startDate = new \DateTime("-$time", new \DateTimeZone('Asia/Kolkata'));
             $endDate   = new \DateTime("today", new \DateTimeZone('Asia/Kolkata'));
 
-            $records = $yahoo->getHistoricalData($symbol, '1d', $startDate, $endDate, $exchange);
+            $records = $yahoo->getHistorical($symbol, '1d', $startDate, $endDate, $exchange);
 
             return $this->response->setStatusCode(200)->setJSON($records);
         } catch (\Exception $e) {
@@ -461,7 +499,7 @@ class Api extends BaseController
         $this->setApiCache(60);
         try {
             $yahoo  = new YahooFinanceService();
-            $options = $yahoo->getOptions($symbol, $exchange);
+            $options = $yahoo->getOptionChain($symbol, $exchange);
 
             return $this->response->setStatusCode(200)->setJSON($options);
         } catch (\Exception $e) {

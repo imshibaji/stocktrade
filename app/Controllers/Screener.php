@@ -12,7 +12,7 @@ class Screener extends BaseController
     public function index(): string
     {
         $stockListModel = new StockListModel();
-        $userId = session()->get('user_id');
+        $userId = current_user_id();
         $savedLists = $stockListModel->where('user_id', $userId)
             ->orderBy('created_at', 'DESC')
             ->findAll();
@@ -56,7 +56,7 @@ class Screener extends BaseController
 
     public function save()
     {
-        $userId = session()->get('user_id');
+        $userId = current_user_id();
         if (!$userId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Not authenticated']);
         }
@@ -91,7 +91,7 @@ class Screener extends BaseController
 
     public function lists()
     {
-        $userId = session()->get('user_id');
+        $userId = current_user_id();
         if (!$userId) {
             return $this->response->setJSON([]);
         }
@@ -108,7 +108,7 @@ class Screener extends BaseController
         if ($listId <= 0) {
             return $this->response->setJSON(['success' => false, 'message' => 'Invalid ID']);
         }
-        $userId = session()->get('user_id');
+        $userId = current_user_id();
         $model  = new StockListModel();
         $list   = $model->where('id', $listId)->where('user_id', $userId)->first();
         if (!$list) {
@@ -141,7 +141,7 @@ class Screener extends BaseController
         if ($listId <= 0) {
             return $this->response->setJSON(['success' => false, 'message' => 'Invalid ID']);
         }
-        $userId = session()->get('user_id');
+        $userId = current_user_id();
         $model  = new StockListModel();
         $list   = $model->where('id', $listId)->where('user_id', $userId)->first();
         if (!$list) {

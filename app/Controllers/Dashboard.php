@@ -9,7 +9,6 @@ class Dashboard extends BaseController
 {
     public function index(): string
     {
-        helper('currency');
         try {
             $userId = current_user_id();
             $stockModel = new StockModel();
@@ -19,7 +18,14 @@ class Dashboard extends BaseController
             $taxRates = [
                 'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
                 'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-                'fee_rates' => $user,
+                'fee_rates' => [
+                    'brokerage_pct' => $user['brokerage_pct'] ?? 0,
+                    'stt_pct'       => $user['stt_pct'] ?? 0,
+                    'exchange_pct'  => $user['exchange_pct'] ?? 0,
+                    'gst_pct'       => $user['gst_pct'] ?? 0,
+                    'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
+                    'sebi_fees'     => $user['sebi_fees'] ?? 0,
+                ],
             ];
 
             $activeInvestments = $investmentModel->getActiveInvestments($userId);

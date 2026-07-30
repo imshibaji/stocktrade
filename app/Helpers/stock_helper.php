@@ -121,33 +121,6 @@ if (!function_exists('format_volume')) {
     }
 }
 
-if (!function_exists('market_status')) {
-    function market_status(): array
-    {
-        static $cached = null;
-        if ($cached !== null) return $cached;
-
-        $now = new DateTime('now', new DateTimeZone('Asia/Kolkata'));
-        $dayOfWeek = (int) $now->format('N');
-        $hour = (int) $now->format('G');
-        $minute = (int) $now->format('i');
-        $currentMinutes = $hour * 60 + $minute;
-
-        if ($dayOfWeek >= 6) {
-            $cached = ['open' => false, 'label' => 'Market Closed (Weekend)', 'color' => 'gray'];
-            return $cached;
-        }
-
-        if ($currentMinutes < 555 || $currentMinutes >= 930) {
-            $cached = ['open' => false, 'label' => 'Market Closed', 'color' => 'gray'];
-            return $cached;
-        }
-
-        $cached = ['open' => true, 'label' => 'Market Open (NSE/BSE)', 'color' => 'green'];
-        return $cached;
-    }
-}
-
 if (!function_exists('generate_price_history')) {
     function generate_price_history(int $stockId, float $basePrice): void
     {

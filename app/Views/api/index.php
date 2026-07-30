@@ -113,32 +113,9 @@
             'quote_lookup' => [
                 'method' => 'GET',
                 'path' => '/api/quote/{symbol}',
-                'desc' => 'Extended lookup (chart + summary merged)',
+                'desc' => 'Extended lookup (quote + summary merged)',
                 'params' => [
                     ['name' => 'symbol', 'label' => 'Symbol', 'default' => 'PFC', 'in' => 'path']
-                ],
-                'auth' => true
-            ],
-            'live_prices' => [
-                'method' => 'GET',
-                'path' => '/api/live-prices',
-                'desc' => 'Live prices for all tracked stocks',
-                'params' => [],
-                'auth' => true
-            ],
-            'sync_prices' => [
-                'method' => 'GET',
-                'path' => '/api/sync-prices',
-                'desc' => 'Sync stock prices from Yahoo Finance',
-                'params' => [],
-                'auth' => true
-            ],
-            'tick' => [
-                'method' => 'GET',
-                'path' => '/api/tick/{id}',
-                'desc' => 'Get tick price by stock ID',
-                'params' => [
-                    ['name' => 'id', 'label' => 'Stock ID', 'default' => '1', 'in' => 'path']
                 ],
                 'auth' => true
             ],
@@ -178,6 +155,7 @@
                         <input type="text" id="apiParam_<?= $key ?>_<?= $param['name'] ?>"
                             value="<?= esc($param['default'] ?? '') ?>"
                             data-in="<?= $param['in'] ?? 'path' ?>"
+                            data-name="<?= $param['name'] ?>"
                             class="api-param w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:border-gold focus:outline-none font-mono">
                     </div>
                     <?php endforeach; ?>
@@ -217,20 +195,15 @@ function buildUrl(key) {
     params.forEach(function(p) {
         var val = encodeURIComponent(p.value.trim());
         var loc = p.getAttribute('data-in');
+        var name = p.getAttribute('data-name');
         if (loc === 'query') {
-            var name = p.id.replace(/^apiParam_\w+_/, '');
             qs.push(name + '=' + val);
         } else {
-            url = url.replace('{' + nameFromId(p.id) + '}', val);
+            url = url.replace('{' + name + '}', val);
         }
     });
     if (qs.length > 0) url += '?' + qs.join('&');
     return url;
-}
-
-function nameFromId(id) {
-    var parts = id.split('_');
-    return parts.slice(2).join('_');
 }
 
 function tryEndpoint(key) {

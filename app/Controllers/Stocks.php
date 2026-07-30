@@ -151,12 +151,17 @@ class Stocks extends BaseController
     {
         $stockModel = new StockModel();
         $stock = $stockModel->find((int) $id);
+        // dd($stock);
         if (!$stock) {
             return redirect()->to('/stocks')->with('error', 'Stock not found.');
         }
+        $sectors = $stockModel->distinct()->select('sector')->findAll();
+        $sectorList = array_unique(array_column($sectors, 'sector'));
+        sort($sectorList);
         $data = [
             'title' => 'Edit ' . $stock['symbol'] . ' - StockTrade Tips',
             'stock' => $stock,
+            'sectors' => $sectorList,
         ];
         return view('templates/header', $data)
             . view('stocks/edit', $data)

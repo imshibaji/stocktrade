@@ -66,7 +66,7 @@
             <i class="fas fa-receipt text-gold mr-2"></i>Brokerage &amp; Transaction Fees
         </h2>
 
-        <form action="/settings/update-tax" method="post">
+        <form action="/settings/update-fees" method="post">
             <?= csrf_field() ?>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>

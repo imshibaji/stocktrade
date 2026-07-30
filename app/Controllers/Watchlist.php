@@ -35,15 +35,18 @@ class Watchlist extends BaseController
             foreach ($allPreds as $p) {
                 $sid = (int) $p['stock_id'];
                 if (!isset($predictions[$sid])) {
-                    $predictions[$sid] = ['low' => INF, 'high' => -INF];
+                    $predictions[$sid] = ['low' => INF, 'high' => -INF, 'sum' => 0, 'count' => 0];
                 }
                 $price = (float) $p['predicted_price'];
                 if ($price < $predictions[$sid]['low']) $predictions[$sid]['low'] = $price;
                 if ($price > $predictions[$sid]['high']) $predictions[$sid]['high'] = $price;
+                $predictions[$sid]['sum'] += $price;
+                $predictions[$sid]['count']++;
             }
             foreach ($predictions as &$r) {
                 if ($r['low'] === INF) $r['low'] = 0;
                 if ($r['high'] === -INF) $r['high'] = 0;
+                $r['avg'] = $r['count'] > 0 ? $r['sum'] / $r['count'] : 0;
             }
             unset($r);
         }
@@ -74,9 +77,10 @@ class Watchlist extends BaseController
 
         $bucketId = $this->request->getPost('bucket_id');
         $watchlistModel->insert([
-            'user_id'   => $userId,
-            'stock_id'  => $sid,
-            'bucket_id' => $bucketId ? (int) $bucketId : null,
+            'user_id'    => $userId,
+            'stock_id'   => $sid,
+            'bucket_id'  => $bucketId ? (int) $bucketId : null,
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         return redirect()->back()->with('success', 'Stock added to watchlist.');
@@ -106,9 +110,11 @@ class Watchlist extends BaseController
             return $this->response->setJSON(['status' => 'removed', 'watched' => false]);
         }
 
+        $now = date('Y-m-d H:i:s');
         $watchlistModel->insert([
-            'user_id'  => $userId,
-            'stock_id' => $sid,
+            'user_id'    => $userId,
+            'stock_id'   => $sid,
+            'created_at' => $now,
         ]);
         return $this->response->setJSON(['status' => 'added', 'watched' => true]);
     }
@@ -121,7 +127,11 @@ class Watchlist extends BaseController
             return redirect()->back()->with('error', 'Bucket name is required.');
         }
         $model = new WatchlistBucketModel();
-        $model->insert(['user_id' => $userId, 'name' => $name]);
+        $model->insert([
+            'user_id'    => $userId,
+            'name'       => $name,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
         return redirect()->to('/watchlist')->with('success', 'Bucket "' . esc($name) . '" created.');
     }
 

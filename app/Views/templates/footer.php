@@ -45,29 +45,5 @@
     </footer>
     <?php endif; ?>
 
-    <?php if (is_logged_in()): ?>
-    <script>
-    (function() {
-        function updateNavBadge(market) {
-            var badge = document.getElementById('navMarketBadge');
-            if (!badge) return;
-            if (market.open) {
-                badge.className = 'hidden md:inline text-xs px-2 py-1 rounded-full border border-green-600 text-green-400';
-                badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-            } else {
-                badge.className = 'hidden md:inline text-xs px-2 py-1 rounded-full border border-gray-600 text-gray-400';
-                badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-            }
-        }
-        function pollNav() {
-            fetch('/api/live-prices')
-                .then(function(r) { return r.json(); })
-                .then(function(data) { updateNavBadge(data.market); })
-                .catch(function() {});
-        }
-        pollNav();
-    })();
-    </script>
-    <?php endif; ?>
 </body>
 </html>

@@ -93,9 +93,9 @@ class StockModel extends Model
 
         $localSymbols = array_column($local, 'symbol');
 
-        $yahoo = new YahooFinanceService(true);
+        $yahoo = new YahooFinanceService();
         try {
-            $yahooResults = $yahoo->search($query);
+            $yahooResults = $yahoo->getSearch($query);
             foreach ($yahooResults as $result) {
                 $sym = $result->getSymbol();
                 $localSym = \App\Libraries\YahooFinanceService::fromYahooSymbol($sym);
@@ -110,15 +110,15 @@ class StockModel extends Model
                     'symbol'         => $localSym,
                     'name'           => $result->getName() ?? $localSym,
                     'sector'         => $result->getTypeDisp() ?? 'N/A',
-                    'current_price'  => null,
-                    'previous_close' => null,
-                    'market_cap'     => null,
-                    'avg_volume'     => null,
-                    'pe_ratio'       => null,
-                    'week_52_high'   => null,
-                    'week_52_low'    => null,
-                    'dividend_yield' => null,
-                    'beta'           => null,
+                    'current_price'  => $result->getPrice(),
+                    'previous_close' => $result->getPreviousClose(),
+                    'market_cap'     => $result->getMarketCap(),
+                    'avg_volume'     => $result->getAvgVolume(),
+                    'pe_ratio'       => $result->getPeRatio(),
+                    'week_52_high'   => $result->getWeek52High(),
+                    'week_52_low'    => $result->getWeek52Low(),
+                    'dividend_yield' => $result->getDividendYield(),
+                    'beta'           => $result->getBeta(),
                     'exchange'       => $result->getExch(),
                     'from_yahoo'     => true,
                 ];

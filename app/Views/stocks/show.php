@@ -27,6 +27,21 @@
             <a href="/stocks/<?= $stock['id'] ?>/predictions" class="bg-gold hover:bg-gold2 text-navy font-semibold px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-chart-line mr-1"></i> Predictions
             </a>
+            <button type="button" onclick="refreshStock()" id="refreshBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-sync-alt mr-1"></i> Refresh
+            </button>
+            <a href="/stocks/<?= $stock['id'] ?>/edit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-edit mr-1"></i> Edit
+            </a>
+            <form action="/stocks/<?= $stock['id'] ?>/delete" method="post" class="inline" onsubmit="return confirm('Delete this stock and all related data?');">
+                <?= csrf_field() ?>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+                    <i class="fas fa-trash mr-1"></i> Remove
+                </button>
+            </form>
+            <a href="/stocks" class="border border-gray-600 text-gray-300 hover:bg-gray-800/50 px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-arrow-left mr-1"></i> Back to List
+            </a>
         </div>
     </div>
 
@@ -36,7 +51,6 @@
                 <div>
                     <div class="flex items-center space-x-3">
                         <p id="livePrice" class="text-4xl font-bold text-white"><?= format_price($stock['current_price'], $cur) ?></p>
-                        <span id="liveIndicator" class="hidden text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300">Live</span>
                     </div>
                     <p id="liveChange" class="<?= $priceChange['change'] >= 0 ? 'text-green-400' : 'text-red-400' ?> mt-1">
                         <?= $priceChange['change'] >= 0 ? '+' : '' ?><?= format_price($priceChange['change'], $cur) ?>
@@ -45,7 +59,7 @@
                 </div>
                 <div class="text-right text-sm text-gray-400">
                     <p>Prev Close: <?= format_price($stock['previous_close'], $cur) ?></p>
-                    <p id="liveUpdated" class="text-gray-600 text-xs mt-1"></p>
+
                 </div>
             </div>
             <div class="h-64">
@@ -235,86 +249,25 @@ new Chart(ctx, {
     }
 });
 </script>
-
 <script>
-(function() {
-    var stockId = <?= $stock['id'] ?>;
-    function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-
-    function updateBadge(market) {
-        var badge = document.getElementById('marketBadge');
-        if (!badge) return;
-        var indicator = document.getElementById('liveIndicator');
-        if (market.open) {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-green-600 text-green-400';
-            badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-            if (indicator) { indicator.className = 'text-xs px-2 py-1 rounded bg-green-900/30 text-green-400'; indicator.textContent = 'Live'; indicator.classList.remove('hidden'); }
-        } else {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400';
-            badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-            if (indicator) indicator.classList.add('hidden');
-        }
-    }
-
-    function formatLarge(v) {
-        if (v == null) return 'N/A';
-        if (v >= 10000000000000) return (v / 10000000000000).toFixed(2) + ' Lakh Cr';
-        if (v >= 10000000) return (v / 10000000).toFixed(2) + ' Cr';
-        if (v >= 100000) return (v / 100000).toFixed(2) + ' L';
-        return Number(v).toLocaleString('en-IN');
-    }
-
-    function updatePrice(data) {
-        var priceEl = document.getElementById('livePrice');
-        var changeEl = document.getElementById('liveChange');
-        var pctEl = document.getElementById('livePct');
-        var updatedEl = document.getElementById('liveUpdated');
-
-        if (priceEl) priceEl.textContent = formatPrice(data.current_price);
-        if (pctEl) {
-            var pct = data.change_percent >= 0 ? '+' + data.change_percent : data.change_percent;
-            pctEl.textContent = pct;
-        }
-        if (updatedEl) updatedEl.textContent = 'Updated: ' + data.updated;
-        if (changeEl) {
-            var changeStr = (data.change >= 0 ? '+' : '') + formatPrice(data.change) + ' (' + (data.change_percent >= 0 ? '+' : '') + data.change_percent + '%)';
-            changeEl.textContent = changeStr;
-            changeEl.className = (data.change >= 0 ? 'text-green-400' : 'text-red-400') + ' mt-1';
-        }
-        if (data.change_percent > 0) {
-            if (priceEl) priceEl.className = 'text-4xl font-bold text-green-400 transition-colors duration-500';
-            setTimeout(function() { if (priceEl) priceEl.className = 'text-4xl font-bold text-white transition-colors duration-500'; }, 1500);
-        } else if (data.change_percent < 0) {
-            if (priceEl) priceEl.className = 'text-4xl font-bold text-red-400 transition-colors duration-500';
-            setTimeout(function() { if (priceEl) priceEl.className = 'text-4xl font-bold text-white transition-colors duration-500'; }, 1500);
-        }
-
-        var openEl = document.getElementById('mktOpen');
-        var highEl = document.getElementById('mktHigh');
-        var lowEl = document.getElementById('mktLow');
-        var volEl = document.getElementById('mktVol');
-        var avgVolEl = document.getElementById('mktAvgVol');
-        var bidAskEl = document.getElementById('mktBidAsk');
-
-        if (openEl && data.open != null) openEl.textContent = formatPrice(data.open);
-        if (highEl && data.day_high != null) highEl.textContent = formatPrice(data.day_high);
-        if (lowEl && data.day_low != null) lowEl.textContent = formatPrice(data.day_low);
-        if (volEl && data.volume != null) volEl.textContent = formatLarge(data.volume);
-        if (avgVolEl && data.avg_volume != null) avgVolEl.textContent = formatLarge(data.avg_volume);
-        if (bidAskEl && data.bid != null && data.ask != null) bidAskEl.textContent = formatPrice(data.bid) + ' / ' + formatPrice(data.ask);
-    }
-
-    function poll() {
-        fetch('/api/tick/' + stockId)
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                updateBadge(data.market);
-                updatePrice(data);
-            })
-            .catch(function() {});
-    }
-
-    poll();
-    setInterval(poll, 5000);
-})();
+function refreshStock() {
+    var btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Refreshing...';
+    var csrf = document.querySelector('input[name="csrf_test_name"]') || document.querySelector('[name="csrf_test_name"]');
+    var token = csrf ? csrf.value : '';
+    fetch('/api/stocks/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'csrf_test_name=' + encodeURIComponent(token) + '&id=<?= $stock["id"] ?>'
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.success) { window.location.reload(); }
+        else { alert(d.message); btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt mr-1"></i> Refresh'; }
+    })
+    .catch(function() { alert('Refresh failed.'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt mr-1"></i> Refresh'; });
+}
 </script>
+
+

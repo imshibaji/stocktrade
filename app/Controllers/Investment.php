@@ -17,7 +17,14 @@ class Investment extends BaseController
         $taxRates = [
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-            'fee_rates' => $user,
+            'fee_rates' => [
+                'brokerage_pct' => $user['brokerage_pct'] ?? 0,
+                'stt_pct'       => $user['stt_pct'] ?? 0,
+                'exchange_pct'  => $user['exchange_pct'] ?? 0,
+                'gst_pct'       => $user['gst_pct'] ?? 0,
+                'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
+                'sebi_fees'     => $user['sebi_fees'] ?? 0,
+            ],
             'base_currency' => $user['base_currency'] ?? 'INR',
         ];
 
@@ -85,6 +92,7 @@ class Investment extends BaseController
             $totalInvested = $shares * $buyPrice;
         }
 
+        $now = date('Y-m-d H:i:s');
         $investmentModel->insert([
             'user_id'        => $userId,
             'stock_id'       => $stockId,
@@ -93,6 +101,8 @@ class Investment extends BaseController
             'total_invested' => $totalInvested,
             'buy_date'       => $buyDate,
             'status'         => 'active',
+            'created_at'     => $now,
+            'updated_at'     => $now,
         ]);
 
         return redirect()->to('/investments')->with('success', sprintf(
@@ -123,7 +133,14 @@ class Investment extends BaseController
         $taxRates = [
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-            'fee_rates' => $user,
+            'fee_rates' => [
+                'brokerage_pct' => $user['brokerage_pct'] ?? 0,
+                'stt_pct'       => $user['stt_pct'] ?? 0,
+                'exchange_pct'  => $user['exchange_pct'] ?? 0,
+                'gst_pct'       => $user['gst_pct'] ?? 0,
+                'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
+                'sebi_fees'     => $user['sebi_fees'] ?? 0,
+            ],
         ];
 
         $pl = $investmentModel->calculateProfitLoss($investment, $taxRates);
@@ -186,7 +203,14 @@ class Investment extends BaseController
         $profitSign = $grossProfit >= 0 ? '+' : '';
 
         $user = current_user();
-        $feeRates = $user;
+        $feeRates = [
+            'brokerage_pct' => $user['brokerage_pct'] ?? 0,
+            'stt_pct'       => $user['stt_pct'] ?? 0,
+            'exchange_pct'  => $user['exchange_pct'] ?? 0,
+            'gst_pct'       => $user['gst_pct'] ?? 0,
+            'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
+            'sebi_fees'     => $user['sebi_fees'] ?? 0,
+        ];
         $sellFees = calc_transaction_fees($saleValue, $feeRates);
         $totalFees = $sellFees['total'];
 
@@ -248,7 +272,14 @@ class Investment extends BaseController
         $taxRates = [
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-            'fee_rates' => $user,
+            'fee_rates' => [
+                'brokerage_pct' => $user['brokerage_pct'] ?? 0,
+                'stt_pct'       => $user['stt_pct'] ?? 0,
+                'exchange_pct'  => $user['exchange_pct'] ?? 0,
+                'gst_pct'       => $user['gst_pct'] ?? 0,
+                'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
+                'sebi_fees'     => $user['sebi_fees'] ?? 0,
+            ],
         ];
 
         $investments = $investmentModel->getUserInvestments($userId);
@@ -283,7 +314,14 @@ class Investment extends BaseController
         $taxRates = [
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-            'fee_rates' => $user,
+            'fee_rates' => [
+                'brokerage_pct' => $user['brokerage_pct'] ?? 0,
+                'stt_pct'       => $user['stt_pct'] ?? 0,
+                'exchange_pct'  => $user['exchange_pct'] ?? 0,
+                'gst_pct'       => $user['gst_pct'] ?? 0,
+                'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
+                'sebi_fees'     => $user['sebi_fees'] ?? 0,
+            ],
         ];
 
         $portfolio = $investmentModel->getPortfolioSummary($userId, $taxRates);

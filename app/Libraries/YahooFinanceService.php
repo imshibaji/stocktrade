@@ -6,152 +6,35 @@ use Scheb\YahooFinanceApi\ApiClient;
 use Scheb\YahooFinanceApi\ApiClientFactory;
 use Scheb\YahooFinanceApi\Results\Quote;
 
-/**
- * Service layer for Yahoo Finance API.
- *
- * Provides v7 quote API with automatic fallback to v8 chart API,
- * exponential backoff with jitter, circuit breaker for 429 responses,
- * optional proxy support, file-based caching, and NSE/BSE/GLOBAL exchange helpers.
- */
 class YahooFinanceService
 {
     private ApiClient $client;
 
-    private static string $cacheFile = '';
-
-    private const CB_FILE = 'yahoo_circuit_breaker.json';
-
-    // ── Configuration ──────────────────────────────────────────────────────
-
-    private static function proxyConfig(): array
+    public function __construct(?ApiClient $client = null)
     {
-        $proxy = env('YAHOO_PROXY');
-        return $proxy ? ['proxy' => $proxy] : [];
-    }
-
-    private static function maxRetries(): int
-    {
-        $max = (int) env('YAHOO_API_MAX_RETRIES', 5);
-        return $max >= 1 ? $max : 5;
-    }
-
-    private static function cachePath(): string
-    {
-        if (self::$cacheFile === '') {
-            self::$cacheFile = WRITEPATH . 'cache/yahoo_quotes.json';
-        }
-        return self::$cacheFile;
-    }
-
-    private static function readCache(): array
-    {
-        $path = self::cachePath();
-        if (!is_file($path)) return [];
-        $raw = file_get_contents($path);
-        $data = json_decode($raw, true);
-        return is_array($data) ? $data : [];
-    }
-
-    private static function writeCache(array $data): void
-    {
-        $path = self::cachePath();
-        $dir = dirname($path);
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
-        }
-        file_put_contents($path, json_encode($data), LOCK_EX);
-    }
-
-    // ── Circuit Breaker (429 rate-limit protection) ───────────────────────
-
-    private static function circuitBreaker(): array
-    {
-        $path = WRITEPATH . 'cache/' . self::CB_FILE;
-        if (!is_file($path)) return ['blocked_until' => 0, 'consecutive_429' => 0];
-        $raw = file_get_contents($path);
-        $data = json_decode($raw, true);
-        return is_array($data) ? $data : ['blocked_until' => 0, 'consecutive_429' => 0];
-    }
-
-    private static function saveCircuitBreaker(array $state): void
-    {
-        file_put_contents(WRITEPATH . 'cache/' . self::CB_FILE, json_encode($state), LOCK_EX);
-    }
-
-    private static function circuitBreakerIsOpen(): bool
-    {
-        $cb = self::circuitBreaker();
-        return $cb['blocked_until'] > time();
-    }
-
-    private static function recordFailure(): void
-    {
-        $cb = self::circuitBreaker();
-        $cb['consecutive_429'] = ($cb['consecutive_429'] ?? 0) + 1;
-        $count = $cb['consecutive_429'];
-        if ($count >= 5) {
-            $cooldown = min(300, 30 * (1 << min($count - 5, 5)));
-            $cb['blocked_until'] = time() + $cooldown;
-        }
-        self::saveCircuitBreaker($cb);
-    }
-
-    private static function recordSuccess(): void
-    {
-        $cb = self::circuitBreaker();
-        $cb['consecutive_429'] = 0;
-        $cb['blocked_until'] = 0;
-        self::saveCircuitBreaker($cb);
-    }
-
-    private static function cleanCookieJar(): void
-    {
-        $path = WRITEPATH . 'cache/yahoo_api_cookies.json';
-        if (is_file($path) && filemtime($path) < time() - 3600) {
-            @unlink($path);
-        }
-    }
-
-    // ── Constructor ────────────────────────────────────────────────────────
-
-    public function __construct(bool $searchMode = false, ?ApiClient $client = null)
-    {
-        $guzzleOptions = array_merge(self::proxyConfig(), [
-            'headers' => [
-                'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            ],
-            'connect_timeout' => $searchMode ? 5 : 10,
-            'timeout' => $searchMode ? 8 : 15,
-            'cookies' => new \GuzzleHttp\Cookie\FileCookieJar(WRITEPATH . 'cache/yahoo_api_cookies.json', true),
-        ]);
-
         $this->client = $client ?? ApiClientFactory::createApiClient(
-            clientOptions: $guzzleOptions,
-            retries: $searchMode ? 1 : 3,
-            retryDelay: $searchMode ? 500 : 2000,
+            clientOptions: [
+                'headers' => ['User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36...']
+            ],
+            retries: 3,
+            retryDelay: 2000,
         );
     }
-
-    // ── Symbol Helpers ─────────────────────────────────────────────────────
 
     public static function toYahooSymbol(string $symbol, string $exchange = 'GLOBAL'): string
     {
         $symbol = strtoupper(trim($symbol));
         $exchange = strtoupper(trim($exchange));
-        if (str_ends_with($symbol, '.NS') || str_ends_with($symbol, '.BO')) {
-            return $symbol;
-        }
-        if ($exchange === 'BSE') return $symbol . '.BO';
-        if ($exchange === 'GLOBAL') return $symbol;
-        return $symbol . '.NS';
+        if (str_ends_with($symbol, '.NS') || str_ends_with($symbol, '.BO')) return $symbol;
+        return match ($exchange) { 'BSE' => $symbol . '.BO', 'GLOBAL' => $symbol, default => $symbol . '.NS' };
     }
 
-    public static function fromYahooSymbol(string $yahooSymbol): string
+    public static function fromYahooSymbol(string $s): string
     {
-        $symbol = trim($yahooSymbol);
-        if (str_ends_with($symbol, '.NS')) return substr($symbol, 0, -3);
-        if (str_ends_with($symbol, '.BO')) return substr($symbol, 0, -3);
-        return $symbol;
+        $s = trim($s);
+        if (str_ends_with($s, '.NS')) return substr($s, 0, -3);
+        if (str_ends_with($s, '.BO')) return substr($s, 0, -3);
+        return $s;
     }
 
     public static function detectExchange(string $symbol): string
@@ -161,577 +44,69 @@ class YahooFinanceService
         return 'GLOBAL';
     }
 
-    // ── v7 Quote API (rich fields) with automatic v8 chart API fallback ──
-
-    public function search(string $query, string $region = 'US'): array
-    {
-        return $this->client->search($query, region: $region);
-    }
-
-    public function getQuote(string $symbol, string $exchange = 'GLOBAL'): ?Quote
-    {
-        $yahooSym = self::toYahooSymbol($symbol, $exchange);
-        try {
-            $quote = $this->client->getQuote($yahooSym);
-            // if ($quote && $quote->getRegularMarketPrice() !== null) {
-            //     return $quote;
-            // }
-            return $quote;
-        } catch (\Throwable $e) {
-            log_message('error', "Yahoo v7 quote error for {$symbol}: " . $e->getMessage());
-        }
-        $quotes = $this->getQuotesFromChartApi([$symbol], $exchange);
-        return $quotes[0] ?? null;
-    }
-
-    public function getQuotes(array $symbols, string $exchange = 'GLOBAL'): array
-    {
-        try {
-            $yahooSymbols = array_map(fn($s) => self::toYahooSymbol($s, $exchange), $symbols);
-            $quotes = $this->client->getQuotes($yahooSymbols);
-            if (!empty($quotes)) return $quotes;
-        } catch (\Throwable $e) {
-            log_message('error', "Yahoo v7 quotes error: " . $e->getMessage());
-        }
-        return $this->getQuotesFromChartApi($symbols, $exchange);
-    }
-
-    // ── v7 API Wrappers (historical, dividends, splits, etc.) ────────────
-
-    public function getHistoricalData(string $symbol, string $interval, \DateTimeInterface $start, \DateTimeInterface $end, string $exchange = 'GLOBAL'): array
-    {
-        return $this->client->getHistoricalQuoteData(self::toYahooSymbol($symbol, $exchange), $interval, $start, $end);
-    }
-
-    public function getDividends(string $symbol, \DateTimeInterface $start, \DateTimeInterface $end, string $exchange = 'GLOBAL'): array
-    {
-        return $this->client->getHistoricalDividendData(self::toYahooSymbol($symbol, $exchange), $start, $end);
-    }
-
-    public function getSplits(string $symbol, \DateTimeInterface $start, \DateTimeInterface $end, string $exchange = 'GLOBAL'): array
-    {
-        return $this->client->getHistoricalSplitData(self::toYahooSymbol($symbol, $exchange), $start, $end);
-    }
-
-    public function getExchangeRate(string $from, string $to): ?Quote
-    {
-        return $this->client->getExchangeRate($from, $to);
-    }
-
-    public function getOptions(string $symbol, string $exchange = 'GLOBAL'): array
-    {
-        return $this->client->getOptionChain(self::toYahooSymbol($symbol, $exchange));
-    }
-
-    public function getSummary(string $symbol, string $exchange = 'GLOBAL', array $modules = []): array
-    {
-        try {
-            $results = $this->client->getStockSummary(self::toYahooSymbol($symbol, $exchange), $modules ?: [
-                'summaryProfile', 'summaryDetail', 'defaultKeyStatistics',
-                'financialData', 'calendarEvents', 'price', 'quoteType'
-            ]);
-            return $results[0] ?? [];
-        } catch (\Throwable $e) {
-            log_message('error', "Yahoo summary error for {$symbol}: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    // ── v8 Chart API Fallback (no auth required) ─────────────────────────
-
-    /**
-     * Fetch quotes from the v8 chart API with exponential backoff + jitter.
-     * Used as fallback when the v7 quote API is rate-limited.
-     *
-     * Retries: 2s → 4s → 8s → 16s → 32s (capped at 60s, up to maxRetries attempts).
-     * Circuit breaker: after 5 consecutive 429s, blocks for 30s–300s.
-     */
-    public function getQuotesFromChartApi(array $symbols, string $exchange = 'GLOBAL'): array
-    {
-        if (empty($symbols)) return [];
-
-        self::cleanCookieJar();
-
-        if (self::circuitBreakerIsOpen()) {
-            log_message('error', "Yahoo Finance circuit breaker open — skipping chart API calls");
-            return [];
-        }
-
-        $maxRetries = self::maxRetries();
-        $baseDelayMs = 2000;
-        $results = [];
-
-        $client = new \GuzzleHttp\Client(array_merge(self::proxyConfig(), [
-            'connect_timeout' => 10,
-            'timeout' => 15,
-            'headers' => ['User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'],
-        ]));
-
-        $attempt = 0;
-        $all429 = false;
-
-        while ($attempt <= $maxRetries) {
-            if ($attempt > 0) {
-                $delayMs = $baseDelayMs * (1 << ($attempt - 1));
-                $jitter = random_int(0, (int)($delayMs * 0.3));
-                $totalDelay = min($delayMs + $jitter, 60000);
-                usleep($totalDelay * 1000);
-                log_message('error', "Yahoo Finance chart API retry {$attempt}/{$maxRetries} after {$totalDelay}ms delay");
-            }
-
-            $requests = [];
-            foreach ($symbols as $sym) {
-                $yahooSym = self::toYahooSymbol($sym, $exchange);
-                $requests[$sym] = $client->getAsync(
-                    "https://query1.finance.yahoo.com/v8/finance/chart/{$yahooSym}?interval=1d&range=5d"
-                );
-            }
-
-            $responses = \GuzzleHttp\Promise\Utils::settle($requests)->wait();
-
-            $results = [];
-            $hasSuccess = false;
-            $all429 = true;
-
-            foreach ($responses as $sym => $outcome) {
-                if ($outcome['state'] !== 'fulfilled') {
-                    $reason = $outcome['value'] ?? 'timeout';
-                    $is429 = $reason instanceof \GuzzleHttp\Exception\ClientException
-                        && $reason->getResponse()
-                        && $reason->getResponse()->getStatusCode() === 429;
-                    if (!$is429) $all429 = false;
-                    log_message('error', "Yahoo Finance chart API error for {$sym}: " . ($reason instanceof \Throwable ? $reason->getMessage() : 'timeout'));
-                    continue;
-                }
-
-                $statusCode = $outcome['value']->getStatusCode();
-                if ($statusCode === 429) {
-                    log_message('error', "Yahoo Finance chart API 429 for {$sym} (attempt {$attempt})");
-                    $results = [];
-                    $all429 = true;
-                    break;
-                }
-
-                $all429 = false;
-
-                try {
-                    $body = json_decode((string) $outcome['value']->getBody(), true);
-                    $meta = $body['chart']['result'][0]['meta'] ?? null;
-                    if (!$meta) continue;
-                    $price = $meta['regularMarketPrice'] ?? null;
-                    if ($price === null) continue;
-                    $prevClose = $meta['chartPreviousClose'] ?? null;
-                    $change = $prevClose !== null ? $price - $prevClose : null;
-                    $changePct = $prevClose > 0 ? ($change / $prevClose) * 100 : null;
-
-                    $build = [
-                        'symbol'                     => $meta['symbol'] ?? self::toYahooSymbol($sym),
-                        'shortName'                  => $meta['shortName'] ?? $sym,
-                        'longName'                   => $meta['longName'] ?? $meta['shortName'] ?? $sym,
-                        'regularMarketPrice'         => $price,
-                        'regularMarketPreviousClose' => $prevClose,
-                        'regularMarketDayHigh'       => $meta['regularMarketDayHigh'] ?? null,
-                        'regularMarketDayLow'        => $meta['regularMarketDayLow'] ?? null,
-                        'regularMarketVolume'        => $meta['regularMarketVolume'] ?? null,
-                        'regularMarketChange'        => $change,
-                        'regularMarketChangePercent' => $changePct,
-                        'fiftyTwoWeekHigh'           => $meta['fiftyTwoWeekHigh'] ?? null,
-                        'fiftyTwoWeekLow'            => $meta['fiftyTwoWeekLow'] ?? null,
-                        'fullExchangeName'           => $meta['fullExchangeName'] ?? null,
-                        'currency'                   => $meta['currency'] ?? null,
-                        'regularMarketTime'          => \DateTime::createFromFormat('U', (string)($meta['regularMarketTime'] ?? time())),
-                    ];
-
-                    $results[] = new Quote($build);
-                    $hasSuccess = true;
-                } catch (\Throwable $e) {
-                    log_message('error', "Yahoo Finance chart API parse error for {$sym}: " . $e->getMessage());
-                }
-            }
-
-            if ($hasSuccess) {
-                self::recordSuccess();
-                return $results;
-            }
-
-            $attempt++;
-        }
-
-        if ($all429) {
-            self::recordFailure();
-        }
-
-        return [];
-    }
-
-    // ── Data Processing ────────────────────────────────────────────────────
-
     public static function cleanQuoteData(array $data): array
     {
+        $drop = ['ask', 'askSize', 'bid', 'bidSize'];
         $keep = [];
-        $dropZero = ['ask', 'askSize', 'bid', 'bidSize'];
         foreach ($data as $k => $v) {
             if ($v === null || $v === []) continue;
-            if (in_array($k, $dropZero, true) && $v === 0) continue;
+            if (in_array($k, $drop, true) && $v === 0) continue;
             $keep[$k] = $v;
         }
         return $keep;
     }
 
-    /**
-     * Convert a Quote object to an associative array using reflection.
-     * Strips null values and zero bid/ask fields.
-     */
     public function quoteToArray(Quote $quote): array
     {
         $out = [];
-        $reflection = new \ReflectionClass($quote);
-        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-            $name = $method->getName();
-            if (str_starts_with($name, 'get') && $name !== 'getHistoricalData') {
-                $key = lcfirst(substr($name, 3));
-                try {
-                    $value = $method->invoke($quote);
-                    if ($value instanceof \DateTimeInterface) {
-                        $out[$key] = $value->format('Y-m-d H:i:s');
-                    } else {
-                        $out[$key] = $value;
-                    }
-                } catch (\Throwable) {
-                    continue;
-                }
-            }
+        $ref = new \ReflectionClass($quote);
+        foreach ($ref->getMethods(\ReflectionMethod::IS_PUBLIC) as $m) {
+            $name = $m->getName();
+            if (!str_starts_with($name, 'get') || $name === 'getHistoricalData') continue;
+            $key = lcfirst(substr($name, 3));
+            try {
+                $v = $m->invoke($quote);
+                $out[$key] = $v instanceof \DateTimeInterface ? $v->format('Y-m-d H:i:s') : $v;
+            } catch (\Throwable) {}
         }
-
         $out['symbol'] = self::fromYahooSymbol($out['symbol'] ?? '');
-
         if (!isset($out['dividendYield']) && isset($out['trailingAnnualDividendYield'])) {
             $out['dividendYield'] = $out['trailingAnnualDividendYield'] * 100;
         }
-
         return self::cleanQuoteData($out);
     }
 
-    // ── Quote Summary (v10 API, cached) ────────────────────────────────────
+    public function getSearch(string $q): array { return $this->client->search($q, region: 'IN'); }
 
-    private static function readSummaryCache(): array
+    public function getQuote(string $s, string $ex = 'GLOBAL'): ?Quote { return $this->client->getQuote(self::toYahooSymbol($s, $ex)); }
+
+    public function getQuotes(array $symbols, string $ex = 'GLOBAL'): array
     {
-        $path = WRITEPATH . 'cache/yahoo_summary.json';
-        if (!is_file($path)) return [];
-        $raw = file_get_contents($path);
-        $data = json_decode($raw, true);
-        return is_array($data) ? $data : [];
+        return $this->client->getQuotes(array_map(fn($s) => self::toYahooSymbol($s, $ex), $symbols));
     }
 
-    private static function writeSummaryCache(array $data): void
+    public function getHistorical(string $s, string $int, \DateTimeInterface $start, \DateTimeInterface $end, string $ex = 'GLOBAL'): array
     {
-        $path = WRITEPATH . 'cache/yahoo_summary.json';
-        $dir = dirname($path);
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
-        }
-        file_put_contents($path, json_encode($data), LOCK_EX);
+        return $this->client->getHistoricalQuoteData(self::toYahooSymbol($s, $ex), $int, $start, $end);
     }
 
-    /**
-     * Fetch and parse the v10 quoteSummary across 7 modules.
-     * Results are cached for 1 hour.
-     */
-    public function getQuoteSummary(string $symbol, string $exchange = 'NSE'): array
+    public function getDividends(string $s, \DateTimeInterface $start, \DateTimeInterface $end, string $ex = 'GLOBAL'): array
     {
-        $cache = self::readSummaryCache();
-        $now = time();
-        $ttl = 3600;
-
-        if (isset($cache[$symbol]) && ($now - $cache[$symbol]['_cached_at']) < $ttl) {
-            return $cache[$symbol]['data'];
-        }
-
-        $rawVal = function ($v) {
-            if (is_array($v)) return $v['raw'] ?? null;
-            if (is_scalar($v) && $v !== []) return $v;
-            return null;
-        };
-
-        $data = [];
-
-        try {
-            $result = $this->getSummary($symbol, $exchange);
-            if (!$result) return [];
-
-            // summaryProfile
-            $profile = $result['summaryProfile'] ?? [];
-            if ($profile) {
-                $data['sector'] = $profile['sector'] ?? null;
-                $data['industry'] = $profile['industry'] ?? null;
-            }
-
-            // summaryDetail
-            $detail = $result['summaryDetail'] ?? [];
-            if ($detail) {
-                $map = [
-                    'previous_close'           => 'previousClose',
-                    'open'                     => 'open',
-                    'day_low'                  => 'dayLow',
-                    'day_high'                 => 'dayHigh',
-                    'volume'                   => 'volume',
-                    'avg_volume'               => 'averageVolume',
-                    'avg_volume_10d'           => 'averageDailyVolume10Day',
-                    'pe_ratio'                 => 'trailingPE',
-                    'forward_pe'               => 'forwardPE',
-                    'dividend_yield'           => 'dividendYield',
-                    'dividend_rate'            => 'dividendRate',
-                    'market_cap'               => 'marketCap',
-                    'beta'                     => 'beta',
-                    'fifty_day_average'        => 'fiftyDayAverage',
-                    'two_hundred_day_average'  => 'twoHundredDayAverage',
-                    'fifty_two_week_low'       => 'fiftyTwoWeekLow',
-                    'fifty_two_week_high'      => 'fiftyTwoWeekHigh',
-                    'bid'                      => 'bid',
-                    'ask'                      => 'ask',
-                    'bid_size'                 => 'bidSize',
-                    'ask_size'                 => 'askSize',
-                    'currency'                 => 'currency',
-                ];
-                foreach ($map as $key => $field) {
-                    $v = $detail[$field] ?? null;
-                    $data[$key] = $v !== null ? $rawVal($v) : ($data[$key] ?? null);
-                }
-            }
-
-            // defaultKeyStatistics
-            $stats = $result['defaultKeyStatistics'] ?? [];
-            if ($stats) {
-                if (empty($data['market_cap'])) $data['market_cap'] = $rawVal($stats['marketCap'] ?? null);
-                if (empty($data['beta'])) $data['beta'] = $rawVal($stats['beta'] ?? null);
-                $data['price_to_book'] = $rawVal($stats['priceToBook'] ?? null);
-                $data['book_value'] = $rawVal($stats['bookValue'] ?? null);
-                $data['shares_outstanding'] = $rawVal($stats['sharesOutstanding'] ?? null);
-                $data['eps_forward'] = $rawVal($stats['forwardEps'] ?? null);
-                $data['eps_trailing'] = $rawVal($stats['trailingEps'] ?? null);
-            }
-
-            // financialData
-            $finData = $result['financialData'] ?? [];
-            if ($finData) {
-                $data['target_price'] = $rawVal($finData['targetMeanPrice'] ?? null);
-                $data['recommendation'] = $finData['recommendationKey'] ?? null;
-                $data['price_to_book'] = $data['price_to_book'] ?? $rawVal($finData['priceToBook'] ?? null);
-                $data['book_value'] = $data['book_value'] ?? $rawVal($finData['bookValue'] ?? null);
-            }
-
-            // calendarEvents
-            $calEvents = $result['calendarEvents'] ?? [];
-            if ($calEvents) {
-                $earnings = $calEvents['earnings'] ?? [];
-                $earningsDates = $earnings['earningsDate'] ?? [];
-                if (!empty($earningsDates)) {
-                    $data['earnings_timestamp'] = isset($earningsDates[0]['raw']) ? date('Y-m-d\TH:i:sP', $earningsDates[0]['raw']) : null;
-                    $data['earnings_timestamp_start'] = $data['earnings_timestamp'];
-                    $data['earnings_timestamp_end'] = isset($earningsDates[1]['raw']) ? date('Y-m-d\TH:i:sP', $earningsDates[1]['raw']) : null;
-                }
-                $data['dividend_date'] = isset($calEvents['exDividendDate']['raw']) ? date('Y-m-d', $calEvents['exDividendDate']['raw']) : null;
-            }
-
-            // price
-            $priceMod = $result['price'] ?? [];
-            if ($priceMod) {
-                if (empty($data['exchange'])) $data['exchange'] = $priceMod['exchangeName'] ?? null;
-                if (empty($data['currency'])) $data['currency'] = $priceMod['currency'] ?? null;
-                $data['quote_type'] = $priceMod['quoteType'] ?? null;
-                $data['exchange_timezone'] = $priceMod['exchangeTimezoneName'] ?? null;
-                $data['regular_market_price'] = $data['regular_market_price'] ?? $rawVal($priceMod['regularMarketPrice'] ?? null);
-                $data['regular_market_previous_close'] = $data['previous_close'] ?? $rawVal($priceMod['regularMarketPreviousClose'] ?? null);
-                $data['regular_market_change'] = $data['regular_market_change'] ?? $rawVal($priceMod['regularMarketChange'] ?? null);
-                $data['regular_market_change_percent'] = $data['regular_market_change_percent'] ?? $rawVal($priceMod['regularMarketChangePercent'] ?? null);
-                $data['market_state'] = $priceMod['marketState'] ?? null;
-                $data['regular_market_time'] = $rawVal($priceMod['regularMarketTime'] ?? null);
-                if ($data['regular_market_time']) {
-                    $data['regular_market_time'] = date('Y-m-d H:i:s', $data['regular_market_time']);
-                }
-            }
-
-            // quoteType
-            $qtType = $result['quoteType'] ?? [];
-            if ($qtType) {
-                if (empty($data['quote_type'])) $data['quote_type'] = $qtType['quoteType'] ?? null;
-                if (empty($data['exchange'])) $data['exchange'] = $qtType['exchange'] ?? null;
-                $data['long_name'] = $qtType['longName'] ?? null;
-                $data['short_name'] = $qtType['shortName'] ?? null;
-            }
-
-            if (!empty($data)) {
-                $cache[$symbol] = ['data' => $data, '_cached_at' => $now];
-                self::writeSummaryCache($cache);
-            }
-
-            return $data;
-        } catch (\Throwable $e) {
-            log_message('error', "Yahoo Finance quoteSummary error for {$symbol}: " . $e->getMessage());
-            if (isset($cache[$symbol])) {
-                return $cache[$symbol]['data'];
-            }
-            return [];
-        }
+        return $this->client->getHistoricalDividendData(self::toYahooSymbol($s, $ex), $start, $end);
     }
 
-    // ── Bulk Operations (with cache) ───────────────────────────────────────
-
-    /**
-     * Fetch quotes by symbols with a 120-second file cache.
-     * Falls back to stale cache on API error.
-     */
-    public function fetchQuotesBySymbols(array $symbols, string $exchange = 'GLOBAL'): array
+    public function getSplits(string $s, \DateTimeInterface $start, \DateTimeInterface $end, string $ex = 'GLOBAL'): array
     {
-        if (empty($symbols)) return [];
-
-        $cache = self::readCache();
-        $now = time();
-        $ttl = 120;
-
-        $allCached = true;
-        $fromCache = [];
-        foreach ($symbols as $s) {
-            if (isset($cache[$s]) && ($now - $cache[$s]['_cached_at']) < $ttl) {
-                $fromCache[$s] = $cache[$s];
-            } else {
-                $allCached = false;
-            }
-        }
-        if ($allCached) return $fromCache;
-
-        try {
-            $quotes = $this->getQuotes($symbols, $exchange);
-            $results = [];
-
-            foreach ($quotes as $quote) {
-                $localSymbol = self::fromYahooSymbol($quote->getSymbol());
-                $arr = $this->quoteToArray($quote);
-                $arr['_cached_at'] = $now;
-                $results[$localSymbol] = $arr;
-            }
-
-            if (!empty($results)) {
-                $merged = array_merge($cache, $results);
-                self::writeCache($merged);
-            }
-
-            return $results;
-        } catch (\Throwable $e) {
-            log_message('error', 'Yahoo Finance API error: ' . $e->getMessage());
-            return $fromCache;
-        }
+        return $this->client->getHistoricalSplitData(self::toYahooSymbol($s, $ex), $start, $end);
     }
 
-    /**
-     * Fetch live prices for all DB stocks and update the stocks table.
-     * Groups stocks by their exchange for per-exchange API calls.
-     */
-    public function fetchAndUpdateStocks(string $exchange = 'GLOBAL'): array
+    public function getExchangeRate(string $from, string $to): ?Quote { return $this->client->getExchangeRate($from, $to); }
+
+    public function getOptionChain(string $s, string $ex = 'GLOBAL'): array { return $this->client->getOptionChain(self::toYahooSymbol($s, $ex)); }
+
+    public function getSummary(string $s, string $ex = 'GLOBAL', array $modules = []): array
     {
-        $stockModel = model('App\Models\StockModel');
-        $allStocks = $stockModel->findAll();
-        if (empty($allStocks)) return [];
-
-        $groups = [];
-        foreach ($allStocks as $s) {
-            $ex = strtoupper(trim($s['exchange'] ?? $exchange));
-            $groups[$ex][] = $s;
-        }
-
-        $updated = [];
-        foreach ($groups as $ex => $stocks) {
-            $symbols = array_column($stocks, 'symbol');
-            $symbolMap = [];
-            foreach ($stocks as $s) {
-                $symbolMap[$s['symbol']] = $s;
-            }
-
-            try {
-                $liveQuotes = $this->fetchQuotesBySymbols($symbols, $ex);
-            } catch (\Throwable $e) {
-                log_message('error', "Yahoo Finance fetchAndUpdateStocks error for {$ex}: " . $e->getMessage());
-                continue;
-            }
-
-            foreach ($liveQuotes as $symbol => $data) {
-                if (($data['regularMarketPrice'] ?? null) === null) continue;
-
-                $updateData = [
-                    'current_price'  => $data['regularMarketPrice'],
-                    'previous_close' => $data['regularMarketPreviousClose'] ?? $symbolMap[$symbol]['previous_close'],
-                    'updated_at'     => date('Y-m-d H:i:s'),
-                ];
-
-                if ($data['marketCap'] ?? null)          $updateData['market_cap'] = $data['marketCap'];
-                if ($data['trailingPE'] ?? null)          $updateData['pe_ratio'] = $data['trailingPE'];
-                if ($data['fiftyTwoWeekHigh'] ?? null)    $updateData['week_52_high'] = $data['fiftyTwoWeekHigh'];
-                if ($data['fiftyTwoWeekLow'] ?? null)     $updateData['week_52_low'] = $data['fiftyTwoWeekLow'];
-                if ($data['trailingAnnualDividendYield'] ?? null) $updateData['dividend_yield'] = $data['trailingAnnualDividendYield'];
-                if ($data['averageDailyVolume3Month'] ?? null)   $updateData['avg_volume'] = $data['averageDailyVolume3Month'];
-
-                $stockModel->where('symbol', $symbol)->set($updateData)->update();
-                $updated[$symbol] = array_merge($symbolMap[$symbol], $updateData);
-            }
-        }
-
-        return $updated;
-    }
-
-    /**
-     * Enrich an array of stock records with live price data.
-     * Groups by exchange for per-exchange API calls.
-     */
-    public function enrichStocks(array $stocks, string $exchange = 'GLOBAL'): array
-    {
-        if (empty($stocks)) return $stocks;
-
-        $groups = [];
-        foreach ($stocks as $s) {
-            $ex = strtoupper(trim($s['exchange'] ?? $exchange));
-            $groups[$ex]['stocks'][] = $s;
-            $groups[$ex]['symbols'][] = $s['symbol'];
-        }
-
-        foreach ($groups as $ex => $g) {
-            $quotes = $this->fetchQuotesBySymbols($g['symbols'], $ex);
-            foreach ($groups[$ex]['stocks'] as &$stock) {
-                $q = $quotes[$stock['symbol']] ?? null;
-                if ($q && ($q['regularMarketPrice'] ?? null) !== null) {
-                    $stock['current_price'] = $q['regularMarketPrice'];
-                    if (($q['regularMarketPreviousClose'] ?? null) !== null) $stock['previous_close'] = $q['regularMarketPreviousClose'];
-                }
-            }
-        }
-
-        $result = [];
-        foreach ($groups as $g) {
-            $result = array_merge($result, $g['stocks']);
-        }
-        return $result;
-    }
-
-    // ── Market Status ──────────────────────────────────────────────────────
-
-    public function isMarketOpen(): bool
-    {
-        $now = new \DateTime('now', new \DateTimeZone('Asia/Kolkata'));
-        $dayOfWeek = (int) $now->format('N');
-        $hour = (int) $now->format('G');
-        $minute = (int) $now->format('i');
-        $currentMinutes = $hour * 60 + $minute;
-
-        if ($dayOfWeek >= 6) return false;
-
-        return $currentMinutes >= 555 && $currentMinutes < 930;
-    }
-
-    public function getMarketInfo(): array
-    {
-        $open = $this->isMarketOpen();
-        return [
-            'open'  => $open,
-            'label' => $open ? 'Market Open (NSE/BSE)' : 'Market Closed',
-        ];
+        $r = $this->client->getStockSummary(self::toYahooSymbol($s, $ex), $modules ?: ['summaryProfile', 'assetProfile']);
+        return $r[0] ?? [];
     }
 }

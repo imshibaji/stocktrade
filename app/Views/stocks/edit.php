@@ -22,8 +22,13 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Sector</label>
-                    <input type="text" name="sector" value="<?= old('sector', $stock['sector']) ?>" required
+                    <input type="text" name="sector" list="sectorList" value="<?= old('sector', $stock['sector']) ?>" required
                         class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none">
+                    <datalist id="sectorList">
+                        <?php foreach (($sectors ?? []) as $s): ?>
+                        <option value="<?= esc($s) ?>"><?= esc($s) ?></option>
+                        <?php endforeach; ?>
+                    </datalist>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Current Price</label>

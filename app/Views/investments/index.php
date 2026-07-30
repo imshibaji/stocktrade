@@ -61,7 +61,6 @@
                         </button>
                     </div>
                 </form>
-                <input type="hidden" id="stockPrices" value='<?= json_encode(array_column($stocks, 'current_price', 'id')) ?>'>
             </div>
         </div>
         <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
@@ -103,17 +102,8 @@
                 <tbody>
 <?php foreach ($investments as $inv): 
     $pl = $investmentPl[(int) $inv['id']] ?? [];
-    $invData = [
-        'id' => (int) $inv['id'],
-        'sid' => (int) $inv['stock_id'],
-        'shares' => (int) $inv['shares'],
-        'buyPrice' => (float) $inv['buy_price'],
-        'invested' => (float) $inv['total_invested'],
-        'buyDate' => $inv['buy_date'],
-        'status' => $inv['status'],
-    ];
 ?>
-                    <tr class="inv-row border-b border-gray-700/50 hover:bg-navy/50" data-inv='<?= json_encode($invData) ?>'>
+                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
                         <td class="px-6 py-4">
                             <a href="/stocks/<?= $inv['stock_id'] ?>" class="text-white font-semibold hover:text-gold"><?= esc($inv['symbol']) ?></a>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
@@ -167,8 +157,6 @@
 
 <script>
 (function() {
-    var prices = JSON.parse(document.getElementById('stockPrices').value);
-
     function getSelectedPrice() {
         var sel = document.getElementById('invStockSelect');
         var opt = sel.options[sel.selectedIndex];
@@ -245,84 +233,14 @@
     document.getElementById('inputTypeAmount').addEventListener('click', function() { switchInputType('amount'); });
     document.getElementById('inputTypeQuantity').addEventListener('click', function() { switchInputType('quantity'); });
     document.getElementById('invStockSelect').addEventListener('change', updateCalc);
-    document.querySelector('input[name="amount"]').addEventListener('input', updateCalc);
-    document.querySelector('input[name="quantity"]').addEventListener('input', updateCalc);
+    var amtInput = document.querySelector('input[name="amount"]');
+    var qtyInput2 = document.querySelector('input[name="quantity"]');
+    if (amtInput) amtInput.addEventListener('input', updateCalc);
+    if (qtyInput2) qtyInput2.addEventListener('input', updateCalc);
 
     var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024' };
     function stockCurrency(exch) { return (exch && (exch.indexOf('NS')>=0||exch.indexOf('BSE')>=0)) ? 'INR' : 'USD'; }
     function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-    function updateBadge(market) {
-        var badge = document.getElementById('marketBadge');
-        if (!badge) return;
-        if (market.open) {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-green-600 text-green-400';
-            badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-        } else {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400';
-            badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-        }
-    }
-
-    function calcTax(gross, buyDate) {
-        if (gross <= 0) return 0;
-        var held = (new Date() - new Date(buyDate)) / 86400000;
-        if (held < 365) return gross * 0.15;
-        return Math.max(0, gross - 100000) * 0.10;
-    }
-
-    function updateRows(stocks) {
-        var priceMap = {}, currencyMap = {};
-        stocks.forEach(function(s) { priceMap[s.id] = s.current_price; currencyMap[s.id] = s.currency || 'INR'; });
-
-        document.querySelectorAll('.inv-row').forEach(function(row) {
-            var inv = JSON.parse(row.getAttribute('data-inv'));
-            if (inv.status !== 'active') return;
-            var livePrice = priceMap[inv.sid];
-            if (!livePrice) return;
-            var cur = currencyMap[inv.sid] || inv.currency || 'INR';
-
-            var currentValue = inv.shares * livePrice;
-            var grossProfit = currentValue - inv.invested;
-            var grossPct = inv.invested > 0 ? (grossProfit / inv.invested) * 100 : 0;
-            var tax = calcTax(grossProfit, inv.buyDate);
-            var netProfit = grossProfit - tax;
-
-            var cp = row.querySelector('.inv-current-price');
-            var val = row.querySelector('.inv-value');
-            var pl = row.querySelector('.inv-pl');
-            var gross = row.querySelector('.inv-gross');
-            var gPct = row.querySelector('.inv-gross-pct');
-
-            if (cp) cp.textContent = formatPrice(livePrice, cur);
-            if (val) val.textContent = formatPrice(currentValue, cur);
-            if (gross) gross.textContent = (grossProfit >= 0 ? '+' : '') + formatPrice(grossProfit, cur);
-            if (gPct) gPct.textContent = (grossPct >= 0 ? '+' : '') + grossPct.toFixed(2) + '%';
-
-            if (grossProfit >= 0) {
-                if (pl) pl.className = 'px-6 py-4 text-right inv-pl text-green-400';
-                if (gPct) gPct.className = 'text-xs inv-gross-pct text-green-500';
-                row.style.boxShadow = 'inset 2px 0 0 rgba(74, 222, 128, 0.4)';
-            } else {
-                if (pl) pl.className = 'px-6 py-4 text-right inv-pl text-red-400';
-                if (gPct) gPct.className = 'text-xs inv-gross-pct text-red-500';
-                row.style.boxShadow = 'inset 2px 0 0 rgba(248, 113, 113, 0.4)';
-            }
-            setTimeout(function() { row.style.boxShadow = ''; }, 2000);
-        });
-    }
-
-    function poll() {
-        fetch('/api/live-prices')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                updateBadge(data.market);
-                updateRows(data.stocks);
-            })
-            .catch(function() {});
-    }
-
-    poll();
-    setInterval(poll, 5000);
 })();
 </script>

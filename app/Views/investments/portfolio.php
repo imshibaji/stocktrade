@@ -33,7 +33,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8" id="portfolioCards">
         <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Invested</p>
-            <p id="totalInvested" class="text-xl font-bold text-white" data-val="<?= $portfolio['total_invested'] ?>"><?= format_price($portfolio['total_invested']) ?></p>
+            <p id="totalInvested" class="text-xl font-bold text-white"><?= format_price($portfolio['total_invested']) ?></p>
         </div>
         <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Current Value</p>
@@ -91,15 +91,8 @@
                 <tbody>
                     <?php foreach ($portfolio['investments'] as $item): 
                         $inv = $item['stock'];
-                        $pfData = [
-                            'sid' => (int) $inv['stock_id'],
-                            'shares' => (int) $inv['shares'],
-                            'buyPrice' => (float) $inv['buy_price'],
-                            'invested' => (float) $item['total_invested'],
-                            'buyDate' => $inv['buy_date'],
-                        ];
                     ?>
-                    <tr class="pf-row border-b border-gray-700/50 hover:bg-navy/50" data-pf='<?= json_encode($pfData) ?>'>
+                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
@@ -167,139 +160,4 @@
     <?php endif; ?>
 </section>
 
-<script>
-(function() {
-    var TAX_CFG = <?= json_encode([
-        'stcg_rate' => (float) ($taxRates['stcg_rate'] ?? 0.15),
-        'ltcg_rate' => (float) ($taxRates['ltcg_rate'] ?? 0.10),
-        'fee_rates' => $taxRates['fee_rates'] ?? [],
-    ]) ?>;
 
-    function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-    var totalInvested = parseFloat(document.getElementById('totalInvested').getAttribute('data-val'));
-
-    function updateBadge(market) {
-        var badge = document.getElementById('marketBadge');
-        if (!badge) return;
-        if (market.open) {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-green-600 text-green-400';
-            badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-        } else {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400';
-            badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-        }
-    }
-
-    function calcFees(amount) {
-        var r = TAX_CFG.fee_rates || {};
-        var b = amount * (parseFloat(r.brokerage_pct || 0) / 100);
-        var s = amount * (parseFloat(r.stt_pct || 0) / 100);
-        var e = amount * (parseFloat(r.exchange_pct || 0) / 100);
-        var g = (b + e) * (parseFloat(r.gst_pct || 18) / 100);
-        var d = amount * (parseFloat(r.stamp_duty_pct || 0) / 100);
-        var se = amount * (parseFloat(r.sebi_fees || 0) / 100);
-        return b + s + e + g + d + se;
-    }
-
-    function calcTax(gross, buyDate) {
-        if (gross <= 0) return 0;
-        var held = (new Date() - new Date(buyDate)) / 86400000;
-        if (held < 365) return gross * TAX_CFG.stcg_rate;
-        var exemption = 100000;
-        return Math.max(0, gross - exemption) * TAX_CFG.ltcg_rate;
-    }
-
-    function updateAll(stocks) {
-        var priceMap = {};
-        stocks.forEach(function(s) { priceMap[s.id] = s.current_price; });
-
-        var totalValue = 0, totalGross = 0, totalFees = 0, totalTax = 0, totalNet = 0;
-
-        document.querySelectorAll('.pf-row').forEach(function(row) {
-            var pf = JSON.parse(row.getAttribute('data-pf'));
-            var livePrice = priceMap[pf.sid];
-            if (!livePrice) return;
-
-            var currentValue = pf.shares * livePrice;
-            var grossProfit = currentValue - pf.invested;
-            var grossPct = pf.invested > 0 ? (grossProfit / pf.invested) * 100 : 0;
-            var fees = calcFees(currentValue);
-            var profitAfterFees = grossProfit - fees;
-            var tax = calcTax(profitAfterFees, pf.buyDate);
-            var netProfit = profitAfterFees - tax;
-
-            totalValue += currentValue;
-            totalGross += grossProfit;
-            totalFees += fees;
-            totalTax += tax;
-            totalNet += netProfit;
-
-            var cp = row.querySelector('.pf-cp');
-            var val = row.querySelector('.pf-value');
-            var gl = row.querySelector('.pf-gl');
-            var grossEl = row.querySelector('.pf-gross');
-            var gpctEl = row.querySelector('.pf-gpct');
-            var feesEl = row.querySelector('.pf-fees');
-            var taxEl = row.querySelector('.pf-tax');
-            var net = row.querySelector('.pf-net');
-            var netVal = row.querySelector('.pf-net-val');
-
-            if (cp) cp.textContent = formatPrice(livePrice);
-            if (val) val.textContent = formatPrice(currentValue);
-            if (grossEl) grossEl.textContent = (grossProfit >= 0 ? '+' : '') + formatPrice(grossProfit);
-            if (gpctEl) gpctEl.textContent = (grossPct >= 0 ? '+' : '') + grossPct.toFixed(2) + '%';
-            if (feesEl) feesEl.textContent = formatPrice(fees);
-            if (taxEl) taxEl.textContent = formatPrice(tax);
-            if (netVal) netVal.textContent = (netProfit >= 0 ? '+' : '') + formatPrice(netProfit);
-
-            if (grossProfit >= 0) {
-                if (gl) gl.className = 'px-6 py-4 text-right pf-gl text-green-400';
-                if (gpctEl) gpctEl.className = 'text-xs pf-gpct text-green-500';
-                if (net) net.className = 'px-6 py-4 text-right pf-net text-green-400 font-semibold';
-            } else {
-                if (gl) gl.className = 'px-6 py-4 text-right pf-gl text-red-400';
-                if (gpctEl) gpctEl.className = 'text-xs pf-gpct text-red-500';
-                if (net) net.className = 'px-6 py-4 text-right pf-net text-red-400 font-semibold';
-            }
-        });
-
-        var tv = document.getElementById('totalValue');
-        var tg = document.getElementById('totalGross');
-        var tf = document.getElementById('totalFeesCard');
-        var tx = document.getElementById('totalTax');
-        var tn = document.getElementById('totalNet');
-        var tr = document.getElementById('totalReturn');
-
-        if (tv) tv.textContent = formatPrice(totalValue);
-        if (tg) { tg.textContent = (totalGross >= 0 ? '+' : '') + formatPrice(totalGross); tg.className = 'text-xl font-bold ' + (totalGross >= 0 ? 'text-green-400' : 'text-red-400'); }
-        if (tf) tf.textContent = formatPrice(totalFees);
-        if (tx) tx.textContent = formatPrice(totalTax);
-        if (tn) { tn.textContent = (totalNet >= 0 ? '+' : '') + formatPrice(totalNet); tn.className = 'text-xl font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
-        if (tr) { tr.textContent = (totalInvested > 0 ? ((totalNet / totalInvested) * 100).toFixed(2) : 0) + '%'; tr.className = 'text-xl font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
-
-        var tvf = document.getElementById('totalValFooter');
-        var tgf = document.getElementById('totalGrossFooter');
-        var tff = document.getElementById('totalFeesFooter');
-        var txf = document.getElementById('totalTaxFooter');
-        var tnf = document.getElementById('totalNetFooter');
-        if (tvf) tvf.textContent = formatPrice(totalValue);
-        if (tgf) { tgf.textContent = (totalGross >= 0 ? '+' : '') + formatPrice(totalGross); tgf.className = 'px-6 py-4 text-right font-bold ' + (totalGross >= 0 ? 'text-green-400' : 'text-red-400'); }
-        if (tff) tff.textContent = formatPrice(totalFees);
-        if (txf) txf.textContent = formatPrice(totalTax);
-        if (tnf) { tnf.textContent = (totalNet >= 0 ? '+' : '') + formatPrice(totalNet); tnf.className = 'px-6 py-4 text-right font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
-    }
-
-    function poll() {
-        fetch('/api/live-prices')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                updateBadge(data.market);
-                updateAll(data.stocks);
-            })
-            .catch(function() {});
-    }
-
-    poll();
-    setInterval(poll, 5000);
-})();
-</script>

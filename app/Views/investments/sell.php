@@ -37,7 +37,7 @@
         </div>
 
         <div class="bg-navy rounded-xl p-6 mb-6 border border-gray-700">
-            <h3 class="text-white font-semibold mb-4">Current Status <span id="liveIndicator" class="hidden text-xs px-2 py-1 rounded bg-green-900/30 text-green-400 ml-2">Live</span></h3>
+                            <h3 class="text-white font-semibold mb-4">Current Status</h3>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-gray-400 text-xs mb-1">Current Price</p>
@@ -90,79 +90,11 @@
 
 <script>
 (function() {
-    var stockId = <?= $investment['stock_id'] ?>;
     var totalShares = <?= (int) $investment['shares'] ?>;
-    var buyPrice = <?= (float) $investment['buy_price'] ?>;
-    var buyDate = '<?= $investment['buy_date'] ?>';
 
-    function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-
-    function calcTax(gross, buyDate) {
-        if (gross <= 0) return 0;
-        var held = (new Date() - new Date(buyDate)) / 86400000;
-        if (held < 365) return gross * 0.15;
-        return Math.max(0, gross - 100000) * 0.10;
-    }
-
-    function updateBadge(market) {
-        var badge = document.getElementById('marketBadge');
-        if (!badge) return;
-        var indicator = document.getElementById('liveIndicator');
-        if (market.open) {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-green-600 text-green-400';
-            badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-            if (indicator) { indicator.classList.remove('hidden'); }
-        } else {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400';
-            badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-            if (indicator) { indicator.classList.add('hidden'); }
-        }
-    }
-
-    function updateDisplay(data) {
-        var price = data.current_price;
-        var qty = parseInt(document.getElementById('sellQtyInput').value) || totalShares;
-        if (qty > totalShares) qty = totalShares;
-        var costBasis = qty * buyPrice;
-        var currentValue = qty * price;
-        var grossProfit = currentValue - costBasis;
-        var grossPct = costBasis > 0 ? (grossProfit / costBasis) * 100 : 0;
-        var tax = calcTax(grossProfit, buyDate);
-
-        document.getElementById('sellLivePrice').textContent = formatPrice(price);
-        document.getElementById('sellLiveValue').textContent = formatPrice(currentValue);
-        document.getElementById('sellLivePL').innerHTML = (grossProfit >= 0 ? '+' : '') + formatPrice(grossProfit) + ' (<span id="sellLivePct">' + (grossPct >= 0 ? '+' : '') + grossPct.toFixed(2) + '</span>%)';
-        document.getElementById('sellLiveTax').textContent = formatPrice(tax);
-        document.getElementById('sellLivePL').className = 'font-semibold ' + (grossProfit >= 0 ? 'text-green-400' : 'text-red-400');
-
-        var input = document.getElementById('sellPriceInput');
-        if (input && !input.dataset.userChanged) {
-            input.value = price.toFixed(2);
-        }
-    }
-
-    function poll() {
-        fetch('/api/tick/' + stockId)
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                updateBadge(data.market);
-                updateDisplay(data);
-            })
-            .catch(function() {});
-    }
-
-    document.getElementById('sellPriceInput').addEventListener('input', function() {
-        this.dataset.userChanged = '1';
-    });
     document.getElementById('sellQtyInput').addEventListener('input', function() {
         var val = parseInt(this.value) || 0;
         if (val > totalShares) this.value = totalShares;
-        if (document.getElementById('sellPriceInput').value) {
-            updateDisplay({ current_price: parseFloat(document.getElementById('sellPriceInput').value) });
-        }
     });
-
-    poll();
-    setInterval(poll, 5000);
 })();
 </script>

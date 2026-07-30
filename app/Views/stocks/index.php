@@ -6,13 +6,10 @@
                 <span id="marketBadge" class="text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400">
                     <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>Checking...
                 </span>
-                <span id="lastUpdated" class="text-gray-600 text-xs"></span>
             </div>
         </div>
         <div class="flex items-center space-x-2 mt-4 md:mt-0">
-            <button onclick="syncPrices()" class="bg-navy2 border border-gray-600 text-gray-300 hover:text-gold hover:border-gold px-4 py-2 rounded-lg transition text-sm" title="Sync prices from Yahoo Finance">
-                <i class="fas fa-sync mr-1"></i> Sync
-            </button>
+
             <div class="relative" id="searchContainer">
                 <input type="text" id="stockSearch" value="<?= esc($search) ?>" placeholder="Search by symbol or name..."
                     autocomplete="off"
@@ -67,7 +64,7 @@
                 <button type="button" onclick="toggleAddForm()" class="px-4 py-2 rounded-lg bg-navy border border-gray-600 text-gray-300 hover:text-white transition">
                     Cancel
                 </button>
-                <button type="button" id="addSubmitBtn" class="px-6 py-2 rounded-lg bg-gold hover:bg-gold2 text-navy font-semibold transition disabled opacity-50 cursor-not-allowed" disabled onclick="window.importStockFromForm()">
+                <button type="button" id="addSubmitBtn" class="px-6 py-2 rounded-lg bg-gold hover:bg-gold2 text-navy font-semibold transition" disabled onclick="window.importStockFromForm()">
                     <i class="fas fa-plus mr-1"></i> Add Stock
                 </button>
             </div>
@@ -174,18 +171,6 @@
     function stockCurrency(exch) { return (exch && (exch.indexOf('NS')>=0||exch.indexOf('BSE')>=0)) ? 'INR' : 'USD'; }
     function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-    function updateMarketBadge(market) {
-        var badge = document.getElementById('marketBadge');
-        if (!badge) return;
-        if (market.open) {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-green-600 text-green-400';
-            badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-        } else {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400';
-            badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-        }
-    }
-
     function buildCardHtml(s) {
         var isPos = s.change_percent !== null && s.change_percent >= 0;
         var changePct = s.change_percent !== null ? (s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent) + '%' : 'N/A';
@@ -196,17 +181,30 @@
         var href = s.id ? '/stocks/' + s.id : '#';
 
         if (s.from_yahoo) {
-            var sym = escHtml(s.symbol);
-            var exch = escHtml(s.exchange || 'NSE');
-            return '<div class="stock-card bg-navy2 rounded-xl p-6 border border-gray-700 hover:border-gold transition relative group opacity-80" onclick="importStock(\'' + sym + '\', \'' + exch + '\')" style="cursor:pointer">' +
+            var yahooPriceHtml = '';
+            var yahooChangeHtml = '';
+            if (s.price) {
+                var yahooIsPos = s.change_percent >= 0;
+                var yahooChangeClass = yahooIsPos ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400';
+                var yahooChangePct = (s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent) + '%';
+                yahooPriceHtml = '<p class="price-value text-2xl font-bold text-white">' + formatPrice(s.price, sc) + '</p>';
+                yahooChangeHtml = '<span class="change-badge px-3 py-1 rounded text-sm font-semibold ' + yahooChangeClass + '">' + yahooChangePct + '</span>';
+            }
+            return '<div class="stock-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition relative group yahoo-result" data-sym="' + (s.symbol || '') + '" data-exch="' + (s.exchange || 'NSE') + '">' +
+                '<div class="p-6 cursor-pointer" onclick="importStock(this.parentElement.dataset.sym, this.parentElement.dataset.exch)">' +
                 '<div class="flex justify-between items-start mb-3">' +
                 '<div>' +
-                '<h3 class="text-white font-bold text-lg">' + sym + '</h3>' +
-                '<p class="text-gray-400 text-sm">' + escHtml(s.name) + '</p>' +
+                '<h3 class="text-white font-bold text-lg">' + escHtml(s.symbol) + '</h3>' +
+                '<p class="text-gray-400 text-sm">' + escHtml(s.name || '') + '</p>' +
                 '</div>' +
-                '<span class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300">' + escHtml(s.sector) + '</span>' +
+                '<span class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300">' + escHtml(s.sector || '') + '</span>' +
                 '</div>' +
-                '<div class="text-center py-4"><span class="text-yellow-400 text-xs"><i class="fas fa-cloud-download-alt mr-1"></i>Click to import from Yahoo Finance</span></div>' +
+                (yahooPriceHtml ? '<div class="flex justify-between items-end mt-4"><div>' + yahooPriceHtml + '</div><div class="text-right">' + yahooChangeHtml + '</div></div>' : '') +
+                '<div class="text-center py-4 import-msg">' +
+                '<span class="inline-flex items-center gap-1 bg-yellow-900/30 text-yellow-400 border border-yellow-700/50 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-800/40 transition cursor-pointer">' +
+                '<i class="fas fa-cloud-download-alt"></i> Import from Yahoo Finance</span>' +
+                '</div>' +
+                '</div>' +
                 '</div>';
         }
 
@@ -252,20 +250,21 @@
     }
 
     window.importStock = function(sym, exchange) {
-        if (!confirm('Import "' + sym + '" from Yahoo Finance?')) return;
-        var body = CSRF_NAME + '=' + encodeURIComponent(CSRF_HASH) + '&symbol=' + encodeURIComponent(sym) + '&exchange=' + encodeURIComponent(exchange);
         var cards = document.querySelectorAll('.stock-card');
         cards.forEach(function(c) {
             if (c.textContent.indexOf(sym) >= 0) {
                 c.style.opacity = '0.5';
                 c.onclick = null;
+                var msg = c.querySelector('.import-msg');
+                if (msg) msg.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Importing...';
             }
         });
+        var body = CSRF_NAME + '=' + encodeURIComponent(CSRF_HASH) + '&symbol=' + encodeURIComponent(sym) + '&exchange=' + encodeURIComponent(exchange);
         fetch('/api/stocks/import', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
             .then(function(r){ return r.json(); })
             .then(function(d){
                 if (d.success) {
-                    window.location.href = '/watchlist';
+                    window.location.reload();
                 } else {
                     alert(d.message);
                     window.location.reload();
@@ -312,7 +311,6 @@
             .then(function(data) {
                 searchStatus.classList.add('hidden');
                 renderResults(data);
-                updateCards(data.results, '');
             })
             .catch(function() {
                 searchStatus.classList.add('hidden');
@@ -339,52 +337,6 @@
         if (searchTimer) clearTimeout(searchTimer);
         window.location.href = '/stocks';
     });
-
-    function updateCards(stocks) {
-        stocks.forEach(function(s) {
-            if (!s.id) return;
-            var card = document.querySelector('.stock-card[data-sid="' + s.id + '"]');
-            if (!card) return;
-            var priceEl = card.querySelector('.price-value');
-            var changeEl = card.querySelector('.change-badge');
-            if (priceEl && s.price) priceEl.textContent = formatPrice(s.price, s.currency);
-            if (changeEl && s.change_percent !== null) {
-                var pct = s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent;
-                changeEl.textContent = pct + '%';
-                changeEl.className = 'change-badge px-3 py-1 rounded text-sm font-semibold ' + (s.change_percent >= 0 ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400');
-            }
-        });
-        var el = document.getElementById('lastUpdated');
-        if (el) el.textContent = 'Updated: ' + new Date().toLocaleTimeString('en-IN');
-    }
-
-    function poll() {
-        if (searchInput.value.trim().length >= 2) return;
-        fetch('/api/live-prices')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                updateMarketBadge(data.market);
-                updateCards(data.stocks);
-            })
-            .catch(function() {});
-    }
-
-    poll();
-    setInterval(poll, 5000);
-
-    window.syncPrices = function() {
-        var btn = document.querySelector('button[onclick="syncPrices()"]');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>'; }
-        fetch('/api/sync-prices')
-            .then(function(r) { return r.json(); })
-            .then(function() {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync mr-1"></i> Sync'; }
-                poll();
-            })
-            .catch(function() {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync mr-1"></i> Sync'; }
-            });
-    };
 
     window.toggleWatch = function(btn) {
         var sid = btn.getAttribute('data-sid');
@@ -415,6 +367,15 @@
 
     var addTimer = null;
 
+    function disableBtn(btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    function enableBtn(btn) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
     window.lookupSymbol = function() {
         var sym = document.getElementById('addSymbol').value.trim().toUpperCase();
         var exchange = document.getElementById('addExchange').value;
@@ -427,7 +388,7 @@
         if (sym.length < 2) {
             status.className = 'text-xs mt-1 hidden';
             nameEl.value = ''; sectorEl.value = ''; priceEl.value = '';
-            btn.disabled = true;
+            disableBtn(btn);
             return;
         }
 
@@ -447,14 +408,14 @@
                     status.className = 'text-xs mt-1 text-red-400';
                     status.textContent = 'Symbol not found on Yahoo Finance.';
                     nameEl.value = ''; sectorEl.value = ''; priceEl.value = '';
-                    btn.disabled = true;
+                    disableBtn(btn);
                     return;
                 }
                 if (match.id) {
                     status.className = 'text-xs mt-1 text-yellow-400';
                     status.innerHTML = 'Already in DB — <a href="/stocks/' + match.id + '" class="underline">View stock</a>';
                     nameEl.value = match.name || ''; sectorEl.value = match.sector || ''; priceEl.value = match.price || '';
-                    btn.disabled = true;
+                    disableBtn(btn);
                     return;
                 }
                 nameEl.value = match.name || '';
@@ -463,37 +424,38 @@
                     priceEl.value = '\u20B9' + parseFloat(match.price).toLocaleString('en-IN');
                     status.className = 'text-xs mt-1 text-green-400';
                     status.textContent = 'Ready to add — all data will come from Yahoo live.';
-                    btn.disabled = false;
+                    enableBtn(btn);
                 } else {
                     status.className = 'text-xs mt-1 text-gray-400';
                     status.textContent = 'Fetching live price...';
-                    fetch('/api/quote/' + encodeURIComponent(sym) + '?exchange=' + encodeURIComponent(exchange))
+                    fetch('/api/quote/' + encodeURIComponent(sym) + '/' + encodeURIComponent(exchange))
                         .then(function(r) { return r.json(); })
                         .then(function(q) {
-                            if (q.price && q.price > 0) {
-                                priceEl.value = '\u20B9' + parseFloat(q.price).toLocaleString('en-IN');
-                                if (!nameEl.value) nameEl.value = q.name || '';
-                                if (!sectorEl.value) sectorEl.value = q.sector || '';
+                            var price = q.regularMarketPrice || q.price || q.current_price;
+                            if (price && price > 0) {
+                                priceEl.value = '\u20B9' + parseFloat(price).toLocaleString('en-IN');
+                                if (!nameEl.value) nameEl.value = q.longName || q.shortName || q.name || '';
+                                if (!sectorEl.value) sectorEl.value = q.sector || q.fullExchangeName || '';
                                 status.className = 'text-xs mt-1 text-green-400';
                                 status.textContent = 'Ready to add — all data from Yahoo live.';
-                                btn.disabled = false;
+                                enableBtn(btn);
                             } else {
                                 status.className = 'text-xs mt-1 text-red-400';
                                 status.textContent = 'No price data available for ' + sym;
-                                btn.disabled = true;
+                                disableBtn(btn);
                             }
                         })
                         .catch(function() {
                             status.className = 'text-xs mt-1 text-red-400';
                             status.textContent = 'Failed to fetch price.';
-                            btn.disabled = true;
+                            disableBtn(btn);
                         });
                 }
             })
             .catch(function() {
                 status.className = 'text-xs mt-1 text-red-400';
                 status.textContent = 'Lookup failed.';
-                btn.disabled = true;
+                disableBtn(btn);
             });
     };
 
@@ -502,8 +464,8 @@
         var exchange = document.getElementById('addExchange').value;
         var btn = document.getElementById('addSubmitBtn');
         var status = document.getElementById('addSymbolStatus');
-        if (!sym) return;
-        btn.disabled = true;
+            if (!sym) return;
+        disableBtn(btn);
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Importing...';
         status.className = 'text-xs mt-1 text-gray-400';
         status.textContent = 'Fetching all data from Yahoo Finance live API...';
@@ -513,20 +475,20 @@
             .then(function(r) { return r.json(); })
             .then(function(d) {
                 if (d.success) {
-                    window.location.href = '/watchlist';
+                    window.location.reload();
                 } else if (d.id) {
                     window.location.href = '/stocks/' + d.id;
                 } else {
                     status.className = 'text-xs mt-1 text-red-400';
                     status.textContent = d.message;
-                    btn.disabled = false;
+                    enableBtn(btn);
                     btn.innerHTML = '<i class="fas fa-plus mr-1"></i> Add Stock';
                 }
             })
             .catch(function() {
                 status.className = 'text-xs mt-1 text-red-400';
                 status.textContent = 'Import failed.';
-                btn.disabled = false;
+                enableBtn(btn);
                 btn.innerHTML = '<i class="fas fa-plus mr-1"></i> Add Stock';
             });
     };

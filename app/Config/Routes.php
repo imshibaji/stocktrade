@@ -15,9 +15,7 @@ $routes->get('/register', 'Auth::register', ['filter' => 'guest']);
 $routes->post('/register', 'Auth::attemptRegister', ['filter' => 'guest']);
 $routes->get('/logout', 'Auth::logout');
 
-$routes->get('/api/live-prices', 'Api::livePrices', ['filter' => 'auth']);
-$routes->get('/api/tick/(:num)', 'Api::tickPrice/$1', ['filter' => 'auth']);
-$routes->get('/api/sync-prices', 'Api::syncPrices', ['filter' => 'auth']);
+$routes->get('/api', 'Api::index');
 $routes->get('/api/search', 'Api::search', ['filter' => 'auth']);
 $routes->get('/api/quote/(:any)/(:any)', 'Api::getQuote/$1/$2', ['filter' => 'auth']);
 $routes->get('/api/quote/(:any)', 'Api::lookup/$1', ['filter' => 'auth']);
@@ -31,6 +29,7 @@ $routes->get('/api/summary/(:any)/(:any)', 'Api::getSummary/$1/$2', ['filter' =>
 $routes->get('/api/news/(:any)', 'Api::getNewsStream/$1', ['filter' => 'auth']);
 $routes->get('/api/search/(:any)', 'Api::getSearch/$1', ['filter' => 'auth']);
 $routes->post('/api/stocks/import', 'Api::importStock', ['filter' => 'auth']);
+$routes->post('/api/stocks/refresh', 'Api::refreshStock', ['filter' => 'auth']);
 
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/predictions', static fn() => redirect()->to('/stocks'));
@@ -71,5 +70,6 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->post('/settings/update-profile', 'Settings::updateProfile');
     $routes->post('/settings/update-password', 'Settings::updatePassword');
     $routes->post('/settings/update-tax', 'Settings::updateTax');
+    $routes->post('/settings/update-fees', 'Settings::updateFees');
     $routes->post('/settings/update-base-currency', 'Settings::updateBaseCurrency');
 });

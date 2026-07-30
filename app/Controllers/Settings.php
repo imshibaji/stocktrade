@@ -100,6 +100,28 @@ class Settings extends BaseController
         return redirect()->to('/settings')->with('success', 'Password changed successfully.');
     }
 
+    public function updateFees()
+    {
+        $userId = current_user_id();
+        $model = new UserModel();
+
+        $fields = ['brokerage_pct', 'stt_pct', 'exchange_pct', 'gst_pct', 'stamp_duty_pct', 'sebi_fees'];
+        $data = [];
+        $session = session();
+        $user = $session->get('user');
+
+        foreach ($fields as $f) {
+            $val = (float) $this->request->getPost($f);
+            $data[$f] = min(100, max(0, $val));
+            $user[$f] = $data[$f];
+        }
+
+        $model->update($userId, $data);
+        $session->set('user', $user);
+
+        return redirect()->to('/settings')->with('success', 'Brokerage & fee settings updated successfully.');
+    }
+
     public function updateBaseCurrency()
     {
         $userId = current_user_id();

@@ -7,12 +7,10 @@
                     <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>Checking...
                 </span>
             </div>
-            <p class="text-gray-400 mt-1">Track your favorite stocks with predictions &amp; organized buckets</p>
+            <p class="text-gray-400 mt-1">Track your favorite stocks with predictions</p>
         </div>
         <div class="flex space-x-3 mt-4 md:mt-0">
-            <button onclick="syncPrices()" class="bg-navy2 border border-gray-600 text-gray-300 hover:text-gold hover:border-gold px-4 py-2 rounded-lg transition text-sm">
-                <i class="fas fa-sync mr-1"></i> Sync
-            </button>
+
             <a href="/stocks" class="bg-gold hover:bg-gold2 text-navy font-semibold px-6 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-plus mr-2"></i>Add Stocks
             </a>
@@ -30,69 +28,14 @@
     </div>
     <?php else: ?>
 
-    <div class="flex flex-wrap items-center gap-2 mb-6">
-        <span class="text-gray-400 text-sm mr-2">Buckets:</span>
-        <a href="/watchlist" class="px-3 py-1.5 rounded-lg text-sm <?= empty($selectedBucket) ? 'bg-gold text-navy font-semibold' : 'bg-navy border border-gray-600 text-gray-300 hover:border-gold' ?> transition">
-            <i class="fas fa-layer-group mr-1"></i>All
-        </a>
-        <?php foreach ($buckets as $b): ?>
-        <a href="/watchlist?bucket=<?= $b['id'] ?>" class="px-3 py-1.5 rounded-lg text-sm <?= (!empty($selectedBucket) && $selectedBucket == $b['id']) ? 'bg-gold text-navy font-semibold' : 'bg-navy border border-gray-600 text-gray-300 hover:border-gold' ?> transition">
-            <i class="fas fa-folder mr-1"></i><?= esc($b['name']) ?>
-        </a>
-        <?php endforeach; ?>
-        <button onclick="document.getElementById('bucketForm').classList.toggle('hidden')" class="px-3 py-1.5 rounded-lg text-sm bg-navy border border-dashed border-gray-600 text-gray-400 hover:text-gold hover:border-gold transition">
-            <i class="fas fa-plus mr-1"></i>New Bucket
-        </button>
-    </div>
-
-    <form id="bucketForm" action="/watchlist/bucket/create" method="post" class="hidden flex items-center gap-2 mb-6 p-3 bg-navy2 rounded-lg border border-gray-700">
-        <?= csrf_field() ?>
-        <input type="text" name="name" placeholder="Bucket name (e.g. Large Cap, Growth)" required
-            class="flex-1 bg-navy border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:border-gold focus:outline-none">
-        <button type="submit" class="bg-gold hover:bg-gold2 text-navy font-semibold px-4 py-2 rounded-lg text-sm transition">Create</button>
-        <button type="button" onclick="this.closest('form').classList.add('hidden')" class="text-gray-400 hover:text-white text-sm px-2">Cancel</button>
-    </form>
-
-    <div class="space-y-8" id="watchlistCards">
-        <?php foreach ($stocksByBucket as $g): $bName = $g['bucket']['name']; $bId = $g['bucket']['id']; ?>
-        <?php if (!empty($g['stocks'])): ?>
-        <div class="bucket-group" data-bucket="<?= $bId ?>">
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-white font-bold text-lg">
-                    <i class="fas fa-folder text-gold mr-2"></i><?= esc($bName) ?>
-                    <span class="text-gray-500 text-sm font-normal">(<?= count($g['stocks']) ?>)</span>
-                </h2>
-                <form action="/watchlist/bucket/<?= $bId ?>/delete" method="post" class="inline" onsubmit="return confirm('Delete bucket "<?= esc($bName) ?>"? Stocks will move to Uncategorized.')">
-                    <?= csrf_field() ?>
-                    <button type="submit" class="text-red-400 hover:text-red-300 text-xs"><i class="fas fa-trash mr-1"></i>Delete Bucket</button>
-                </form>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <?php foreach ($g['stocks'] as $stock): echo renderWatchlistCard($stock, $predictions, $buckets); endforeach; ?>
-            </div>
-        </div>
-        <?php endif; ?>
-        <?php endforeach; ?>
-
-        <?php if (!empty($uncategorized)): ?>
-        <div class="bucket-group" data-bucket="">
-            <div class="flex items-center mb-3">
-                <h2 class="text-white font-bold text-lg">
-                    <i class="fas fa-inbox text-gray-500 mr-2"></i>Uncategorized
-                    <span class="text-gray-500 text-sm font-normal">(<?= count($uncategorized) ?>)</span>
-                </h2>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <?php foreach ($uncategorized as $stock): echo renderWatchlistCard($stock, $predictions, $buckets); endforeach; ?>
-            </div>
-        </div>
-        <?php endif; ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="watchlistCards">
+        <?php foreach ($stocks as $stock): echo renderWatchlistCard($stock, $predictions); endforeach; ?>
     </div>
     <?php endif; ?>
 </section>
 
 <?php
-function renderWatchlistCard($stock, $predictions, $buckets)
+function renderWatchlistCard($stock, $predictions)
 {
     $change = get_price_change((float) $stock['current_price'], (float) $stock['previous_close']);
     $cur = stock_currency($stock['exchange'] ?? null);
@@ -108,16 +51,6 @@ function renderWatchlistCard($stock, $predictions, $buckets)
                 <h3 class="text-white font-bold text-lg"><?= esc($stock['symbol']) ?></h3>
                 <p class="text-gray-400 text-sm"><?= esc($stock['name']) ?></p>
             </a>
-            <div class="flex flex-col items-end gap-1">
-                <span class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300"><?= esc($stock['sector']) ?></span>
-                <select onchange="moveToBucket(<?= $watchlistId ?>, this.value)" class="text-xs bg-navy border border-gray-700 rounded px-1 py-0.5 text-gray-400 cursor-pointer hover:border-gold">
-                    <option value="">Move...</option>
-                    <option value="">Uncategorized</option>
-                    <?php foreach ($buckets as $b): ?>
-                    <option value="<?= $b['id'] ?>"><?= esc($b['name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
         </div>
 
         <?php if ($pred): ?>
@@ -126,6 +59,31 @@ function renderWatchlistCard($stock, $predictions, $buckets)
             <span class="text-green-400 font-semibold"><?= format_price($pred['low'], $cur) ?></span>
             <span class="text-gray-500">–</span>
             <span class="text-red-400 font-semibold"><?= format_price($pred['high'], $cur) ?></span>
+        </div>
+        <?php
+            $outlook = 'neutral';
+            $outlookLabel = '30-Day Outlook: Neutral';
+            $outlookClass = 'bg-gray-800/50 text-gray-400 border-gray-600';
+            if ($pred['avg'] > 0 && (float) $stock['current_price'] > 0) {
+                $outlookPct = (($pred['avg'] - (float) $stock['current_price']) / (float) $stock['current_price']) * 100;
+                if ($outlookPct > 2) {
+                    $outlook = 'bullish';
+                    $outlookLabel = '30-Day Outlook: Bullish (+' . round($outlookPct, 1) . '%)';
+                    $outlookClass = 'bg-green-900/30 text-green-400 border-green-700/50';
+                } elseif ($outlookPct < -2) {
+                    $outlook = 'bearish';
+                    $outlookLabel = '30-Day Outlook: Bearish (' . round($outlookPct, 1) . '%)';
+                    $outlookClass = 'bg-red-900/30 text-red-400 border-red-700/50';
+                } else {
+                    $outlookLabel = '30-Day Outlook: Sideways';
+                }
+            }
+        ?>
+        <div class="mb-3">
+            <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border <?= $outlookClass ?> font-semibold">
+                <i class="fas fa-<?= $outlook === 'bullish' ? 'arrow-trend-up' : ($outlook === 'bearish' ? 'arrow-trend-down' : 'arrows-left-right') ?>"></i>
+                <?= $outlookLabel ?>
+            </span>
         </div>
         <?php endif; ?>
 
@@ -151,7 +109,7 @@ function renderWatchlistCard($stock, $predictions, $buckets)
         <a href="/stocks/<?= $sid ?>/predictions" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
             <i class="fas fa-chart-simple mr-1"></i>Predict
         </a>
-        <button onclick="removeWatchlist(<?= $sid ?>, '<?= esc($stock['symbol']) ?>')" class="flex-1 text-center py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 text-sm transition">
+        <button data-sid="<?= $sid ?>" data-symbol="<?= str_replace(['"', "'"], ['', '`'], $stock['symbol']) ?>" onclick="removeWatchlist(this.dataset.sid, this.dataset.symbol)" class="flex-1 text-center py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 text-sm transition">
             <i class="fas fa-trash mr-1"></i>Remove
         </button>
     </div>
@@ -170,71 +128,6 @@ function renderWatchlistCard($stock, $predictions, $buckets)
         return document.querySelector('input[name="' + CSRF_NAME + '"]')
             || document.querySelector('input[name^="csrf_"]');
     }
-
-    var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024' };
-    function stockCurrency(exch) { return (exch && (exch.indexOf('NS')>=0||exch.indexOf('BSE')>=0)) ? 'INR' : 'USD'; }
-    function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-
-    function updateBadge(market) {
-        var badge = document.getElementById('marketBadge');
-        if (!badge) return;
-        if (market.open) {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-green-600 text-green-400';
-            badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-        } else {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400';
-            badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-        }
-    }
-
-    function updateCards(stocks) {
-        stocks.forEach(function(s) {
-            var card = document.querySelector('.wl-card[data-sid="' + s.id + '"]');
-            if (!card) return;
-            var priceEl = card.querySelector('.wl-price');
-            var changeEl = card.querySelector('.wl-change');
-            if (priceEl) priceEl.textContent = formatPrice(s.current_price, s.currency);
-            if (changeEl) {
-                var pct = s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent;
-                changeEl.textContent = pct + '%';
-                changeEl.className = 'wl-change px-3 py-1 rounded text-sm font-semibold ' + (s.change_percent >= 0 ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400');
-            }
-            if (s.change_percent > 0) {
-                card.style.borderColor = 'rgba(74, 222, 128, 0.3)';
-                setTimeout(function() { card.style.borderColor = ''; }, 1500);
-            } else if (s.change_percent < 0) {
-                card.style.borderColor = 'rgba(248, 113, 113, 0.3)';
-                setTimeout(function() { card.style.borderColor = ''; }, 1500);
-            }
-        });
-    }
-
-    function poll() {
-        fetch('/api/live-prices')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                updateBadge(data.market);
-                updateCards(data.stocks);
-            })
-            .catch(function() {});
-    }
-
-    poll();
-    setInterval(poll, 5000);
-
-    window.syncPrices = function() {
-        var btn = document.querySelector('button[onclick="syncPrices()"]');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>'; }
-        fetch('/api/sync-prices')
-            .then(function(r) { return r.json(); })
-            .then(function() {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync mr-1"></i> Sync'; }
-                poll();
-            })
-            .catch(function() {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync mr-1"></i> Sync'; }
-            });
-    };
 
     window.removeWatchlist = function(id, symbol) {
         if (!confirm('Remove ' + symbol + ' from watchlist?')) return;
@@ -255,21 +148,6 @@ function renderWatchlistCard($stock, $predictions, $buckets)
                     setTimeout(function() { card.remove(); }, 300);
                 }
             }
-        });
-    };
-
-    window.moveToBucket = function(watchlistId, bucketId) {
-        var csrfInput = getCSRF();
-        var bodyStr = (CSRF_NAME || 'csrf_test_name') + '=' + encodeURIComponent(csrfInput ? csrfInput.value : '')
-            + '&watchlist_id=' + watchlistId + '&bucket_id=' + bucketId;
-        fetch('/watchlist/move-to-bucket', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
-            body: bodyStr
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-            if (d.success) location.reload();
         });
     };
 })();

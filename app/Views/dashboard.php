@@ -87,15 +87,8 @@
                     <?php 
                         $currency = $inv['currency'] ?? 'INR';
                         $baseCurrency = $inv['base_currency'] ?? 'INR';
-                        $dashInv = [
-                            'id' => (int) $inv['stock_id'],
-                            'shares' => (float) $inv['shares'],
-                            'buyPrice' => (float) $inv['buy_price'],
-                            'invested' => (float) $inv['total_invested'],
-                            'buyDate' => $inv['buy_date'] ?? date('Y-m-d'),
-                        ];
                     ?>
-                    <tr class="dash-inv-row border-b border-gray-700/50 hover:bg-navy/50" data-inv='<?= json_encode($dashInv) ?>'>
+                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
@@ -173,9 +166,7 @@
         <div class="flex justify-between items-center mb-4">
             <div class="flex items-center space-x-3">
                 <h2 class="text-white font-bold text-lg">All Stocks — Live Prices</h2>
-                <button onclick="syncPrices()" class="text-xs px-3 py-1 rounded bg-navy border border-gray-600 text-gray-400 hover:text-gold hover:border-gold transition" title="Sync prices from Yahoo Finance">
-                    <i class="fas fa-sync mr-1"></i> Sync
-                </button>
+
             </div>
             <div class="flex items-center space-x-3">
                 <div class="relative" id="dashSearchContainer">
@@ -210,186 +201,14 @@
 
 <script>
 (function() {
-    var TAX_CFG = <?= json_encode([
-        'stcg_rate' => (float) ($taxRates['stcg_rate'] ?? 0.15),
-        'ltcg_rate' => (float) ($taxRates['ltcg_rate'] ?? 0.10),
-        'fee_rates' => $taxRates['fee_rates'] ?? [],
-    ]) ?>;
 
-    var BASE_CURRENCY = '<?= esc($portfolio['base_currency'] ?? 'INR') ?>';
-    var CURRENCY_SYMBOLS = {
-        'INR': '₹', 'USD': '$', 'EUR': '€', 'GBP': '£',
-        'JPY': '¥', 'AUD': 'A$', 'CAD': 'C$', 'CHF': 'CHF ',
-        'CNY': '¥', 'SGD': 'S$'
-    };
-
-    function formatPrice(v, currency) {
-        currency = currency || BASE_CURRENCY;
-        var sym = CURRENCY_SYMBOLS[currency] || (currency + ' ');
-        return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function formatPriceDual(v, nativeCurrency) {
-        if (!nativeCurrency || nativeCurrency === BASE_CURRENCY) return formatPrice(v, BASE_CURRENCY);
-        // Note: JS cannot do real-time FX conversion, so we show native only here
-        // Server-side rendered values have both native and converted
-        return formatPrice(v, nativeCurrency);
-    }
-
-    function calcFees(amount) {
-        var r = TAX_CFG.fee_rates || {};
-        var b = amount * (parseFloat(r.brokerage_pct || 0) / 100);
-        var s = amount * (parseFloat(r.stt_pct || 0) / 100);
-        var e = amount * (parseFloat(r.exchange_pct || 0) / 100);
-        var g = (b + e) * (parseFloat(r.gst_pct || 18) / 100);
-        var d = amount * (parseFloat(r.stamp_duty_pct || 0) / 100);
-        var se = amount * (parseFloat(r.sebi_fees || 0) / 100);
-        return b + s + e + g + d + se;
-    }
-
-    function calcTax(gross, buyDate) {
-        if (gross <= 0) return 0;
-        var held = (new Date() - new Date(buyDate)) / 86400000;
-        if (held < 365) return gross * TAX_CFG.stcg_rate;
-        var exemption = 100000;
-        return Math.max(0, gross - exemption) * TAX_CFG.ltcg_rate;
-    }
-
-    function updateBadge(market) {
-        var badge = document.getElementById('marketBadge');
-        if (!badge) return;
-        if (market.open) {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-green-600 text-green-400';
-            badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-        } else {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400';
-            badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-        }
-    }
-
-    function updateMarketItems(stocks) {
-        stocks.forEach(function(s) {
-            var item = document.querySelector('.market-item[data-sid="' + s.id + '"]');
-            if (!item) return;
-            var priceEl = item.querySelector('.mkt-price');
-            var changeEl = item.querySelector('.mkt-change');
-            if (priceEl) priceEl.textContent = formatPrice(s.current_price);
-            if (changeEl) {
-                var pct = s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent;
-                changeEl.textContent = pct + '%';
-                changeEl.className = 'mkt-change ' + (s.change_percent >= 0 ? 'text-green-400' : 'text-red-400') + ' text-sm';
-            }
-            if (s.change_percent > 0) {
-                item.style.borderColor = 'rgba(74, 222, 128, 0.3)';
-                setTimeout(function() { item.style.borderColor = 'transparent'; }, 1500);
-            } else if (s.change_percent < 0) {
-                item.style.borderColor = 'rgba(248, 113, 113, 0.3)';
-                setTimeout(function() { item.style.borderColor = 'transparent'; }, 1500);
-            }
-        });
-    }
-
-    function updateInvestments(stocks) {
-        var priceMap = {};
-        stocks.forEach(function(s) { priceMap[s.id] = s.current_price; });
-
-        var totalInvested = 0, totalValue = 0, totalGross = 0, totalFees = 0, totalTax = 0, totalNet = 0;
-
-        document.querySelectorAll('.dash-inv-row').forEach(function(row) {
-            var inv = JSON.parse(row.getAttribute('data-inv'));
-            var livePrice = priceMap[inv.id];
-            if (!livePrice) return;
-
-            var currentValue = inv.shares * livePrice;
-            var grossProfit = currentValue - inv.invested;
-            var grossPct = inv.invested > 0 ? (grossProfit / inv.invested) * 100 : 0;
-            var fees = calcFees(currentValue);
-            var profitAfterFees = grossProfit - fees;
-            var tax = calcTax(profitAfterFees, inv.buyDate);
-            var netProfit = profitAfterFees - tax;
-
-            totalInvested += inv.invested;
-            totalValue += currentValue;
-            totalGross += grossProfit;
-            totalFees += fees;
-            totalTax += tax;
-            totalNet += netProfit;
-
-            var cp = row.querySelector('.dash-cp');
-            var val = row.querySelector('.dash-value');
-            var pl = row.querySelector('.dash-pl');
-            var gross = row.querySelector('.dash-gross');
-            var gpct = row.querySelector('.dash-gpct');
-            var feesEl = row.querySelector('.dash-fees');
-            var taxEl = row.querySelector('.dash-tax');
-            var net = row.querySelector('.dash-net');
-            var netVal = row.querySelector('.dash-net-val');
-
-            var nativeCurrency = inv.currency || 'INR';
-
-            if (cp) cp.textContent = formatPrice(livePrice, nativeCurrency);
-            if (val) val.textContent = formatPrice(currentValue, nativeCurrency);
-            if (gross) gross.textContent = (grossProfit >= 0 ? '+' : '') + formatPrice(grossProfit, nativeCurrency);
-            if (gpct) gpct.textContent = (grossPct >= 0 ? '+' : '') + grossPct.toFixed(2) + '%';
-            if (feesEl) feesEl.textContent = formatPrice(fees, nativeCurrency);
-            if (taxEl) taxEl.textContent = formatPrice(tax, nativeCurrency);
-            if (netVal) netVal.textContent = (netProfit >= 0 ? '+' : '') + formatPrice(netProfit, nativeCurrency);
-
-            if (grossProfit >= 0) {
-                if (pl) pl.className = 'px-6 py-4 dash-pl text-green-400';
-                if (gpct) gpct.className = 'text-xs dash-gpct text-green-500';
-                if (net) net.className = 'px-6 py-4 dash-net text-green-400 font-semibold';
-            } else {
-                if (pl) pl.className = 'px-6 py-4 dash-pl text-red-400';
-                if (gpct) gpct.className = 'text-xs dash-gpct text-red-500';
-                if (net) net.className = 'px-6 py-4 dash-net text-red-400 font-semibold';
-            }
-        });
-
-        var dInv = document.getElementById('dashInvested');
-        var dNet = document.getElementById('dashNetPL');
-        var dIcon = document.getElementById('dashNetIcon');
-        var dLink = document.getElementById('dashNetLink');
-
-        if (dInv) dInv.textContent = formatPrice(totalInvested, BASE_CURRENCY);
-        if (dNet) { dNet.textContent = (totalNet >= 0 ? '+' : '') + formatPrice(totalNet, BASE_CURRENCY); dNet.className = 'text-3xl font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
-        if (dIcon) { dIcon.className = 'w-12 h-12 ' + (totalNet >= 0 ? 'bg-green-900/30' : 'bg-red-900/30') + ' rounded-lg flex items-center justify-center'; dIcon.querySelector('i').className = 'fas fa-chart-line ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400') + ' text-xl'; }
-        if (dLink) { dLink.className = (totalNet >= 0 ? 'text-green-400' : 'text-red-400') + ' text-sm mt-2 inline-block'; }
-
-        var sv = document.getElementById('dashSumValue');
-        var sg = document.getElementById('dashSumGross');
-        var sf = document.getElementById('dashSumFees');
-        var st = document.getElementById('dashSumTax');
-        var sn = document.getElementById('dashSumNet');
-        var sr = document.getElementById('dashSumReturn');
-
-        if (sv) sv.textContent = formatPrice(totalValue, BASE_CURRENCY);
-        if (sg) { sg.textContent = (totalGross >= 0 ? '+' : '') + formatPrice(totalGross, BASE_CURRENCY); sg.className = 'font-bold ' + (totalGross >= 0 ? 'text-green-400' : 'text-red-400'); }
-        if (sf) sf.textContent = formatPrice(totalFees, BASE_CURRENCY);
-        if (st) st.textContent = formatPrice(totalTax, BASE_CURRENCY);
-        if (sn) { sn.textContent = (totalNet >= 0 ? '+' : '') + formatPrice(totalNet, BASE_CURRENCY); sn.className = 'font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
-        if (sr) { sr.textContent = (totalInvested > 0 ? ((totalNet / totalInvested) * 100).toFixed(2) : 0) + '%'; sr.className = 'font-bold ' + (totalNet >= 0 ? 'text-green-400' : 'text-red-400'); }
-    }
-
-    function poll() {
-        fetch('/api/live-prices')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                updateBadge(data.market);
-                updateMarketItems(data.stocks);
-                updateInvestments(data.stocks);
-            })
-            .catch(function() {});
-    }
-
-    poll();
-    setInterval(poll, 5000);
 
     var CSRF_NAME = '<?= csrf_token() ?>';
     var CSRF_HASH = '<?= csrf_hash() ?>';
     var dashSearch = document.getElementById('dashStockSearch');
     var dashDropdown = document.getElementById('dashSearchDropdown');
     var dashTimer = null;
+    if (!dashSearch) return;
 
     function escHtml(str) {
         if (!str) return '';
@@ -398,23 +217,23 @@
         return d.innerHTML;
     }
 
-    function importStock(sym) {
+    window.importStock = function(sym) {
         var body = CSRF_NAME + '=' + encodeURIComponent(CSRF_HASH) + '&symbol=' + encodeURIComponent(sym);
-        var btn = document.querySelector('[data-import="' + sym + '"]');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+        var btns = document.querySelectorAll('[data-import="' + sym + '"]');
+        btns.forEach(function(btn) { if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; } });
         fetch('/api/stocks/import', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
             .then(function(r){ return r.json(); })
             .then(function(d){
                 if (d.success) {
-                    window.location.href = '/watchlist';
+                    window.location.reload();
                 } else {
                     alert(d.message);
-                    if (btn) { btn.disabled = false; btn.innerHTML = '+ Add'; }
+                    btns.forEach(function(btn) { if (btn) { btn.disabled = false; btn.innerHTML = '+ Add'; } });
                 }
             })
             .catch(function(){
                 alert('Failed to import stock.');
-                if (btn) { btn.disabled = false; btn.innerHTML = '+ Add'; }
+                btns.forEach(function(btn) { if (btn) { btn.disabled = false; btn.innerHTML = '+ Add'; } });
             });
     }
 
@@ -429,7 +248,7 @@
             fetch('/api/search?q=' + encodeURIComponent(val))
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
-                    if (data.results.length === 0) {
+                    if (!data.results || data.results.length === 0) {
                         dashDropdown.innerHTML = '<div class="p-3 text-gray-400 text-sm text-center">No results found</div>';
                         dashDropdown.classList.remove('hidden');
                         return;
@@ -477,20 +296,5 @@
         }
     });
 
-    window.syncPrices = function() {
-        var btn = document.querySelector('button[onclick="syncPrices()"]');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Syncing...'; }
-        fetch('/api/sync-prices')
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync mr-1"></i> Sync'; }
-                if (d.success) {
-                    poll();
-                }
-            })
-            .catch(function() {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync mr-1"></i> Sync'; }
-            });
-    };
 })();
 </script>

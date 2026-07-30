@@ -151,35 +151,6 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
 </section>
 
 <script>
-(function() {
-    function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-
-    function updateBadge(market) {
-        var badge = document.getElementById('marketBadge');
-        if (!badge) return;
-        if (market.open) {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-green-600 text-green-400';
-            badge.innerHTML = '<i class="fas fa-circle text-green-400 text-[8px] mr-1 animate-pulse"></i>' + market.label;
-        } else {
-            badge.className = 'text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400';
-            badge.innerHTML = '<i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>' + market.label;
-        }
-    }
-
-    function poll() {
-        fetch('/api/tick/<?= $stock['id'] ?>')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                updateBadge(data.market);
-                document.getElementById('predCurrentPrice').textContent = formatPrice(data.current_price);
-            })
-            .catch(function() {});
-    }
-
-    poll();
-    setInterval(poll, 5000);
-})();
-
 var ctx = document.getElementById('predictionChart').getContext('2d');
 
 new Chart(ctx, {

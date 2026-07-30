@@ -306,7 +306,9 @@
 
     window.toggleMathValue = function(sel) {
         var row = sel.closest('.filter-row');
+        if (!row) return;
         var inp = row.querySelector('.math-value');
+        if (!inp) return;
         if (sel.value === '=') { inp.style.display = 'none'; inp.value = ''; }
         else { inp.style.display = 'block'; }
     };
@@ -370,7 +372,8 @@
 
     window.clearAll = function() {
         document.getElementById('filterList').innerHTML = '';
-        document.getElementById('resultsContainer').classList.add('hidden');
+        var rc = document.getElementById('resultsContainer');
+        if (rc) rc.classList.add('hidden');
         document.getElementById('resultCount').textContent = '';
         lastResults = [];
     };
@@ -439,8 +442,9 @@
             .then(function(data) {
                 if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-search mr-2"></i>Run Screener'; }
                 lastResults = data.stocks || [];
-                document.getElementById('resultCount').textContent = data.total + ' stocks found';
-                document.getElementById('resultCount2').textContent = '(' + data.total + ')';
+                var total = data.total ?? data.stocks?.length ?? 0;
+                document.getElementById('resultCount').textContent = total + ' stocks found';
+                document.getElementById('resultCount2').textContent = '(' + total + ')';
                 var tbody = document.getElementById('resultsBody');
                 tbody.innerHTML = '';
                 if (data.stocks.length === 0) {
@@ -458,7 +462,7 @@
                             '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
+                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>';
                         tbody.appendChild(tr);
@@ -494,10 +498,11 @@
         formData.append('technical_criteria', JSON.stringify(cf.techFilters));
         formData.append('stock_ids', JSON.stringify(stockIds));
         formData.append('stock_symbols', JSON.stringify(stockSymbols));
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
         fetch('/api/screener/save', { method: 'POST', body: formData })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                if (data.success) { closeSaveDialog(); var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0') + 1; }
+                if (data.success) { closeSaveDialog(); var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0', 10) + 1; }
                 else { alert(data.message || 'Save failed'); }
             })
             .catch(function() { alert('Save failed'); });
@@ -596,9 +601,9 @@
                         '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>';
+'<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
+                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
+                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>';
                     tbody.appendChild(tr);
                 });
                 document.getElementById('resultsContainer').classList.remove('hidden');
@@ -611,10 +616,11 @@
         if (!confirm('Delete this saved list?')) return;
         var formData = new FormData();
         formData.append('id', id);
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
         fetch('/api/screener/delete-list', { method: 'POST', body: formData })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                if (data.success) { loadSavedLists(); var c = document.getElementById('savedCount'); c.textContent = Math.max(0, parseInt(c.textContent || '0') - 1); }
+                if (data.success) { loadSavedLists(); var c = document.getElementById('savedCount'); c.textContent = Math.max(0, parseInt(c.textContent || '0', 10) - 1); }
                 else { alert(data.message); }
             }).catch(function() { alert('Delete failed'); });
     };
