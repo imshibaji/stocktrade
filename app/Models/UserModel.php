@@ -8,7 +8,7 @@ class UserModel extends Model
 {
     protected $table = 'users';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['name', 'email', 'password', 'base_currency', 'stcg_rate', 'ltcg_rate', 'brokerage_pct', 'stt_pct', 'exchange_pct', 'gst_pct', 'stamp_duty_pct', 'sebi_fees'];
+    protected $allowedFields = ['name', 'email', 'password', 'base_currency', 'stcg_rate', 'ltcg_rate', 'brokerage_pct', 'stt_pct', 'exchange_pct', 'gst_pct', 'stamp_duty_pct', 'sebi_fees', 'is_admin'];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';

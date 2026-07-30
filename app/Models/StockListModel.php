@@ -11,4 +11,9 @@ class StockListModel extends Model
     protected $allowedFields = ['user_id', 'name', 'criteria', 'technical_criteria', 'stock_ids', 'stock_symbols', 'stock_count'];
     protected $useTimestamps = true;
     protected $returnType = 'array';
+
+    public function emptyTable(): bool
+    {
+        return $this->db->table($this->table)->emptyTable();
+    }
 }

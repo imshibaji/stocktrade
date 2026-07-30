@@ -9,11 +9,32 @@ $routes->get('/about', 'About::index');
 $routes->get('/contact', 'Contact::index');
 $routes->post('/contact/send', 'Contact::send');
 
+$routes->get('/page/(:any)', 'Page::show/$1');
+
 $routes->get('/login', 'Auth::login', ['filter' => 'guest']);
 $routes->post('/login', 'Auth::attemptLogin', ['filter' => 'guest']);
 $routes->get('/register', 'Auth::register', ['filter' => 'guest']);
 $routes->post('/register', 'Auth::attemptRegister', ['filter' => 'guest']);
 $routes->get('/logout', 'Auth::logout');
+
+$routes->group('admin', ['filter' => 'admin'], static function ($routes) {
+    $routes->get('', 'Admin::index');
+    $routes->get('users', 'Admin::users');
+    $routes->get('users/make-admin/(:num)', 'Admin::makeAdmin/$1');
+    $routes->get('users/remove-admin/(:num)', 'Admin::removeAdmin/$1');
+    $routes->get('users/delete/(:num)', 'Admin::deleteUser/$1');
+    $routes->get('stocks', 'Admin::stocks');
+    $routes->get('stocks/delete/(:num)', 'Admin::deleteStock/$1');
+    $routes->get('screeners', 'Admin::screeners');
+    $routes->get('screeners/delete-all', 'Admin::deleteScreeners');
+    $routes->get('pages', 'Admin::pages');
+    $routes->match(['GET', 'POST'], 'pages/edit/(:num)', 'Admin::editPage/$1');
+    $routes->match(['GET', 'POST'], 'pages/create', 'Admin::editPage');
+    $routes->post('pages/save', 'Admin::savePage');
+    $routes->get('pages/delete/(:num)', 'Admin::deletePage/$1');
+    $routes->get('settings', 'Admin::settings');
+    $routes->post('settings/update', 'Admin::updateSettings');
+});
 
 $routes->get('/api', 'Api::index');
 $routes->get('/api/search', 'Api::search', ['filter' => 'auth']);
@@ -52,6 +73,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/screener', 'Screener::index');
     $routes->get('/api-playground', 'ApiDocs::index');
     $routes->get('/api/screener/run', 'Screener::run');
+    $routes->post('/api/screener/run-manual', 'Screener::runManualQuery');
     $routes->post('/api/screener/save', 'Screener::save');
     $routes->get('/api/screener/lists', 'Screener::lists');
     $routes->get('/api/screener/load-list', 'Screener::loadList');

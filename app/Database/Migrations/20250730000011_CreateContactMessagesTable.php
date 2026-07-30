@@ -8,6 +8,9 @@ class CreateContactMessagesTable extends Migration
 {
     public function up()
     {
+        if ($this->db->tableExists('contact_messages')) {
+            return;
+        }
         $this->forge->addField([
             'id' => [
                 'type'           => 'INT',

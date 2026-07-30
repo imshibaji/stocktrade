@@ -54,6 +54,186 @@ class Screener extends BaseController
         ]);
     }
 
+    public function runManualQuery()
+    {
+        $query  = trim($this->request->getPost('query') ?? '');
+        $match  = $this->request->getPost('match_mode') ?? 'all';
+        $listName = $this->request->getPost('list_name') ?? '';
+        $listDesc = $this->request->getPost('list_desc') ?? '';
+
+        if (empty($query)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Query is required']);
+        }
+
+        $compiled = $this->compileManualQuery($query);
+        if (!$compiled['valid']) {
+            return $this->response->setJSON(['success' => false, 'message' => $compiled['error']]);
+        }
+
+        $stockModel = new StockModel();
+        $stocks = $stockModel->findAll();
+
+        $results = [];
+        foreach ($stocks as $s) {
+            if ($this->matchesFilters($s, $compiled['filters'], $match)) {
+                $results[] = $s;
+            }
+        }
+
+        $response = [
+            'success'  => true,
+            'total'    => count($results),
+            'stocks'   => array_values($results),
+            'query'    => $query,
+            'compiled' => $compiled['filters'],
+            'match_mode' => $match,
+        ];
+
+        if (!empty($listName) && !empty($results)) {
+            $userId = current_user_id();
+            $listModel = new StockListModel();
+            $stockIds = array_column($results, 'id');
+            $stockSymbols = array_column($results, 'symbol');
+            $listModel->save([
+                'user_id'            => $userId,
+                'name'               => $listName,
+                'criteria'           => json_encode(['match_mode' => $match, 'filters' => $compiled['filters'], 'is_manual_query' => true, 'query_text' => $query]),
+                'technical_criteria' => json_encode(['match_mode' => $match, 'filters' => []]),
+                'stock_ids'          => json_encode($stockIds),
+                'stock_symbols'      => json_encode($stockSymbols),
+                'stock_count'        => count($results),
+            ]);
+            $response['saved'] = true;
+        }
+
+        return $this->response->setJSON($response);
+    }
+
+    private function compileManualQuery(string $query): array
+    {
+        $query = trim($query);
+        if (empty($query)) {
+            return ['valid' => false, 'error' => 'Query is empty', 'filters' => []];
+        }
+
+        $validOps = ['>', '>=', '<', '<=', '==', '!='];
+        $validMathOps = ['=', '+', '-', '*', '/', '%'];
+
+        $clauses = preg_split('/\s+(AND|OR)\s+/i', $query, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($clauses === false || count($clauses) === 0) {
+            return ['valid' => false, 'error' => 'Invalid query syntax.', 'filters' => []];
+        }
+
+        $filters = [];
+        $currentLogic = 'AND';
+
+        foreach ($clauses as $i => $clause) {
+            $clause = trim($clause);
+            if ($clause === '') {
+                continue;
+            }
+
+            $upper = strtoupper($clause);
+            if ($upper === 'AND' || $upper === 'OR') {
+                $currentLogic = $upper;
+                continue;
+            }
+
+            $bestOp = null;
+            $bestOpLen = 0;
+            $bestOpPos = -1;
+
+            foreach ($validOps as $op) {
+                $opLen = strlen($op);
+                $searchFrom = 0;
+                while (($opPos = strpos($clause, $op, $searchFrom)) !== false) {
+                    $prefix = trim(substr($clause, 0, $opPos));
+                    $suffix = trim(substr($clause, $opPos + $opLen));
+                    if ($prefix !== '' && $suffix !== '') {
+                        if ($opLen > $bestOpLen) {
+                            $validPrefix = preg_match('~^[\w.]+$~', $prefix);
+                            if ($validPrefix) {
+                                $bestOp = $op;
+                                $bestOpLen = $opLen;
+                                $bestOpPos = $opPos;
+                            }
+                        }
+                    }
+                    $searchFrom = $opPos + 1;
+                }
+            }
+
+            if ($bestOp === null || $bestOpPos < 0) {
+                return ['valid' => false, 'error' => 'Cannot parse condition: "' . $clause . '". Use format: field operator value', 'filters' => []];
+            }
+
+            $field = trim(substr($clause, 0, $bestOpPos));
+            $value = trim(substr($clause, $bestOpPos + $bestOpLen));
+
+            if ($field === '' || $value === '') {
+                return ['valid' => false, 'error' => 'Missing field or value in: "' . $clause . '"', 'filters' => []];
+            }
+
+            $parsed = $this->parseConditionSide($value, $validMathOps);
+            if ($parsed === null) {
+                return ['valid' => false, 'error' => 'Cannot parse value: "' . $value . '"', 'filters' => []];
+            }
+
+            $filters[] = array_merge([
+                'field' => $field,
+                'op' => $bestOp,
+                'logic' => $currentLogic,
+            ], $parsed);
+
+            $currentLogic = 'AND';
+        }
+
+        if (empty($filters)) {
+            return ['valid' => false, 'error' => 'No valid conditions found.', 'filters' => []];
+        }
+
+        return ['valid' => true, 'filters' => $filters, 'error' => ''];
+    }
+
+    private function parseConditionSide(string $value, array $validMathOps): ?array
+    {
+        $value = trim($value);
+
+        foreach ($validMathOps as $mo) {
+            if ($mo === '=') continue;
+            $parts = explode($mo, $value, 2);
+            if (count($parts) === 2 && trim($parts[0]) !== '' && trim($parts[1]) !== '') {
+                $left = trim($parts[0]);
+                $right = trim($parts[1]);
+                if (is_numeric($left) && is_numeric($right)) {
+                    return ['math_op' => $mo, 'math_value' => $right, 'value' => $left];
+                }
+                if (is_numeric($left)) {
+                    return ['math_op' => $mo, 'math_value' => $right, 'value' => $left];
+                }
+                return ['math_op' => '=', 'math_value' => '', 'value' => $value];
+            }
+        }
+
+        if (strlen($value) >= 2 && (($value[0] === "'" && $value[strlen($value) - 1] === "'") || ($value[0] === '"' && $value[strlen($value) - 1] === '"'))) {
+            return ['math_op' => '=', 'math_value' => '', 'value' => substr($value, 1, -1), 'is_string' => true];
+        }
+
+        if (preg_match('~^([a-zA-Z_][a-zA-Z0-9_]*)\\s*([+\\-*%])\\s*(\\d+\\.?\\d*)$~', $value, $m)) {
+            return ['math_op' => $m[2], 'math_value' => $m[3], 'value' => $m[1], 'is_field_ref' => true];
+        }
+
+        if (preg_match('~^(\\d+\\.?\\d*)\\s*([+\\-*%])\\s*([a-zA-Z_][a-zA-Z0-9_]*)$~', $value, $m)) {
+            return ['math_op' => $m[2], 'math_value' => $m[3], 'value' => $m[1], 'is_field_ref' => true, 'math_value_is_field' => true];
+        }
+
+        if (is_numeric($value)) {
+            return ['math_op' => '=', 'math_value' => '', 'value' => floatval($value)];
+        }
+
+        return ['math_op' => '=', 'math_value' => '', 'value' => $value, 'is_string' => true];
+    }
+
     public function save()
     {
         $userId = current_user_id();
@@ -67,12 +247,17 @@ class Screener extends BaseController
         $techCriteria  = $this->request->getPost('technical_criteria');
         $stockIds      = $this->request->getPost('stock_ids');
         $stockSymbols  = $this->request->getPost('stock_symbols');
+        $queryText     = $this->request->getPost('query_text');
 
         if (empty($name)) {
             return $this->response->setJSON(['success' => false, 'message' => 'List name is required']);
         }
 
-        $criteriaData = ['match_mode' => $matchMode, 'filters' => is_array($criteria) ? $criteria : json_decode($criteria ?? '[]', true)];
+        if (!empty($queryText)) {
+            $criteriaData = ['match_mode' => $matchMode, 'is_manual_query' => true, 'query_text' => $queryText];
+        } else {
+            $criteriaData = ['match_mode' => $matchMode, 'filters' => is_array($criteria) ? $criteria : json_decode($criteria ?? '[]', true)];
+        }
         $techData     = ['match_mode' => $matchMode, 'filters' => is_array($techCriteria) ? $techCriteria : json_decode($techCriteria ?? '[]', true)];
 
         $model = new StockListModel();
@@ -124,6 +309,8 @@ class Screener extends BaseController
         $matchMode        = $criteriaData['match_mode'] ?? 'all';
         $filters          = $criteriaData['filters'] ?? [];
         $techFilters      = $techData['filters'] ?? [];
+        $isManualQuery    = !empty($criteriaData['is_manual_query']);
+        $queryText        = $criteriaData['query_text'] ?? '';
 
         return $this->response->setJSON([
             'success'            => true,
@@ -132,6 +319,8 @@ class Screener extends BaseController
             'match_mode'         => $matchMode,
             'criteria'           => $filters,
             'technical_criteria' => $techFilters,
+            'is_manual_query'    => $isManualQuery,
+            'query_text'         => $queryText,
         ]);
     }
 
@@ -155,13 +344,27 @@ class Screener extends BaseController
     //  Private Helpers
     // ------------------------------------------------------------------ //
 
-    private function resolveFilterValue(array $f, array $stock): float
+    private function resolveFilterValue(array $f, array $stock): ?float
     {
+        if (!empty($f['is_string'])) {
+            return null;
+        }
         if (!empty($f['value_is_field'])) {
             $fieldVal = $this->getFieldValue($stock, $f['value'] ?? '');
             return $fieldVal !== null ? (float) $fieldVal : 0.0;
         }
         return (float) ($f['value'] ?? 0);
+    }
+
+    private function resolveFilterStringValue(array $f, array $stock): ?string
+    {
+        if (empty($f['is_string'])) {
+            return null;
+        }
+        if (!empty($f['value_is_field'])) {
+            return $this->getFieldStringValue($stock, $f['value'] ?? '');
+        }
+        return $f['value'] ?? null;
     }
 
     private function matchesFilters(array $stock, array $filters, string $mode = 'all'): bool
@@ -174,8 +377,24 @@ class Screener extends BaseController
             $op       = $f['op'] ?? '';
             $mathOp   = $f['math_op'] ?? '=';
             $mathVal  = (float) ($f['math_value'] ?? 0);
-            $stockVal = $this->getFieldValue($stock, $field);
+            $filterLogic = $f['logic'] ?? 'AND';
+            $isString = !empty($f['is_string']);
 
+            if ($isString) {
+                $stockVal = $this->getFieldStringValue($stock, $field);
+                if ($stockVal === null) { $results[] = false; continue; }
+                $compareVal = $this->resolveFilterValue($f, $stock);
+                if ($compareVal === null) { $results[] = false; continue; }
+                $compareStr = is_array($compareVal) ? ($compareVal['value'] ?? '') : (string) $compareVal;
+                switch ($op) {
+                    case '==': $results[] = strtolower($stockVal) === strtolower($compareStr); break;
+                    case '!=': $results[] = strtolower($stockVal) !== strtolower($compareStr); break;
+                    default:   $results[] = false;
+                }
+                continue;
+            }
+
+            $stockVal = $this->getFieldValue($stock, $field);
             if ($stockVal === null) { $results[] = false; continue; }
 
             $stockVal = (float) $stockVal;
@@ -191,35 +410,121 @@ class Screener extends BaseController
 
             $compareVal = $this->resolveFilterValue($f, $stock);
 
+            $pass = false;
             switch ($op) {
-                case '>':  $results[] = $stockVal > $compareVal; break;
-                case '>=': $results[] = $stockVal >= $compareVal; break;
-                case '<':  $results[] = $stockVal < $compareVal; break;
-                case '<=': $results[] = $stockVal <= $compareVal; break;
-                case '==': $results[] = (float) $stockVal == $compareVal; break;
-                default:   $results[] = false;
+                case '>':  $pass = $stockVal > $compareVal; break;
+                case '>=': $pass = $stockVal >= $compareVal; break;
+                case '<':  $pass = $stockVal < $compareVal; break;
+                case '<=': $pass = $stockVal <= $compareVal; break;
+                case '==': $pass = (float) $stockVal == $compareVal; break;
+                case '!=': $pass = (float) $stockVal != $compareVal; break;
+                default:   $pass = false;
+            }
+            $results[] = $pass;
+        }
+
+        if (count($filters) === 1) {
+            return $results[0];
+        }
+
+        if ($mode === 'any') {
+            return in_array(true, $results, true);
+        }
+
+        // Check per-filter logic if mixed AND/OR conditions exist
+        $hasMixedLogic = false;
+        foreach ($filters as $f) {
+            if (($f['logic'] ?? 'AND') !== 'AND') {
+                $hasMixedLogic = true;
+                break;
             }
         }
 
-        return $mode === 'any' ? in_array(true, $results, true) : !in_array(false, $results, true);
+        if ($hasMixedLogic) {
+            $result = true;
+            $currentGroup = true;
+            foreach ($results as $i => $r) {
+                $logic = ($filters[$i]['logic'] ?? 'AND');
+                if ($logic === 'OR') {
+                    $currentGroup = $currentGroup || $r;
+                } else {
+                    $result = $result && $currentGroup;
+                    $currentGroup = $r;
+                }
+            }
+            return $result && $currentGroup;
+        }
+
+        return !in_array(false, $results, true);
     }
 
     private function getFieldValue(array $stock, string $field): ?float
     {
         $map = [
-            'price'          => $stock['current_price'] ?? null,
-            'current_price'  => $stock['current_price'] ?? null,
-            'previous_close' => $stock['previous_close'] ?? null,
-            'market_cap'     => $stock['market_cap'] ?? null,
-            'pe_ratio'       => $stock['pe_ratio'] ?? null,
-            'dividend_yield' => $stock['dividend_yield'] ?? null,
-            'beta'           => $stock['beta'] ?? null,
-            'avg_volume'     => $stock['avg_volume'] ?? null,
-            'week_52_high'   => $stock['week_52_high'] ?? null,
-            'week_52_low'    => $stock['week_52_low'] ?? null,
+            'price'                          => $stock['current_price'] ?? null,
+            'current_price'                  => $stock['current_price'] ?? null,
+            'regularMarketPrice'             => $stock['current_price'] ?? null,
+            'regularMarketPreviousClose'      => $stock['previous_close'] ?? null,
+            'previous_close'                 => $stock['previous_close'] ?? null,
+            'regularMarketOpen'              => $stock['current_price'] ?? null,
+            'regularMarketDayHigh'           => $stock['current_price'] ?? null,
+            'regularMarketDayLow'            => $stock['current_price'] ?? null,
+            'regularMarketChange'            => null,
+            'regularMarketChangePercent'     => null,
+            'market_cap'                     => $stock['market_cap'] ?? null,
+            'pe_ratio'                       => $stock['pe_ratio'] ?? null,
+            'trailingPE'                     => $stock['pe_ratio'] ?? null,
+            'forwardPE'                      => null,
+            'epsTrailingTwelveMonths'        => null,
+            'epsForward'                     => null,
+            'dividend_yield'                 => $stock['dividend_yield'] ?? null,
+            'trailingAnnualDividendYield'    => $stock['dividend_yield'] ?? null,
+            'trailingAnnualDividendRate'     => null,
+            'beta'                           => $stock['beta'] ?? null,
+            'avg_volume'                     => $stock['avg_volume'] ?? null,
+            'averageDailyVolume10Day'        => $stock['avg_volume'] ?? null,
+            'averageDailyVolume3Month'       => $stock['avg_volume'] ?? null,
+            'regularMarketVolume'            => $stock['avg_volume'] ?? null,
+            'week_52_high'                   => $stock['week_52_high'] ?? null,
+            'fiftyTwoWeekHigh'               => $stock['week_52_high'] ?? null,
+            'week_52_low'                    => $stock['week_52_low'] ?? null,
+            'fiftyTwoWeekLow'                => $stock['week_52_low'] ?? null,
+            'fiftyDayAverage'                => null,
+            'twoHundredDayAverage'           => null,
+            'bookValue'                      => null,
+            'priceToBook'                    => null,
+            'priceHint'                      => null,
+            'sharesOutstanding'              => null,
+            'marketCap'                      => $stock['market_cap'] ?? null,
         ];
         $v = $map[$field] ?? null;
         return $v !== null ? (float) $v : null;
+    }
+
+    private function getFieldStringValue(array $stock, string $field): ?string
+    {
+        $map = [
+            'name'                    => $stock['name'] ?? null,
+            'sector'                  => $stock['sector'] ?? null,
+            'symbol'                  => $stock['symbol'] ?? null,
+            'exchange'                => $stock['exchange'] ?? null,
+            'currency'                => $stock['exchange'] ?? null,
+            'financialCurrency'       => 'INR',
+            'fullExchangeName'        => 'NSE',
+            'exchangeTimezoneName'    => 'Asia/Kolkata',
+            'exchangeTimezoneShortName' => 'IST',
+            'quoteSourceName'         => 'Delayed Quote',
+            'quoteType'               => 'EQUITY',
+            'market'                  => 'in_market',
+            'longName'                => $stock['name'] ?? null,
+            'shortName'               => $stock['name'] ?? null,
+            'marketState'             => null,
+            'language'                => 'en-US',
+            'messageBoardId'          => null,
+            'sourceInterval'          => null,
+            'tradeable'               => null,
+        ];
+        return $map[$field] ?? null;
     }
 
     private function applyTechnicalFilters(array $stocks, array $techFilters, string $matchMode = 'all'): array

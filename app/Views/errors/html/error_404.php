@@ -1,84 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title><?= lang('Errors.pageNotFound') ?></title>
-
-    <style>
-        div.logo {
-            height: 200px;
-            width: 155px;
-            display: inline-block;
-            opacity: 0.08;
-            position: absolute;
-            top: 2rem;
-            left: 50%;
-            margin-left: -73px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | StockTrade Tips</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0B1220',
+                        navy2: '#111827',
+                        gold: '#D4A853',
+                        gold2: '#E8C56D',
+                    }
+                }
+            }
         }
-        body {
-            height: 100%;
-            background: #fafafa;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            color: #777;
-            font-weight: 300;
-        }
-        h1 {
-            font-weight: lighter;
-            letter-spacing: normal;
-            font-size: 3rem;
-            margin-top: 0;
-            margin-bottom: 0;
-            color: #222;
-        }
-        .wrap {
-            max-width: 1024px;
-            margin: 5rem auto;
-            padding: 2rem;
-            background: #fff;
-            text-align: center;
-            border: 1px solid #efefef;
-            border-radius: 0.5rem;
-            position: relative;
-        }
-        pre {
-            white-space: normal;
-            margin-top: 1.5rem;
-        }
-        code {
-            background: #fafafa;
-            border: 1px solid #efefef;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            display: block;
-        }
-        p {
-            margin-top: 1.5rem;
-        }
-        .footer {
-            margin-top: 2rem;
-            border-top: 1px solid #efefef;
-            padding: 1em 2em 0 2em;
-            font-size: 85%;
-            color: #999;
-        }
-        a:active,
-        a:link,
-        a:visited {
-            color: #dd4814;
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <div class="wrap">
-        <h1>404</h1>
-
-        <p>
-            <?php if (ENVIRONMENT !== 'production') : ?>
-                <?= nl2br(esc($message)) ?>
-            <?php else : ?>
-                <?= lang('Errors.sorryCannotFind') ?>
-            <?php endif; ?>
+<body class="bg-navy text-gray-100 min-h-screen flex items-center justify-center">
+    <div class="text-center px-4">
+        <div class="mb-8">
+            <i class="fas fa-search text-gold text-8xl opacity-80"></i>
+        </div>
+        <h1 class="text-6xl font-bold text-white mb-4">404</h1>
+        <h2 class="text-2xl text-gray-300 mb-6">Page Not Found</h2>
+        <p class="text-gray-500 max-w-md mx-auto mb-8">
+            The page you're looking for doesn't exist or has been moved. 
+            It might have been a bad link or the stock you're looking for was delisted.
         </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/dashboard" class="bg-gold hover:bg-gold2 text-navy font-semibold px-6 py-3 rounded-lg transition">
+                <i class="fas fa-tachometer-alt mr-2"></i>Go to Dashboard
+            </a>
+            <a href="/stocks" class="border border-gold text-gold hover:bg-gold/10 font-semibold px-6 py-3 rounded-lg transition">
+                <i class="fas fa-search mr-2"></i>Browse Stocks
+            </a>
+            <a href="/" class="text-gray-400 hover:text-white text-sm">
+                <i class="fas fa-home mr-1"></i>Back to Home
+            </a>
+        </div>
     </div>
 </body>
 </html>

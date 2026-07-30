@@ -27,15 +27,38 @@
             <div>
                 <h3 class="text-gold font-semibold mb-3">Fundamental Fields</h3>
                 <table class="w-full text-gray-300">
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">price</td><td class="py-1.5 text-gray-500">Current market price</td></tr>
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">previous_close</td><td class="py-1.5 text-gray-500">Previous day close</td></tr>
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">market_cap</td><td class="py-1.5 text-gray-500">Market capitalization</td></tr>
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">pe_ratio</td><td class="py-1.5 text-gray-500">Price-to-earnings ratio</td></tr>
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">dividend_yield</td><td class="py-1.5 text-gray-500">Dividend yield (0.02 = 2%)</td></tr>
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">beta</td><td class="py-1.5 text-gray-500">Beta (volatility)</td></tr>
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">avg_volume</td><td class="py-1.5 text-gray-500">Average daily volume</td></tr>
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">week_52_high</td><td class="py-1.5 text-gray-500">52-week high</td></tr>
-                    <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">week_52_low</td><td class="py-1.5 text-gray-500">52-week low</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">price</td><td class="py-1.5 text-gray-500">Current market price</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">previous_close</td><td class="py-1.5 text-gray-500">Previous day close</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">regularMarketDayHigh</td><td class="py-1.5 text-gray-500">Regular market day high</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">regularMarketDayLow</td><td class="py-1.5 text-gray-500">Regular market day low</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">regularMarketOpen</td><td class="py-1.5 text-gray-500">Regular market open</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">regularMarketChange</td><td class="py-1.5 text-gray-500">Regular market change amount</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">regularMarketChangePercent</td><td class="py-1.5 text-gray-500">Regular market change %</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">regularMarketVolume</td><td class="py-1.5 text-gray-500">Regular market volume</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">market_cap</td><td class="py-1.5 text-gray-500">Market capitalization</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">pe_ratio</td><td class="py-1.5 text-gray-500">Trailing P/E ratio</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">forwardPE</td><td class="py-1.5 text-gray-500">Forward P/E ratio</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">trailingPE</td><td class="py-1.5 text-gray-500">Trailing P/E (Yahoo)</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">priceToBook</td><td class="py-1.5 text-gray-500">Price to book value</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">bookValue</td><td class="py-1.5 text-gray-500">Book value per share</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">epsTrailingTwelveMonths</td><td class="py-1.5 text-gray-500">EPS trailing twelve months</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">epsForward</td><td class="py-1.5 text-gray-500">EPS forward estimate</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">dividend_yield</td><td class="py-1.5 text-gray-500">Dividend yield (0.02 = 2%)</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">trailingAnnualDividendYield</td><td class="py-1.5 text-gray-500">Trailing annual dividend yield</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">avg_volume</td><td class="py-1.5 text-gray-500">Average daily volume</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">averageDailyVolume10Day</td><td class="py-1.5 text-gray-500">Avg daily volume (10 days)</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">averageDailyVolume3Month</td><td class="py-1.5 text-gray-500">Avg daily volume (3 months)</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">week_52_high</td><td class="py-1.5 text-gray-500">52-week high</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">week_52_low</td><td class="py-1.5 text-gray-500">52-week low</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">fiftyDayAverage</td><td class="py-1.5 text-gray-500">50-day average price</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">twoHundredDayAverage</td><td class="py-1.5 text-gray-500">200-day average price</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">fiftyTwoWeekHigh</td><td class="py-1.5 text-gray-500">52-week high (Yahoo)</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">fiftyTwoWeekLow</td><td class="py-1.5 text-gray-500">52-week low (Yahoo)</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">sharesOutstanding</td><td class="py-1.5 text-gray-500">Shares outstanding</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">exchange</td><td class="py-1.5 text-gray-500" style="color:#818cf8">String: Exchange (NSE, BSE)</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">currency</td><td class="py-1.5 text-gray-500" style="color:#818cf8">String: Currency code</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">sector</td><td class="py-1.5 text-gray-500" style="color:#818cf8">String: Sector name</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">name</td><td class="py-1.5 text-gray-500" style="color:#818cf8">String: Company name</td></tr>
                 </table>
                 <h3 class="text-gold font-semibold mt-4 mb-2">Math Operators</h3>
                 <p class="text-gray-400 text-xs">Transform a field value before comparing:</p>
@@ -86,35 +109,56 @@
     <div class="flex gap-6">
         <div class="flex-1 min-w-0">
             <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-white font-bold text-lg">Filter Criteria</h2>
-                    <div class="flex items-center gap-4">
-                        <label class="text-gray-400 text-xs">Match:</label>
-                        <select id="matchMode" class="bg-navy border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:border-gold focus:outline-none">
-                            <option value="all">All (AND)</option>
-                            <option value="any">Any (OR)</option>
-                        </select>
-                        <div class="flex gap-2">
-                            <button onclick="addFundamentalFilter()" class="text-gold hover:text-gold2 text-sm transition">
-                                <i class="fas fa-plus mr-1"></i>Fundamental
+             <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-white font-bold text-lg">Filter Criteria</h2>
+                        <div class="flex items-center gap-4">
+                            <label class="text-gray-400 text-xs">Match:</label>
+                            <select id="matchMode" class="bg-navy border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:border-gold focus:outline-none">
+                                <option value="all">All (AND)</option>
+                                <option value="any">Any (OR)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mb-4">
+                        <button onclick="switchScreenerTab('filters')" id="tab-filters" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy">Filters</button>
+                        <button onclick="switchScreenerTab('manual')" id="tab-manual" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Manual Query</button>
+                    </div>
+                    <div id="filtersPanel">
+                        <div id="filterList" class="space-y-3 mb-4"></div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                <i class="fas fa-search mr-2"></i>Run Screener
                             </button>
-                            <button onclick="addTechnicalFilter()" class="text-gold hover:text-gold2 text-sm transition">
-                                <i class="fas fa-chart-line mr-1"></i>Technical
+                            <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                <i class="fas fa-undo mr-1"></i>Clear All
+                            </button>
+                            <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
+                        </div>
+                    </div>
+                    <div id="manualPanel" class="hidden">
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Stock Logic Query</label>
+                            <textarea id="manualQuery" rows="4" class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-gold" placeholder="e.g. pe_ratio &lt; 20 AND market_cap &gt; 1000000000"></textarea>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">
+                            Supported operators: <code class="text-gray-400">&gt; &gt;= &lt; &lt;= == !=</code>
+                            Logical: <code class="text-gray-400">AND OR</code>
+                            Math: <code class="text-gray-400">price * 2 &gt; 5000</code>
+                            String: <code class="text-gray-400">sector == 'Technology'</code>
+                        </p>
+                        <div class="flex items-center gap-3 mb-4">
+                            <button onclick="runManualQuery()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                <i class="fas fa-search mr-2"></i>Compile &amp; Run
+                            </button>
+                        </div>
+                        <div id="manualResultCount" class="text-gray-400 text-sm mb-2"></div>
+                        <div id="manualSaveBtn" class="hidden">
+                            <button onclick="showSaveDialog()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                                <i class="fas fa-save mr-1"></i>Save as Query List
                             </button>
                         </div>
                     </div>
                 </div>
-                <div id="filterList" class="space-y-3 mb-4"></div>
-                <div class="flex items-center gap-3">
-                    <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
-                        <i class="fas fa-search mr-2"></i>Run Screener
-                    </button>
-                    <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
-                        <i class="fas fa-undo mr-1"></i>Clear All
-                    </button>
-                    <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
-                </div>
-            </div>
 
             <div id="resultsContainer" class="hidden">
                 <div class="bg-navy2 rounded-xl border border-gray-700 p-4 mb-4">
@@ -141,9 +185,11 @@
                                     <th class="text-right px-6 py-3">P/E</th>
                                     <th class="text-right px-6 py-3">M Cap</th>
                                     <th class="text-right px-6 py-3">Div Yield</th>
-                                    <th class="text-right px-6 py-3">Beta</th>
-                                    <th class="text-right px-6 py-3">Volume</th>
-                                </tr>
+                        <th class="text-right px-6 py-3">Beta</th>
+                            <th class="text-right px-6 py-3">Volume</th>
+                            <th class="text-right px-6 py-3">14D Hist</th>
+                            <th class="text-right px-6 py-3">Summary</th>
+                        </tr>
                             </thead>
                             <tbody id="resultsBody"></tbody>
                         </table>
@@ -177,17 +223,69 @@
 
 <script>
 (function() {
-    var FILTER_FIELDS = [
-        { value: 'market_cap', label: 'Market Cap' },
-        { value: 'pe_ratio', label: 'P/E Ratio' },
-        { value: 'dividend_yield', label: 'Dividend Yield' },
-        { value: 'beta', label: 'Beta' },
-        { value: 'price', label: 'Current Price' },
-        { value: 'previous_close', label: 'Previous Close' },
-        { value: 'avg_volume', label: 'Avg Volume' },
-        { value: 'week_52_high', label: '52-Week High' },
-        { value: 'week_52_low', label: '52-Week Low' },
-    ];
+     var FILTER_FIELDS = [
+         // Price / Valuation
+         { value: 'price', label: 'Current Price' },
+         { value: 'previous_close', label: 'Previous Close' },
+         { value: 'regularMarketDayHigh', label: 'Regular Market Day High' },
+         { value: 'regularMarketDayLow', label: 'Regular Market Day Low' },
+         { value: 'regularMarketOpen', label: 'Regular Market Open' },
+         { value: 'regularMarketChange', label: 'Regular Market Change' },
+         { value: 'regularMarketChangePercent', label: 'Regular Market Change %' },
+         { value: 'regularMarketVolume', label: 'Regular Market Volume' },
+         { value: 'regularMarketPreviousClose', label: 'Regular Market Prev Close' },
+         { value: 'weekly_change', label: 'Weekly Change %' },
+         { value: 'monthly_change', label: 'Monthly Change %' },
+         { value: 'market_cap', label: 'Market Cap' },
+         { value: 'pe_ratio', label: 'P/E Ratio' },
+         { value: 'forwardPE', label: 'Forward P/E' },
+         { value: 'trailingPE', label: 'Trailing P/E' },
+         { value: 'priceToBook', label: 'Price to Book' },
+         { value: 'bookValue', label: 'Book Value' },
+         { value: 'epsTrailingTwelveMonths', label: 'EPS (TTM)' },
+         { value: 'epsForward', label: 'EPS Forward' },
+         { value: 'dividend_yield', label: 'Dividend Yield' },
+         { value: 'trailingAnnualDividendRate', label: 'Trailing Annual Dividend Rate' },
+         { value: 'trailingAnnualDividendYield', label: 'Trailing Annual Dividend Yield' },
+         { value: 'priceHint', label: 'Price Hint' },
+         // Volume
+         { value: 'avg_volume', label: 'Avg Volume' },
+         { value: 'averageDailyVolume10Day', label: 'Avg Daily Volume (10D)' },
+         { value: 'averageDailyVolume3Month', label: 'Avg Daily Volume (3M)' },
+         // 52-Week / Averages
+         { value: 'week_52_high', label: '52-Week High' },
+         { value: 'week_52_low', label: '52-Week Low' },
+         { value: 'fiftyDayAverage', label: '50-Day Average' },
+         { value: 'twoHundredDayAverage', label: '200-Day Average' },
+         { value: 'fiftyTwoWeekHigh', label: '52-Week High (Yahoo)' },
+         { value: 'fiftyTwoWeekLow', label: '52-Week Low (Yahoo)' },
+         { value: 'fiftyDayAverageChange', label: '50-Day Avg Change' },
+         { value: 'fiftyDayAverageChangePercent', label: '50-Day Avg Change %' },
+         { value: 'twoHundredDayAverageChange', label: '200-Day Avg Change' },
+         { value: 'twoHundredDayAverageChangePercent', label: '200-Day Avg Change %' },
+         // Shares
+         { value: 'sharesOutstanding', label: 'Shares Outstanding' },
+         // Currency / Exchange
+         { value: 'currency', label: 'Currency', isString: true },
+         { value: 'financialCurrency', label: 'Financial Currency', isString: true },
+         { value: 'exchange', label: 'Exchange', isString: true },
+         { value: 'fullExchangeName', label: 'Full Exchange Name', isString: true },
+         { value: 'exchangeTimezoneName', label: 'Exchange Timezone', isString: true },
+         { value: 'exchangeTimezoneShortName', label: 'Exchange TZ Short', isString: true },
+         { value: 'exchangeDataDelayedBy', label: 'Exchange Data Delayed By (min)' },
+         // Quote metadata
+         { value: 'quoteType', label: 'Quote Type', isString: true },
+         { value: 'quoteSourceName', label: 'Quote Source', isString: true },
+         { value: 'marketState', label: 'Market State', isString: true },
+         { value: 'market', label: 'Market', isString: true },
+         { value: 'longName', label: 'Long Name', isString: true },
+         { value: 'shortName', label: 'Short Name', isString: true },
+         { value: 'symbol', label: 'Symbol', isString: true },
+         { value: 'language', label: 'Language', isString: true },
+         { value: 'messageBoardId', label: 'Message Board ID', isString: true },
+         { value: 'sourceInterval', label: 'Source Interval', isString: true },
+         { value: 'tradeable', label: 'Tradeable (0/1)' },
+     ];
 
     var TECH_GROUPS = [
         { label: 'Overlay & Trend', options: [
@@ -280,7 +378,7 @@
         ]},
     ];
 
-    var OPS = ['>', '>=', '<', '<=', '=='];
+    var OPS = ['>', '>=', '<', '<=', '==', '!='];
     var MATH_OPS = [
         { value: '=', label: '=' },
         { value: '+', label: '+' },
@@ -294,6 +392,89 @@
 
     function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
     function escHtml(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    window.switchScreenerTab = function(tab) {
+        var filtersPanel = document.getElementById('filtersPanel');
+        var manualPanel = document.getElementById('manualPanel');
+        var tabFilters = document.getElementById('tab-filters');
+        var tabManual = document.getElementById('tab-manual');
+        if (tab === 'filters') {
+            filtersPanel.classList.remove('hidden');
+            manualPanel.classList.add('hidden');
+            tabFilters.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+            tabManual.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white';
+        } else {
+            filtersPanel.classList.add('hidden');
+            manualPanel.classList.remove('hidden');
+            tabManual.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+            tabFilters.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white';
+        }
+    };
+
+    window.runManualQuery = function() {
+        var query = document.getElementById('manualQuery').value.trim();
+        if (!query) { alert('Enter a query.'); return; }
+        var matchMode = document.getElementById('matchMode').value;
+        var params = new URLSearchParams();
+        params.set('query', query);
+        params.set('match_mode', matchMode);
+        params.set('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+        var btn = document.querySelector('button[onclick="runManualQuery()"]');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Compiling...'; }
+        fetch('/api/screener/run-manual', {
+            method: 'POST',
+            body: params.toString(),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-search mr-2"></i>Compile &amp; Run'; }
+            if (!data.success) {
+                document.getElementById('manualResultCount').innerHTML = '<span class="text-red-400">' + escHtml(data.message) + '</span>';
+                var tbody = document.getElementById('resultsBody');
+                tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-red-400">' + escHtml(data.message) + '</td></tr>';
+                document.getElementById('resultsContainer').classList.remove('hidden');
+                return;
+            }
+            lastResults = data.stocks || [];
+            var total = data.total ?? data.stocks?.length ?? 0;
+            document.getElementById('manualResultCount').innerHTML = '<span class="text-green-400">' + total + ' stocks matched</span>';
+            var tbody = document.getElementById('resultsBody');
+            tbody.innerHTML = '';
+            if (data.stocks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-gray-500">No stocks match your query.</td></tr>';
+            } else {
+                data.stocks.forEach(function(s) {
+                    var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
+                    var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
+                    var tr = document.createElement('tr');
+                    tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                    tr.innerHTML =
+                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                        '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
+                        '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
+                        '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>';
+                    tbody.appendChild(tr);
+                });
+            }
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            document.getElementById('resultCount').textContent = total + ' stocks found (query)';
+            document.getElementById('resultCount2').textContent = '(' + total + ')';
+            var sb = document.getElementById('manualSaveBtn');
+            if (sb) sb.classList.remove('hidden');
+        })
+        .catch(function() {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-search mr-2"></i>Compile &amp; Run'; }
+            alert('Query failed. Check the console for details.');
+        });
+    };
 
     window.toggleGuide = function() {
         document.getElementById('screenerGuide').classList.toggle('hidden');
@@ -375,6 +556,8 @@
         var rc = document.getElementById('resultsContainer');
         if (rc) rc.classList.add('hidden');
         document.getElementById('resultCount').textContent = '';
+        var mrc = document.getElementById('manualResultCount');
+        if (mrc) mrc.textContent = '';
         lastResults = [];
     };
 
@@ -406,19 +589,25 @@
                         value: val
                     });
                 }
-            } else {
-                var fieldSelect = selects[0], opSelect = selects[selects.length - 1], valueInput = inputs[inputs.length - 1];
-                if (fieldSelect && opSelect && valueInput) {
-                    var val = valueInput.value.trim();
-                    if (val !== '') filters.push({
-                        field: fieldSelect.value,
-                        math_op: mathOp,
-                        math_value: mathOp !== '=' ? mathValue : '',
-                        op: opSelect.value,
-                        value: val
-                    });
-                }
-            }
+             } else {
+                 var fieldSelect = selects[0], opSelect = selects[selects.length - 1], valueInput = inputs[inputs.length - 1];
+                 if (fieldSelect && opSelect && valueInput) {
+                     var val = valueInput.value.trim();
+                     if (val !== '') {
+                         var fieldInfo = FILTER_FIELDS.find(function(f) { return f.value === fieldSelect.value; });
+                         if (fieldInfo && fieldInfo.isString && !val.startsWith("'") && !val.endsWith("'")) {
+                             val = "'" + val + "'";
+                         }
+                         filters.push({
+                             field: fieldSelect.value,
+                             math_op: mathOp,
+                             math_value: mathOp !== '=' ? mathValue : '',
+                             op: opSelect.value,
+                             value: val
+                         });
+                     }
+                 }
+             }
         });
         return { filters: filters, techFilters: techFilters };
     }
@@ -464,16 +653,18 @@
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>';
-                        tbody.appendChild(tr);
-                    });
-                }
-                document.getElementById('resultsContainer').classList.remove('hidden');
-            })
-            .catch(function() {
-                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-search mr-2"></i>Run Screener'; }
-                alert('Screener failed. Check console for details.');
-            });
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>';
+                    tbody.appendChild(tr);
+                });
+            }
+            document.getElementById('resultsContainer').classList.remove('hidden');
+        })
+        .catch(function() {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-search mr-2"></i>Run Screener'; }
+            alert('Screener failed. Check console for details.');
+        });
     };
 
     window.showSaveDialog = function() {
@@ -487,25 +678,41 @@
     window.saveList = function() {
         var name = document.getElementById('listNameInput').value.trim();
         if (!name) { alert('Enter a list name.'); return; }
-        var cf = collectFilters();
-        var stockIds = lastResults.map(function(s) { return s.id; });
-        var stockSymbols = lastResults.map(function(s) { return s.symbol; });
-        var matchMode = document.getElementById('matchMode').value;
+        var isManualQuery = !document.getElementById('manualPanel').classList.contains('hidden');
         var formData = new FormData();
         formData.append('name', name);
-        formData.append('match_mode', matchMode);
-        formData.append('criteria', JSON.stringify(cf.filters));
-        formData.append('technical_criteria', JSON.stringify(cf.techFilters));
-        formData.append('stock_ids', JSON.stringify(stockIds));
-        formData.append('stock_symbols', JSON.stringify(stockSymbols));
-        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
-        fetch('/api/screener/save', { method: 'POST', body: formData })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) { closeSaveDialog(); var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0', 10) + 1; }
-                else { alert(data.message || 'Save failed'); }
-            })
-            .catch(function() { alert('Save failed'); });
+        formData.append('match_mode', document.getElementById('matchMode').value);
+        if (isManualQuery) {
+            formData.append('query_text', document.getElementById('manualQuery').value.trim());
+            formData.append('stock_ids', JSON.stringify(lastResults.map(function(s) { return s.id; })));
+            formData.append('stock_symbols', JSON.stringify(lastResults.map(function(s) { return s.symbol; })));
+            formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+            fetch('/api/screener/save', { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) { closeSaveDialog(); var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0', 10) + 1; }
+                    else { alert(data.message || 'Save failed'); }
+                })
+                .catch(function() { alert('Save failed'); });
+        } else {
+            var cf = collectFilters();
+            var stockIds = lastResults.map(function(s) { return s.id; });
+            var stockSymbols = lastResults.map(function(s) { return s.symbol; });
+            var matchMode = document.getElementById('matchMode').value;
+            formData.append('match_mode', matchMode);
+            formData.append('criteria', JSON.stringify(cf.filters));
+            formData.append('technical_criteria', JSON.stringify(cf.techFilters));
+            formData.append('stock_ids', JSON.stringify(stockIds));
+            formData.append('stock_symbols', JSON.stringify(stockSymbols));
+            formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+            fetch('/api/screener/save', { method: 'POST', body: formData })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) { closeSaveDialog(); var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0', 10) + 1; }
+                    else { alert(data.message || 'Save failed'); }
+                })
+                .catch(function() { alert('Save failed'); });
+        }
     };
 
     function loadSavedLists() {
@@ -536,6 +743,44 @@
     window.loadList = function(id) {
         fetch('/api/screener/load-list?id=' + id).then(function(r) { return r.json(); }).then(function(data) {
             if (!data.success) { alert(data.message); return; }
+            if (data.is_manual_query) {
+                switchScreenerTab('manual');
+                document.getElementById('manualQuery').value = data.query_text || '';
+                if (data.match_mode) document.getElementById('matchMode').value = data.match_mode;
+                if (data.stocks && data.stocks.length > 0) {
+                    lastResults = data.stocks;
+                    var total = data.stocks.length;
+                    document.getElementById('manualResultCount').innerHTML = '<span class="text-green-400">' + total + ' stocks matched</span>';
+                    var tbody = document.getElementById('resultsBody');
+                    tbody.innerHTML = '';
+                    data.stocks.forEach(function(s) {
+                        var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
+                        var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
+                        var tr = document.createElement('tr');
+                        tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                        tr.innerHTML =
+                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                            '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
+                            '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
+                            '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
+                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
+                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
+                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
+                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
+                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
+                             '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
+                             '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>';
+                        tbody.appendChild(tr);
+                    });
+                    document.getElementById('resultsContainer').classList.remove('hidden');
+                    document.getElementById('resultCount').textContent = total + ' stocks found (query)';
+                    document.getElementById('resultCount2').textContent = '(' + total + ')';
+                    var sb = document.getElementById('manualSaveBtn');
+                    if (sb) sb.classList.remove('hidden');
+                }
+                document.getElementById('savedListsPanel').classList.add('hidden');
+                return;
+            }
             document.getElementById('filterList').innerHTML = '';
             filterId = 0;
             if (data.match_mode) document.getElementById('matchMode').value = data.match_mode;
@@ -601,9 +846,11 @@
                         '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
-'<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>';
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>';
                     tbody.appendChild(tr);
                 });
                 document.getElementById('resultsContainer').classList.remove('hidden');

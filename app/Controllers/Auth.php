@@ -29,9 +29,10 @@ class Auth extends BaseController
             $session->set([
                 'isLoggedIn' => true,
                 'user'       => [
-                    'id'    => $user['id'],
-                    'name'  => $user['name'],
-                    'email' => $user['email'],
+                    'id'       => $user['id'],
+                    'name'     => $user['name'],
+                    'email'    => $user['email'],
+                    'is_admin' => $user['is_admin'] ?? 0,
                 ],
             ]);
             $redirect = $this->request->getPost('redirect') ?: $session->get('redirect_after_login') ?: '/dashboard';
