@@ -1,6 +1,6 @@
 <?php
-$watchlistModel = new \App\Models\WatchlistModel();
-$isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int) $stock['id']) : false;
+$isWatched = $isWatched ?? false;
+$cur = stock_currency($stock['exchange'] ?? null);
 $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
 ?>
 <section>
@@ -56,19 +56,19 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
             <div class="space-y-3">
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Current Price</span>
-                    <span id="predCurrentPrice" class="text-white"><?= format_price($currentPrice) ?></span>
+                    <span id="predCurrentPrice" class="text-white"><?= format_price($currentPrice, $cur) ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Predicted High</span>
-                    <span class="text-green-400"><?= format_price($maxPred) ?></span>
+                    <span class="text-green-400"><?= format_price($maxPred, $cur) ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Predicted Low</span>
-                    <span class="text-red-400"><?= format_price($minPred) ?></span>
+                    <span class="text-red-400"><?= format_price($minPred, $cur) ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Average Prediction</span>
-                    <span class="text-white"><?= format_price($avgPred) ?></span>
+                    <span class="text-white"><?= format_price($avgPred, $cur) ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Max Upside</span>
@@ -111,9 +111,9 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
                     ?>
                     <tr class="border-b border-gray-700/50 hover:bg-navy/50">
                         <td class="px-6 py-3 text-gray-300"><?= date('M d, Y', strtotime($p['predicted_date'])) ?></td>
-                        <td class="px-6 py-3 text-right text-white font-medium"><?= format_price($p['predicted_price']) ?></td>
+                        <td class="px-6 py-3 text-right text-white font-medium"><?= format_price($p['predicted_price'], $cur) ?></td>
                         <td class="px-6 py-3 text-right <?= $change >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                            <?= $change >= 0 ? '+' : '' ?><?= format_price($change) ?>
+                            <?= $change >= 0 ? '+' : '' ?><?= format_price($change, $cur) ?>
                         </td>
                         <td class="px-6 py-3 text-right <?= $changePct >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                             <?= $changePct >= 0 ? '+' : '' ?><?= round($changePct, 2) ?>%

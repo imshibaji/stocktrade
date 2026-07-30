@@ -265,34 +265,44 @@ class StockTechnicalAnalysisEngine
      */
     public function calculateMACD(array $prices, int $fast = 12, int $slow = 26, int $signal = 9): array
     {
-        $fastEma = $this->calculateEMA($prices, $fast);
-        $slowEma = $this->calculateEMA($prices, $slow);
-
-        if ($fastEma === null || $slowEma === null) {
+        $count = count($prices);
+        if ($count < $slow) {
             return ['macd' => null, 'signal' => null, 'histogram' => null];
         }
 
-        $macdLine = $fastEma - $slowEma;
+        $fastMult = 2.0 / ($fast + 1);
+        $slowMult = 2.0 / ($slow + 1);
 
-        // Calculate MACD history for signal line calculation
+        $fastEma = array_sum(array_slice($prices, 0, $fast)) / $fast;
+        $slowEma = array_sum(array_slice($prices, 0, $slow)) / $slow;
+
         $macdHistory = [];
-        $count = count($prices);
-        for ($i = $slow; $i <= $count; $i++) {
-            $subPrices = array_slice($prices, 0, $i);
-            $f = $this->calculateEMA($subPrices, $fast);
-            $s = $this->calculateEMA($subPrices, $slow);
-            if ($f !== null && $s !== null) {
-                $macdHistory[] = $f - $s;
+        for ($i = $slow; $i < $count; $i++) {
+            if ($i >= $fast) {
+                $fastEma = (($prices[$i] - $fastEma) * $fastMult) + $fastEma;
             }
+            $slowEma = (($prices[$i] - $slowEma) * $slowMult) + $slowEma;
+            $macdHistory[] = $fastEma - $slowEma;
         }
 
-        $signalLine = $this->calculateEMA($macdHistory, $signal);
-        $histogram = ($signalLine !== null) ? ($macdLine - $signalLine) : null;
+        $macdLine = end($macdHistory);
+
+        if ($signal <= 0 || count($macdHistory) < $signal) {
+            return ['macd' => round($macdLine, 4), 'signal' => null, 'histogram' => null];
+        }
+
+        $signalMult = 2.0 / ($signal + 1);
+        $signalEma = array_sum(array_slice($macdHistory, 0, $signal)) / $signal;
+        for ($i = $signal; $i < count($macdHistory); $i++) {
+            $signalEma = (($macdHistory[$i] - $signalEma) * $signalMult) + $signalEma;
+        }
+
+        $histogram = $macdLine - $signalEma;
 
         return [
             'macd'      => round($macdLine, 4),
-            'signal'    => $signalLine !== null ? round($signalLine, 4) : null,
-            'histogram' => $histogram !== null ? round($histogram, 4) : null,
+            'signal'    => round($signalEma, 4),
+            'histogram' => round($histogram, 4),
         ];
     }
 

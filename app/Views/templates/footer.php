@@ -66,7 +66,6 @@
                 .catch(function() {});
         }
         pollNav();
-        setInterval(pollNav, 30000);
     })();
     </script>
     <?php endif; ?>

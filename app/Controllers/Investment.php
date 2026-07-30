@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Libraries\YahooFinanceService;
 use App\Models\InvestmentModel;
 use App\Models\StockModel;
 
@@ -25,7 +24,6 @@ class Investment extends BaseController
         $investments = $investmentModel->getUserInvestments($userId);
         $portfolio = $investmentModel->getPortfolioSummary($userId, $taxRates);
         $stocks = $stockModel->findAll();
-        $stocks = (new YahooFinanceService())->enrichStocks($stocks);
 
         $stockCurrencyMap = [];
         foreach ($stocks as $s) {
@@ -36,13 +34,20 @@ class Investment extends BaseController
         }
         unset($inv);
 
+        $investmentPl = [];
+        foreach ($investments as $inv) {
+            $invId = (int) $inv['id'];
+            $investmentPl[$invId] = $investmentModel->calculateProfitLoss($inv, $taxRates);
+        }
+
         $data = [
-            'title'       => 'My Investments - StockTrade Tips',
-            'investments' => $investments,
-            'portfolio'   => $portfolio,
-            'stocks'      => $stocks,
-            'taxInfo'     => tax_bracket_info($user),
-            'taxRates'    => $taxRates,
+            'title'          => 'My Investments - StockTrade Tips',
+            'investments'    => $investments,
+            'investmentPl'   => $investmentPl,
+            'portfolio'      => $portfolio,
+            'stocks'         => $stocks,
+            'taxInfo'        => tax_bracket_info($user),
+            'taxRates'       => $taxRates,
         ];
 
         return view('templates/header', $data)
@@ -67,14 +72,6 @@ class Investment extends BaseController
             return redirect()->back()->with('error', 'Stock not found.');
         }
 
-        $yahoo = new \App\Libraries\YahooFinanceService();
-        $quote = $yahoo->getQuote($stock['symbol']);
-        if ($quote) {
-            $d = $yahoo->quoteToArray($quote);
-            if (($d['regularMarketPrice'] ?? null) !== null) {
-                $stock['current_price'] = $d['regularMarketPrice'];
-            }
-        }
         $buyPrice = (float) $stock['current_price'];
 
         if ($inputType === 'quantity') {
@@ -112,7 +109,7 @@ class Investment extends BaseController
         $userId = current_user_id();
         $investmentModel = new InvestmentModel();
 
-        $investment = $investmentModel->select('investments.*, stocks.symbol, stocks.name, stocks.current_price')
+        $investment = $investmentModel->select('investments.*, stocks.symbol, stocks.name, stocks.current_price, stocks.exchange')
             ->join('stocks', 'stocks.id = investments.stock_id')
             ->where('investments.id', (int) $id)
             ->where('investments.user_id', $userId)
@@ -120,19 +117,6 @@ class Investment extends BaseController
 
         if (!$investment) {
             return redirect()->to('/investments')->with('error', 'Investment not found.');
-        }
-
-        $yahoo = new YahooFinanceService();
-        try {
-            $quote = $yahoo->getQuote($investment['symbol']);
-            if ($quote) {
-                $data = $yahoo->quoteToArray($quote);
-                if (($data['regularMarketPrice'] ?? null) !== null) {
-                    $investment['current_price'] = $data['regularMarketPrice'];
-                }
-            }
-        } catch (\Throwable $e) {
-            log_message('error', 'Yahoo quote error in sell form: ' . $e->getMessage());
         }
 
         $user = current_user();
@@ -269,10 +253,19 @@ class Investment extends BaseController
 
         $investments = $investmentModel->getUserInvestments($userId);
 
+        $investmentPl = [];
+        foreach ($investments as $inv) {
+            $invId = (int) $inv['id'];
+            if ($inv['status'] === 'active') {
+                $investmentPl[$invId] = $investmentModel->calculateProfitLoss($inv, $taxRates);
+            }
+        }
+
         $data = [
-            'title'       => 'Investment History - StockTrade Tips',
-            'investments' => $investments,
-            'taxRates'    => $taxRates,
+            'title'         => 'Investment History - StockTrade Tips',
+            'investments'   => $investments,
+            'investmentPl'  => $investmentPl,
+            'taxRates'      => $taxRates,
         ];
 
         return view('templates/header', $data)
@@ -296,7 +289,6 @@ class Investment extends BaseController
         $portfolio = $investmentModel->getPortfolioSummary($userId, $taxRates);
 
         $stocks = $stockModel->findAll();
-        $stocks = (new YahooFinanceService())->enrichStocks($stocks);
 
         $stockCurrencyMap = [];
         foreach ($stocks as $s) {

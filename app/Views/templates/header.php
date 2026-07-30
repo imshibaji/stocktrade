@@ -4,22 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'StockTrade Tips') ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        navy: '#0a1929',
-                        navy2: '#0f2744',
-                        gold: '#d4a853',
-                        gold2: '#f0c060',
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="/css/tailwind.css">
+    <?php if (!empty($showChartJs)): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <?php endif; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-navy text-gray-100 min-h-screen">

@@ -23,6 +23,7 @@ function fetch_exchange_rate(string $from, string $to): ?float
 
     $cache = get_currency_cache();
     $cacheKey = "fx_rate_{$from}_{$to}";
+    $cacheTtl = 86400;
 
     $cached = $cache->get($cacheKey);
     if ($cached !== null) {
@@ -33,22 +34,21 @@ function fetch_exchange_rate(string $from, string $to): ?float
     $directKey = "{$from}_{$to}";
     if (isset($fallbackRates[$directKey])) {
         $rate = $fallbackRates[$directKey];
-        $cache->save($cacheKey, $rate, 3600);
+        $cache->save($cacheKey, $rate, $cacheTtl);
         return $rate;
     }
 
     $inverseKey = "{$to}_{$from}";
     if (isset($fallbackRates[$inverseKey])) {
-        $rate = 1.0 / $fallbackRates[$inverseKey];
-        $cache->save($cacheKey, $rate, 3600);
+        $rate = round(1.0 / $fallbackRates[$inverseKey], 6);
+        $cache->save($cacheKey, $rate, $cacheTtl);
         return $rate;
     }
 
     $client = service('curlrequest');
     $symbol = "{$from}{$to}=X";
 
-    $maxRetries = 2;
-    for ($attempt = 0; $attempt <= $maxRetries; $attempt++) {
+    for ($attempt = 0; $attempt <= 1; $attempt++) {
         try {
             $response = $client->request('GET', "https://query1.finance.yahoo.com/v8/finance/chart/{$symbol}", [
                 'query' => ['interval' => '1d', 'range' => '1d'],
@@ -60,13 +60,12 @@ function fetch_exchange_rate(string $from, string $to): ?float
             $rate = $data['chart']['result'][0]['meta']['regularMarketPrice'] ?? null;
 
             if ($rate !== null) {
-                $cache->save($cacheKey, (float) $rate, 3600);
+                $cache->save($cacheKey, (float) $rate, $cacheTtl);
                 return (float) $rate;
             }
         } catch (\Throwable $e) {
-            log_message('error', "FX rate fetch failed for {$from}/{$to} (attempt " . ($attempt + 1) . "): " . $e->getMessage());
-            if ($attempt < $maxRetries) {
-                usleep(500000 * pow(2, $attempt));
+            if ($attempt === 0) {
+                usleep(200000);
             }
         }
     }

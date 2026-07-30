@@ -52,6 +52,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <?php foreach ($topStocks as $stock): ?>
         <?php $change = get_price_change((float) $stock['current_price'], (float) $stock['previous_close']); ?>
+        <?php $cur = stock_currency($stock['exchange'] ?? null); ?>
         <div class="bg-navy2 rounded-xl p-6 border border-gray-700 hover:border-gold transition cursor-pointer"
              onclick="<?= is_logged_in() ? "window.location.href='/stocks/{$stock['id']}'" : "window.location.href='/login'" ?>">
             <div class="flex justify-between items-start mb-3">
@@ -62,7 +63,7 @@
                 <span class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300"><?= esc($stock['sector']) ?></span>
             </div>
             <div class="flex justify-between items-end">
-                <span class="text-2xl font-bold text-white"><?= format_price($stock['current_price']) ?></span>
+                <span class="text-2xl font-bold text-white"><?= format_price($stock['current_price'], $cur) ?></span>
                 <span class="<?= $change['change'] >= 0 ? 'text-green-400' : 'text-red-400' ?> text-sm">
                     <?= $change['change'] >= 0 ? '+' : '' ?><?= $change['percent'] ?>%
                 </span>

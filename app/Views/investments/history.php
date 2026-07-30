@@ -42,12 +42,11 @@
                 </thead>
                 <tbody>
                     <?php foreach ($investments as $inv):
-                        $invModel = new \App\Models\InvestmentModel();
                         $isActive = $inv['status'] === 'active';
                         if ($isActive) {
-                            $pl = $invModel->calculateProfitLoss($inv, $taxRates ?? []);
-                            $actualPl = $pl['gross_profit'];
-                            $actualPlPct = $pl['gross_profit_pct'];
+                            $pl = $investmentPl[(int) $inv['id']] ?? [];
+                            $actualPl = $pl['gross_profit'] ?? 0;
+                            $actualPlPct = $pl['gross_profit_pct'] ?? 0;
                         } else {
                             $actualPl = ((float) $inv['sell_price'] - (float) $inv['buy_price']) * (float) $inv['shares'];
                             $actualPlPct = (float) $inv['buy_price'] > 0 ? (((float) $inv['sell_price'] - (float) $inv['buy_price']) / (float) $inv['buy_price']) * 100 : 0;

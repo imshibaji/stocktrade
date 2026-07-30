@@ -197,7 +197,7 @@
                     <p class="text-gray-500 text-xs"><?= esc($stock['name']) ?></p>
                 </div>
                 <div class="text-right">
-                    <p class="mkt-price text-white font-semibold"><?= format_price($stock['current_price']) ?></p>
+                    <p class="mkt-price text-white font-semibold"><?= format_price($stock['current_price'], stock_currency($stock['exchange'] ?? null)) ?></p>
                     <p class="mkt-change <?= $change['change'] >= 0 ? 'text-green-400' : 'text-red-400' ?> text-sm">
                         <?= $change['change'] >= 0 ? '+' : '' ?><?= $change['percent'] ?>%
                     </p>

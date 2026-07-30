@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Libraries\YahooFinanceService;
 use App\Models\StockModel;
 use App\Models\InvestmentModel;
 
@@ -61,7 +60,6 @@ class Dashboard extends BaseController
             $portfolio['net_profit_loss_base'] = convert_to_base_currency($portfolio['net_profit_loss'] ?? 0, 'INR');
 
             $allStocks = $stockModel->orderBy('symbol', 'ASC')->findAll();
-            $allStocks = (new YahooFinanceService())->enrichStocks($allStocks);
 
             $data = [
                 'title'              => 'Dashboard - StockTrade Tips',

@@ -95,6 +95,7 @@
 function renderWatchlistCard($stock, $predictions, $buckets)
 {
     $change = get_price_change((float) $stock['current_price'], (float) $stock['previous_close']);
+    $cur = stock_currency($stock['exchange'] ?? null);
     $sid = (int) $stock['stock_id'];
     $pred = $predictions[$sid] ?? null;
     $watchlistId = (int) $stock['id'];
@@ -122,15 +123,15 @@ function renderWatchlistCard($stock, $predictions, $buckets)
         <?php if ($pred): ?>
         <div class="flex items-center gap-2 mb-3 text-xs">
             <span class="text-gray-500">Prediction:</span>
-            <span class="text-green-400 font-semibold"><?= format_price($pred['low']) ?></span>
+            <span class="text-green-400 font-semibold"><?= format_price($pred['low'], $cur) ?></span>
             <span class="text-gray-500">–</span>
-            <span class="text-red-400 font-semibold"><?= format_price($pred['high']) ?></span>
+            <span class="text-red-400 font-semibold"><?= format_price($pred['high'], $cur) ?></span>
         </div>
         <?php endif; ?>
 
         <div class="flex justify-between items-end mt-2">
             <div>
-                <p class="wl-price text-2xl font-bold text-white"><?= format_price($stock['current_price']) ?></p>
+                <p class="wl-price text-2xl font-bold text-white"><?= format_price($stock['current_price'], $cur) ?></p>
             </div>
             <div class="text-right">
                 <span class="wl-change px-3 py-1 rounded text-sm font-semibold <?= $change['change'] >= 0 ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400' ?>">
@@ -170,7 +171,9 @@ function renderWatchlistCard($stock, $predictions, $buckets)
             || document.querySelector('input[name^="csrf_"]');
     }
 
-    function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024' };
+    function stockCurrency(exch) { return (exch && (exch.indexOf('NS')>=0||exch.indexOf('BSE')>=0)) ? 'INR' : 'USD'; }
+    function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
     function updateBadge(market) {
         var badge = document.getElementById('marketBadge');
@@ -190,7 +193,7 @@ function renderWatchlistCard($stock, $predictions, $buckets)
             if (!card) return;
             var priceEl = card.querySelector('.wl-price');
             var changeEl = card.querySelector('.wl-change');
-            if (priceEl) priceEl.textContent = formatPrice(s.current_price);
+            if (priceEl) priceEl.textContent = formatPrice(s.current_price, s.currency);
             if (changeEl) {
                 var pct = s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent;
                 changeEl.textContent = pct + '%';

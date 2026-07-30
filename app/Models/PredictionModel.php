@@ -21,4 +21,14 @@ class PredictionModel extends Model
             ->limit($days)
             ->findAll();
     }
+
+    public function getPredictionsForStocks(array $stockIds, int $days = 30): array
+    {
+        if (empty($stockIds)) return [];
+
+        return $this->whereIn('stock_id', $stockIds)
+            ->where('predicted_date >=', date('Y-m-d'))
+            ->orderBy('stock_id, predicted_date', 'ASC')
+            ->findAll();
+    }
 }

@@ -33,8 +33,8 @@ class StockSeeder extends Seeder
 
             $stockId = $this->db->insertID();
             $basePrice = (float) $data['current_price'];
-            $this->generatePriceHistory($stockId, $basePrice);
-            $this->generatePredictions($stockId, $basePrice);
+            generate_price_history($stockId, $basePrice);
+            generate_predictions($stockId, $basePrice);
         }
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Libraries\YahooFinanceService;
 use App\Models\WatchlistModel;
 use App\Models\WatchlistBucketModel;
 use App\Models\PredictionModel;
@@ -28,19 +27,25 @@ class Watchlist extends BaseController
         }
 
         $allStocks = array_merge($uncategorized, ...array_column($stocksByBucket, 'stocks'));
-        $allStocks = (new YahooFinanceService())->enrichStocks($allStocks);
+        $stockIds = array_map(fn($s) => (int) $s['stock_id'], $allStocks);
 
         $predictions = [];
-        foreach ($allStocks as $s) {
-            $sid = (int) $s['stock_id'];
-            $preds = $predictionModel->getPredictionsForStock($sid, 30);
-            if (!empty($preds)) {
-                $prices = array_column($preds, 'predicted_price');
-                $predictions[$sid] = [
-                    'low'  => min($prices),
-                    'high' => max($prices),
-                ];
+        if (!empty($stockIds)) {
+            $allPreds = $predictionModel->getPredictionsForStocks($stockIds, 30);
+            foreach ($allPreds as $p) {
+                $sid = (int) $p['stock_id'];
+                if (!isset($predictions[$sid])) {
+                    $predictions[$sid] = ['low' => INF, 'high' => -INF];
+                }
+                $price = (float) $p['predicted_price'];
+                if ($price < $predictions[$sid]['low']) $predictions[$sid]['low'] = $price;
+                if ($price > $predictions[$sid]['high']) $predictions[$sid]['high'] = $price;
             }
+            foreach ($predictions as &$r) {
+                if ($r['low'] === INF) $r['low'] = 0;
+                if ($r['high'] === -INF) $r['high'] = 0;
+            }
+            unset($r);
         }
 
         $data = [

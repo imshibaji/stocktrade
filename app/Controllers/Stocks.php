@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Libraries\YahooFinanceService;
 use App\Models\StockModel;
 use App\Models\WatchlistModel;
 
@@ -30,7 +29,6 @@ class Stocks extends BaseController
         } else {
             $stocks = $stockModel->findAll();
         }
-        $stocks = (new YahooFinanceService())->enrichStocks($stocks);
 
         $sectors = $stockModel->select('sector')->distinct()->findAll();
 
@@ -93,61 +91,11 @@ class Stocks extends BaseController
             'beta'           => null,
         ]);
 
-        $this->generatePriceHistory($stockId, $price);
-        $this->generatePredictions($stockId, $price);
+        generate_price_history($stockId, $price);
+        generate_predictions($stockId, $price);
 
         return redirect()->to('/stocks/' . $stockId)
             ->with('success', 'Stock ' . $symbol . ' added successfully.');
-    }
-
-    private function generatePriceHistory(int $stockId, float $basePrice): void
-    {
-        $db = \Config\Database::connect();
-        $prices = [];
-        for ($i = 90; $i >= 0; $i--) {
-            $date = date('Y-m-d', strtotime("-{$i} days"));
-            $volatility = $basePrice * 0.03;
-            $change = (mt_rand(-1000, 1000) / 1000) * $volatility;
-            $close = round($basePrice + $change, 2);
-            $open = round($close - (mt_rand(-500, 500) / 1000) * $volatility, 2);
-            $high = round(max($open, $close) + abs(mt_rand(0, 500) / 1000) * $volatility, 2);
-            $low = round(min($open, $close) - abs(mt_rand(0, 500) / 1000) * $volatility, 2);
-            $volume = mt_rand(100000, 50000000);
-
-            $prices[] = [
-                'stock_id'   => $stockId,
-                'price_date' => $date,
-                'open'       => $open,
-                'high'       => $high,
-                'low'        => $low,
-                'close'      => $close,
-                'volume'     => $volume,
-            ];
-            $basePrice = $close;
-        }
-        $db->table('stock_prices')->insertBatch($prices);
-    }
-
-    private function generatePredictions(int $stockId, float $basePrice): void
-    {
-        $db = \Config\Database::connect();
-        $predictions = [];
-        for ($i = 1; $i <= 30; $i++) {
-            $date = date('Y-m-d', strtotime("+{$i} days"));
-            $trend = (mt_rand(-100, 100) / 10000) * $basePrice;
-            $predictedPrice = round($basePrice + ($trend * $i), 2);
-            $confidence = round(max(60, min(95, 95 - ($i * 0.5))), 2);
-
-            $predictions[] = [
-                'stock_id'        => $stockId,
-                'predicted_date'  => $date,
-                'predicted_price' => $predictedPrice,
-                'confidence_score'=> $confidence,
-                'method'          => 'Monte Carlo + EMA',
-                'created_at'      => date('Y-m-d H:i:s'),
-            ];
-        }
-        $db->table('predictions')->insertBatch($predictions);
     }
 
     public function show($id): string
@@ -157,33 +105,6 @@ class Stocks extends BaseController
 
         if (!$stock) {
             return redirect()->to('/stocks')->with('error', 'Stock not found.');
-        }
-
-        $yahoo = new YahooFinanceService();
-        $exchange = $stock['exchange'] ?? 'NSE';
-        try {
-            $quote = $yahoo->getQuote($stock['symbol'], $exchange);
-            if ($quote) {
-                $data = $yahoo->quoteToArray($quote);
-                if (($data['regularMarketPrice'] ?? null) !== null) {
-                    $stock['current_price'] = $data['regularMarketPrice'];
-                    $stock['previous_close'] = $data['regularMarketPreviousClose'] ?? $stock['previous_close'];
-                    if (($data['marketCap'] ?? null) !== null) $stock['market_cap'] = $data['marketCap'];
-                    if (($data['trailingPE'] ?? null) !== null) $stock['pe_ratio'] = $data['trailingPE'];
-                    if (($data['fiftyTwoWeekHigh'] ?? null) !== null) $stock['week_52_high'] = $data['fiftyTwoWeekHigh'];
-                    if (($data['fiftyTwoWeekLow'] ?? null) !== null) $stock['week_52_low'] = $data['fiftyTwoWeekLow'];
-                    if (($data['trailingAnnualDividendYield'] ?? null) !== null) $stock['dividend_yield'] = $data['trailingAnnualDividendYield'];
-                    if (($data['bid'] ?? null) !== null) $stock['bid'] = $data['bid'];
-                    if (($data['ask'] ?? null) !== null) $stock['ask'] = $data['ask'];
-                    if (($data['regularMarketDayHigh'] ?? null) !== null) $stock['day_high'] = $data['regularMarketDayHigh'];
-                    if (($data['regularMarketDayLow'] ?? null) !== null) $stock['day_low'] = $data['regularMarketDayLow'];
-                    if (($data['regularMarketOpen'] ?? null) !== null) $stock['open_price'] = $data['regularMarketOpen'];
-                    if (($data['regularMarketVolume'] ?? null) !== null) $stock['volume'] = $data['regularMarketVolume'];
-                    if (($data['averageDailyVolume3Month'] ?? null) !== null) $stock['avg_volume'] = $data['averageDailyVolume3Month'];
-                }
-            }
-        } catch (\Throwable $e) {
-            log_message('error', 'Yahoo quote error for ' . $stock['symbol'] . ': ' . $e->getMessage());
         }
 
         $priceData = [];
@@ -204,6 +125,12 @@ class Stocks extends BaseController
             (float) $stock['previous_close']
         );
 
+        $isWatched = false;
+        if (is_logged_in()) {
+            $watchlistModel = new \App\Models\WatchlistModel();
+            $isWatched = $watchlistModel->isWatched(current_user_id(), (int) $stock['id']);
+        }
+
         $data = [
             'title'           => $stock['symbol'] . ' - StockTrade Tips',
             'stock'           => $stock,
@@ -211,6 +138,8 @@ class Stocks extends BaseController
             'priceData'       => $priceData,
             'predictionData'  => $predictionData,
             'predictionDates' => $predictionDates,
+            'isWatched'       => $isWatched,
+            'showChartJs'     => true,
         ];
 
         return view('templates/header', $data)
@@ -300,6 +229,12 @@ class Stocks extends BaseController
             $dateLabels[] = date('M d', strtotime($p['price_date']));
         }
 
+        $isWatched = false;
+        if (is_logged_in()) {
+            $watchlistModel = new \App\Models\WatchlistModel();
+            $isWatched = $watchlistModel->isWatched(current_user_id(), (int) $stock['id']);
+        }
+
         $data = [
             'title'            => 'Predictions - ' . $stock['symbol'] . ' - StockTrade Tips',
             'stock'            => $stock,
@@ -308,6 +243,8 @@ class Stocks extends BaseController
             'confidenceScores' => $confidenceScores,
             'priceData'        => $priceData,
             'dateLabels'       => $dateLabels,
+            'showChartJs'      => true,
+            'isWatched'        => $isWatched,
         ];
 
         return view('templates/header', $data)

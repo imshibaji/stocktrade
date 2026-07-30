@@ -87,6 +87,12 @@ php_errors.log
 vendor/
 
 #-------------------------
+# Node / Tailwind
+#-------------------------
+node_modules/
+src/
+
+#-------------------------
 # IDE / Development Files
 #-------------------------
 

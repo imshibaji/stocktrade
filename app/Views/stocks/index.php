@@ -102,6 +102,7 @@
             <?php foreach ($stocks as $stock): ?>
             <?php $change = get_price_change((float) $stock['current_price'], (float) $stock['previous_close']); ?>
             <?php $isWatched = isset($watchlistMap[(int) $stock['id']]); ?>
+            <?php $cur = stock_currency($stock['exchange'] ?? null); ?>
             <div class="stock-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition relative group" data-sid="<?= $stock['id'] ?>">
                 <div class="p-6 cursor-pointer" onclick="goToStock(<?= $stock['id'] ?>)">
                     <button class="watch-btn absolute top-3 right-3 text-xl transition"
@@ -120,9 +121,9 @@
                     </div>
                     <div class="flex justify-between items-end mt-4">
                         <div>
-                            <p class="price-value text-2xl font-bold text-white"><?= format_price($stock['current_price']) ?></p>
+                            <p class="price-value text-2xl font-bold text-white"><?= format_price($stock['current_price'], $cur) ?></p>
                             <p class="text-gray-500 text-xs mt-1 prev-close">
-                                Prev Close: <?= format_price($stock['previous_close']) ?>
+                                Prev Close: <?= format_price($stock['previous_close'], $cur) ?>
                             </p>
                         </div>
                         <div class="text-right">
@@ -169,7 +170,9 @@
             || document.querySelector('input[name^="csrf_"]');
     }
 
-    function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024' };
+    function stockCurrency(exch) { return (exch && (exch.indexOf('NS')>=0||exch.indexOf('BSE')>=0)) ? 'INR' : 'USD'; }
+    function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
     function updateMarketBadge(market) {
         var badge = document.getElementById('marketBadge');
@@ -186,8 +189,9 @@
     function buildCardHtml(s) {
         var isPos = s.change_percent !== null && s.change_percent >= 0;
         var changePct = s.change_percent !== null ? (s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent) + '%' : 'N/A';
-        var priceHtml = s.price ? formatPrice(s.price) : '<span class="text-gray-500">—</span>';
-        var prevCloseHtml = s.price ? 'Prev Close: ' + formatPrice(s.price - (s.change || 0)) : '';
+        var sc = s.currency || stockCurrency(s.exchange);
+        var priceHtml = s.price ? formatPrice(s.price, sc) : '<span class="text-gray-500">—</span>';
+        var prevCloseHtml = s.price ? 'Prev Close: ' + formatPrice(s.price - (s.change || 0), sc) : '';
         var changeClass = isPos ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400';
         var href = s.id ? '/stocks/' + s.id : '#';
 
@@ -343,7 +347,7 @@
             if (!card) return;
             var priceEl = card.querySelector('.price-value');
             var changeEl = card.querySelector('.change-badge');
-            if (priceEl && s.price) priceEl.textContent = formatPrice(s.price);
+            if (priceEl && s.price) priceEl.textContent = formatPrice(s.price, s.currency);
             if (changeEl && s.change_percent !== null) {
                 var pct = s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent;
                 changeEl.textContent = pct + '%';

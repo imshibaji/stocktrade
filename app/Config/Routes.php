@@ -19,17 +19,17 @@ $routes->get('/api/live-prices', 'Api::livePrices', ['filter' => 'auth']);
 $routes->get('/api/tick/(:num)', 'Api::tickPrice/$1', ['filter' => 'auth']);
 $routes->get('/api/sync-prices', 'Api::syncPrices', ['filter' => 'auth']);
 $routes->get('/api/search', 'Api::search', ['filter' => 'auth']);
+$routes->get('/api/quote/(:any)/(:any)', 'Api::getQuote/$1/$2', ['filter' => 'auth']);
 $routes->get('/api/quote/(:any)', 'Api::lookup/$1', ['filter' => 'auth']);
-$routes->get('/api/quote/(:any)/(:any)', 'Api::getQuote/$1/$2');
 $routes->get('/api/quotes/(:any)/(:any)', 'Api::getQuotes/$1/$2', ['filter' => 'auth']);
-$routes->get('/api/historical/(:any)/(:any)/(:any)', 'Api::getHistorical/$1/$2/$3');
-$routes->get('/api/dividends/(:any)/(:any)/(:any)', 'Api::getDividends/$1/$2/$3');
-$routes->get('/api/splits/(:any)/(:any)/(:any)', 'Api::getSplits/$1/$2/$3');
-$routes->get('/api/exchange/(:any)/(:any)', 'Api::getExchangeRate/$1/$2');
-$routes->get('/api/options/(:any)/(:any)', 'Api::getOptionChain/$1/$2');
-$routes->get('/api/summary/(:any)/(:any)', 'Api::getSummary/$1/$2');
-$routes->get('/api/news/(:any)', 'Api::getNewsStream/$1');
-$routes->get('/api/search/(:any)', 'Api::getSearch/$1');
+$routes->get('/api/historical/(:any)/(:any)/(:any)', 'Api::getHistorical/$1/$2/$3', ['filter' => 'auth']);
+$routes->get('/api/dividends/(:any)/(:any)/(:any)', 'Api::getDividends/$1/$2/$3', ['filter' => 'auth']);
+$routes->get('/api/splits/(:any)/(:any)/(:any)', 'Api::getSplits/$1/$2/$3', ['filter' => 'auth']);
+$routes->get('/api/exchange/(:any)/(:any)', 'Api::getExchangeRate/$1/$2', ['filter' => 'auth']);
+$routes->get('/api/options/(:any)/(:any)', 'Api::getOptionChain/$1/$2', ['filter' => 'auth']);
+$routes->get('/api/summary/(:any)/(:any)', 'Api::getSummary/$1/$2', ['filter' => 'auth']);
+$routes->get('/api/news/(:any)', 'Api::getNewsStream/$1', ['filter' => 'auth']);
+$routes->get('/api/search/(:any)', 'Api::getSearch/$1', ['filter' => 'auth']);
 $routes->post('/api/stocks/import', 'Api::importStock', ['filter' => 'auth']);
 
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
@@ -53,6 +53,10 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/screener', 'Screener::index');
     $routes->get('/api-playground', 'ApiDocs::index');
     $routes->get('/api/screener/run', 'Screener::run');
+    $routes->post('/api/screener/save', 'Screener::save');
+    $routes->get('/api/screener/lists', 'Screener::lists');
+    $routes->get('/api/screener/load-list', 'Screener::loadList');
+    $routes->post('/api/screener/delete-list', 'Screener::deleteList');
     $routes->get('/investments', 'Investment::index');
     $routes->post('/investments/create', 'Investment::create');
     $routes->get('/investments/(:num)/sell', 'Investment::sellForm/$1');

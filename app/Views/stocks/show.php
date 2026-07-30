@@ -1,7 +1,5 @@
-<?php
-$watchlistModel = new \App\Models\WatchlistModel();
-$isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int) $stock['id']) : false;
-?>
+<?php $isWatched = $isWatched ?? false; ?>
+<?php $cur = stock_currency($stock['exchange'] ?? null); ?>
 <section>
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
@@ -37,16 +35,16 @@ $isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int
             <div class="flex justify-between items-start mb-6">
                 <div>
                     <div class="flex items-center space-x-3">
-                        <p id="livePrice" class="text-4xl font-bold text-white"><?= format_price($stock['current_price']) ?></p>
+                        <p id="livePrice" class="text-4xl font-bold text-white"><?= format_price($stock['current_price'], $cur) ?></p>
                         <span id="liveIndicator" class="hidden text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300">Live</span>
                     </div>
                     <p id="liveChange" class="<?= $priceChange['change'] >= 0 ? 'text-green-400' : 'text-red-400' ?> mt-1">
-                        <?= $priceChange['change'] >= 0 ? '+' : '' ?><?= format_price($priceChange['change']) ?>
+                        <?= $priceChange['change'] >= 0 ? '+' : '' ?><?= format_price($priceChange['change'], $cur) ?>
                         (<span id="livePct"><?= $priceChange['change'] >= 0 ? '+' : '' ?><?= $priceChange['percent'] ?></span>%)
                     </p>
                 </div>
                 <div class="text-right text-sm text-gray-400">
-                    <p>Prev Close: <?= format_price($stock['previous_close']) ?></p>
+                    <p>Prev Close: <?= format_price($stock['previous_close'], $cur) ?></p>
                     <p id="liveUpdated" class="text-gray-600 text-xs mt-1"></p>
                 </div>
             </div>
@@ -68,15 +66,15 @@ $isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Open</span>
-                    <span class="text-white text-sm" id="mktOpen"><?= isset($stock['open_price']) ? format_price($stock['open_price']) : 'N/A' ?></span>
+                    <span class="text-white text-sm" id="mktOpen"><?= isset($stock['open_price']) ? format_price($stock['open_price'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Day High</span>
-                    <span class="text-green-400 text-sm" id="mktHigh"><?= isset($stock['day_high']) ? format_price($stock['day_high']) : 'N/A' ?></span>
+                    <span class="text-green-400 text-sm" id="mktHigh"><?= isset($stock['day_high']) ? format_price($stock['day_high'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Day Low</span>
-                    <span class="text-red-400 text-sm" id="mktLow"><?= isset($stock['day_low']) ? format_price($stock['day_low']) : 'N/A' ?></span>
+                    <span class="text-red-400 text-sm" id="mktLow"><?= isset($stock['day_low']) ? format_price($stock['day_low'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Volume</span>
@@ -88,11 +86,11 @@ $isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">52-Week High</span>
-                    <span class="text-green-400 text-sm"><?= ($stock['week_52_high'] ?? 0) ? format_price($stock['week_52_high']) : 'N/A' ?></span>
+                    <span class="text-green-400 text-sm"><?= ($stock['week_52_high'] ?? 0) ? format_price($stock['week_52_high'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">52-Week Low</span>
-                    <span class="text-red-400 text-sm"><?= ($stock['week_52_low'] ?? 0) ? format_price($stock['week_52_low']) : 'N/A' ?></span>
+                    <span class="text-red-400 text-sm"><?= ($stock['week_52_low'] ?? 0) ? format_price($stock['week_52_low'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Dividend Yield</span>
@@ -100,7 +98,7 @@ $isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Bid / Ask</span>
-                    <span class="text-white text-sm" id="mktBidAsk"><?= (isset($stock['bid']) && isset($stock['ask'])) ? format_price($stock['bid']) . ' / ' . format_price($stock['ask']) : 'N/A' ?></span>
+                    <span class="text-white text-sm" id="mktBidAsk"><?= (isset($stock['bid']) && isset($stock['ask'])) ? format_price($stock['bid'], $cur) . ' / ' . format_price($stock['ask'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2">
                     <span class="text-gray-400 text-sm">Beta</span>
@@ -136,7 +134,7 @@ $isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int
                     ?>
                     <tr class="border-b border-gray-700/50 hover:bg-navy/50">
                         <td class="px-4 py-3 text-gray-300"><?= date('M d, Y', strtotime($p['predicted_date'])) ?></td>
-                        <td class="px-4 py-3 text-right text-white"><?= format_price($p['predicted_price']) ?></td>
+                        <td class="px-4 py-3 text-right text-white"><?= format_price($p['predicted_price'], $cur) ?></td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex items-center justify-end space-x-1">
                                 <div class="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -147,7 +145,7 @@ $isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int
                             </div>
                         </td>
                         <td class="px-4 py-3 text-right <?= $predChange >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                            <?= $predChange >= 0 ? '+' : '' ?><?= format_price($predChange) ?> (<?= $predChangePct >= 0 ? '+' : '' ?><?= round($predChangePct, 2) ?>%)
+                            <?= $predChange >= 0 ? '+' : '' ?><?= format_price($predChange, $cur)?> (<?= $predChangePct >= 0 ? '+' : '' ?><?= round($predChangePct, 2) ?>%)
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -165,7 +163,7 @@ $isWatched = is_logged_in() ? $watchlistModel->isWatched(current_user_id(), (int
             <input type="hidden" name="stock_id" value="<?= $stock['id'] ?>">
             <div>
                 <label class="block text-gray-300 mb-2 text-sm">Current Price</label>
-                <input type="text" value="<?= format_price($stock['current_price']) ?>" disabled
+                <input type="text" value="<?= format_price($stock['current_price'], $cur) ?>" disabled
                     class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
             </div>
             <div>

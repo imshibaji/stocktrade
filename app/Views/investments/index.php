@@ -30,7 +30,7 @@
                         <select name="stock_id" id="invStockSelect" required class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none">
                             <option value="">Choose a stock...</option>
                             <?php foreach ($stocks as $s): ?>
-                            <option value="<?= $s['id'] ?>" data-price="<?= $s['current_price'] ?>"><?= esc($s['symbol']) ?> - <?= esc($s['name']) ?> (<?= format_price($s['current_price']) ?>)</option>
+                            <option value="<?= $s['id'] ?>" data-price="<?= $s['current_price'] ?>" data-currency="<?= stock_currency($s['exchange'] ?? null) ?>"><?= esc($s['symbol']) ?> - <?= esc($s['name']) ?> (<?= format_price($s['current_price'], stock_currency($s['exchange'] ?? null)) ?>)</option>
                             <?php endforeach; ?>
                         </select>
                         <div id="selectedPrice" class="text-gray-500 text-xs mt-1 hidden">Price: <span id="liveStockPrice"></span></div>
@@ -102,8 +102,7 @@
                 </thead>
                 <tbody>
 <?php foreach ($investments as $inv): 
-    $invModel = new \App\Models\InvestmentModel();
-    $pl = $invModel->calculateProfitLoss($inv, $taxRates ?? []);
+    $pl = $investmentPl[(int) $inv['id']] ?? [];
     $invData = [
         'id' => (int) $inv['id'],
         'sid' => (int) $inv['stock_id'],
@@ -176,6 +175,14 @@
         return opt && opt.value ? parseFloat(opt.dataset.price) : null;
     }
 
+    function getSelectedCurrency() {
+        var sel = document.getElementById('invStockSelect');
+        var opt = sel.options[sel.selectedIndex];
+        return opt && opt.dataset.currency ? opt.dataset.currency : 'INR';
+    }
+
+    function fmtr(v) { return v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
     function updateCalc() {
         var price = getSelectedPrice();
         var priceDisplay = document.getElementById('selectedPrice');
@@ -186,7 +193,9 @@
             calcResult.classList.add('hidden');
             return;
         }
-        priceSpan.textContent = '\u20B9' + price.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        var cur = getSelectedCurrency();
+        var sym = CURRENCY_SYMBOLS[cur] || (cur + ' ');
+        priceSpan.textContent = sym + fmtr(price);
         priceDisplay.classList.remove('hidden');
 
         var type = document.getElementById('inputType').value;
@@ -195,10 +204,10 @@
             var shares = Math.floor(amt / price);
             if (shares > 0) {
                 var total = shares * price;
-                calcResult.textContent = 'You can buy ' + shares + ' shares @ \u20B9' + price.toFixed(2) + ' = \u20B9' + total.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                calcResult.textContent = 'You can buy ' + shares + ' shares @ ' + sym + price.toFixed(2) + ' = ' + sym + fmtr(total);
                 calcResult.classList.remove('hidden');
             } else if (amt > 0) {
-                calcResult.textContent = 'Amount too low. Need at least \u20B9' + price.toFixed(2) + ' for 1 share.';
+                calcResult.textContent = 'Amount too low. Need at least ' + sym + price.toFixed(2) + ' for 1 share.';
                 calcResult.classList.remove('hidden');
             } else {
                 calcResult.classList.add('hidden');
@@ -207,7 +216,7 @@
             var qty = parseInt(document.querySelector('input[name="quantity"]').value) || 0;
             if (qty > 0) {
                 var total = qty * price;
-                calcResult.textContent = qty + ' shares @ \u20B9' + price.toFixed(2) + ' = \u20B9' + total.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                calcResult.textContent = qty + ' shares @ ' + sym + price.toFixed(2) + ' = ' + sym + fmtr(total);
                 calcResult.classList.remove('hidden');
             } else {
                 calcResult.classList.add('hidden');
@@ -239,7 +248,9 @@
     document.querySelector('input[name="amount"]').addEventListener('input', updateCalc);
     document.querySelector('input[name="quantity"]').addEventListener('input', updateCalc);
 
-    function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024' };
+    function stockCurrency(exch) { return (exch && (exch.indexOf('NS')>=0||exch.indexOf('BSE')>=0)) ? 'INR' : 'USD'; }
+    function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
     function updateBadge(market) {
         var badge = document.getElementById('marketBadge');
@@ -261,14 +272,15 @@
     }
 
     function updateRows(stocks) {
-        var priceMap = {};
-        stocks.forEach(function(s) { priceMap[s.id] = s.current_price; });
+        var priceMap = {}, currencyMap = {};
+        stocks.forEach(function(s) { priceMap[s.id] = s.current_price; currencyMap[s.id] = s.currency || 'INR'; });
 
         document.querySelectorAll('.inv-row').forEach(function(row) {
             var inv = JSON.parse(row.getAttribute('data-inv'));
             if (inv.status !== 'active') return;
             var livePrice = priceMap[inv.sid];
             if (!livePrice) return;
+            var cur = currencyMap[inv.sid] || inv.currency || 'INR';
 
             var currentValue = inv.shares * livePrice;
             var grossProfit = currentValue - inv.invested;
@@ -282,9 +294,9 @@
             var gross = row.querySelector('.inv-gross');
             var gPct = row.querySelector('.inv-gross-pct');
 
-            if (cp) cp.textContent = formatPrice(livePrice);
-            if (val) val.textContent = formatPrice(currentValue);
-            if (gross) gross.textContent = (grossProfit >= 0 ? '+' : '') + formatPrice(grossProfit);
+            if (cp) cp.textContent = formatPrice(livePrice, cur);
+            if (val) val.textContent = formatPrice(currentValue, cur);
+            if (gross) gross.textContent = (grossProfit >= 0 ? '+' : '') + formatPrice(grossProfit, cur);
             if (gPct) gPct.textContent = (grossPct >= 0 ? '+' : '') + grossPct.toFixed(2) + '%';
 
             if (grossProfit >= 0) {
