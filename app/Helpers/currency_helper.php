@@ -6,6 +6,7 @@ $instance = null;
 
 function get_currency_cache(): Cache
 {
+    global $instance;
     if ($instance === null) {
         $instance = new Cache();
     }

@@ -2,8 +2,9 @@
 
 namespace App\Controllers;
 
-use App\Models\StockModel;
 use App\Models\InvestmentModel;
+use App\Models\WatchlistModel;
+use App\Models\PredictionModel;
 
 class Dashboard extends BaseController
 {
@@ -11,7 +12,6 @@ class Dashboard extends BaseController
     {
         try {
             $userId = current_user_id();
-            $stockModel = new StockModel();
             $investmentModel = new InvestmentModel();
             $user = current_user();
 
@@ -65,15 +65,41 @@ class Dashboard extends BaseController
             $portfolio['total_tax_base'] = convert_to_base_currency($portfolio['total_tax'] ?? 0, 'INR');
             $portfolio['net_profit_loss_base'] = convert_to_base_currency($portfolio['net_profit_loss'] ?? 0, 'INR');
 
-            $allStocks = $stockModel->orderBy('symbol', 'ASC')->findAll();
+            $watchlistModel = new WatchlistModel();
+            $watchlistStocks = $watchlistModel->getUserWatchlist($userId);
+
+            $watchlistStockIds = array_map(fn($s) => (int) $s['stock_id'], $watchlistStocks);
+            $watchlistPredictions = [];
+            if (!empty($watchlistStockIds)) {
+                $predictionModel = new PredictionModel();
+                $allPreds = $predictionModel->getPredictionsForStocks($watchlistStockIds, 30);
+                foreach ($allPreds as $p) {
+                    $sid = (int) $p['stock_id'];
+                    if (!isset($watchlistPredictions[$sid])) {
+                        $watchlistPredictions[$sid] = ['low' => INF, 'high' => -INF, 'sum' => 0, 'count' => 0];
+                    }
+                    $price = (float) $p['predicted_price'];
+                    if ($price < $watchlistPredictions[$sid]['low']) $watchlistPredictions[$sid]['low'] = $price;
+                    if ($price > $watchlistPredictions[$sid]['high']) $watchlistPredictions[$sid]['high'] = $price;
+                    $watchlistPredictions[$sid]['sum'] += $price;
+                    $watchlistPredictions[$sid]['count']++;
+                }
+                foreach ($watchlistPredictions as &$r) {
+                    if ($r['low'] === INF) $r['low'] = 0;
+                    if ($r['high'] === -INF) $r['high'] = 0;
+                    $r['avg'] = $r['count'] > 0 ? $r['sum'] / $r['count'] : 0;
+                }
+                unset($r);
+            }
 
             $data = [
-                'title'              => 'Dashboard - StockTrade Tips',
-                'activeInvestments'  => $activeInvestments,
-                'investmentDetails'  => $investmentDetails,
-                'portfolio'          => $portfolio,
-                'allStocks'          => $allStocks,
-                'taxRates'           => $taxRates,
+                'title'                => 'Dashboard - StockTrade Tips',
+                'activeInvestments'    => $activeInvestments,
+                'investmentDetails'    => $investmentDetails,
+                'portfolio'            => $portfolio,
+                'watchlistStocks'      => $watchlistStocks,
+                'watchlistPredictions' => $watchlistPredictions,
+                'taxRates'             => $taxRates,
             ];
 
             return view('templates/header', $data)

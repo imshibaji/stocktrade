@@ -11,7 +11,7 @@ class PredictionModel extends Model
     protected $allowedFields = ['stock_id', 'predicted_date', 'predicted_price', 'confidence_score', 'method'];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
-    protected $updatedField = false;
+    protected $updatedField = '';
 
     public function getPredictionsForStock(int $stockId, int $days = 30)
     {

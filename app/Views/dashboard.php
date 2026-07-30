@@ -123,7 +123,7 @@
             <h2 class="text-white font-bold text-lg">Portfolio Summary</h2>
             <span class="text-gray-400 text-xs">Base Currency: <?= esc($portfolio['base_currency'] ?? 'INR') ?></span>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             <div class="text-center p-4 bg-navy rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Invested</p>
                 <p id="dashSumInvested" class="text-white font-bold"><?= format_price_dual($portfolio['total_invested'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
@@ -162,41 +162,73 @@
     </div>
     <?php endif; ?>
 
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+    <?php if (!empty($watchlistStocks)): ?>
+    <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-8">
         <div class="flex justify-between items-center mb-4">
-            <div class="flex items-center space-x-3">
-                <h2 class="text-white font-bold text-lg">All Stocks — Live Prices</h2>
-
-            </div>
-            <div class="flex items-center space-x-3">
-                <div class="relative" id="dashSearchContainer">
-                    <input type="text" id="dashStockSearch" placeholder="Quick search by symbol or name..."
-                        autocomplete="off"
-                        class="bg-navy border border-gray-600 rounded-lg pl-8 pr-3 py-1.5 text-sm text-white focus:border-gold focus:outline-none w-40 md:w-56">
-                    <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
-                    <div id="dashSearchDropdown" class="hidden absolute top-full right-0 mt-1 w-72 bg-navy2 border border-gray-600 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"></div>
-                </div>
-                <a href="/stocks" class="text-gold text-sm hover:text-gold2 transition whitespace-nowrap">View All Stocks</a>
-            </div>
+            <h2 class="text-white font-bold text-lg">
+                <i class="fas fa-star text-yellow-400 mr-2"></i>My Watchlist
+            </h2>
+            <a href="/watchlist" class="text-gold text-sm hover:text-gold2 transition">Manage</a>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="marketOverview">
-            <?php foreach ($allStocks as $stock): ?>
-            <?php $change = get_price_change((float) $stock['current_price'], (float) $stock['previous_close']); ?>
-            <a href="/stocks/<?= $stock['id'] ?>" class="market-item flex justify-between items-center p-4 bg-navy rounded-lg hover:border-gold border border-transparent transition" data-sid="<?= $stock['id'] ?>">
-                <div>
-                    <p class="text-white font-semibold"><?= esc($stock['symbol']) ?></p>
-                    <p class="text-gray-500 text-xs"><?= esc($stock['name']) ?></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <?php foreach ($watchlistStocks as $ws): ?>
+            <?php
+                $change = get_price_change((float) $ws['current_price'], (float) $ws['previous_close']);
+                $sid = (int) $ws['stock_id'];
+                $pred = $watchlistPredictions[$sid] ?? null;
+                $cur = stock_currency($ws['exchange'] ?? null);
+            ?>
+            <div class="wl-card p-4 bg-navy rounded-lg border border-transparent hover:border-gold transition" data-wlid="<?= $ws['id'] ?>">
+                <div class="flex justify-between items-start mb-2">
+                    <a href="/stocks/<?= $sid ?>" class="min-w-0 flex-1">
+                        <p class="text-white font-semibold truncate"><?= esc($ws['symbol']) ?></p>
+                        <p class="text-gray-500 text-xs truncate"><?= esc($ws['name']) ?></p>
+                    </a>
+                    <span class="text-xs px-2 py-0.5 rounded bg-navy2 border border-gray-600 text-gray-300 shrink-0 ml-2"><?= esc($ws['exchange'] ?? 'NSE') ?></span>
                 </div>
-                <div class="text-right">
-                    <p class="mkt-price text-white font-semibold"><?= format_price($stock['current_price'], stock_currency($stock['exchange'] ?? null)) ?></p>
-                    <p class="mkt-change <?= $change['change'] >= 0 ? 'text-green-400' : 'text-red-400' ?> text-sm">
-                        <?= $change['change'] >= 0 ? '+' : '' ?><?= $change['percent'] ?>%
-                    </p>
+                <?php if ($pred && $pred['low'] > 0 && $pred['high'] > 0): ?>
+                <div class="text-xs flex items-center gap-2 mb-2">
+                    <span class="text-red-400 font-semibold">SL: <?= format_price($pred['low'], $cur) ?></span>
+                    <span class="text-gray-600">|</span>
+                    <span class="text-green-400 font-semibold">Target: <?= format_price($pred['high'], $cur) ?></span>
                 </div>
-            </a>
+                <?php
+                    $outlookPct = $pred['avg'] > 0 && (float) $ws['current_price'] > 0 ? ((($pred['avg'] - (float) $ws['current_price']) / (float) $ws['current_price']) * 100) : 0;
+                    if ($outlookPct > 2) {
+                        $outlookIcon = 'arrow-trend-up';
+                        $outlookClass = 'text-green-400';
+                        $outlookText = 'Bullish (+' . round($outlookPct, 1) . '%)';
+                    } elseif ($outlookPct < -2) {
+                        $outlookIcon = 'arrow-trend-down';
+                        $outlookClass = 'text-red-400';
+                        $outlookText = 'Bearish (' . round($outlookPct, 1) . '%)';
+                    } else {
+                        $outlookIcon = 'arrows-left-right';
+                        $outlookClass = 'text-gray-400';
+                        $outlookText = 'Sideways';
+                    }
+                ?>
+                <div class="text-xs mb-2">
+                    <span class="<?= $outlookClass ?> font-semibold"><i class="fas fa-<?= $outlookIcon ?> mr-1"></i>30-Day: <?= $outlookText ?></span>
+                </div>
+                <?php endif; ?>
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-white font-bold"><?= format_price($ws['current_price'], $cur) ?></p>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-xs font-semibold <?= $change['change'] >= 0 ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400' ?>">
+                            <?= $change['change'] >= 0 ? '+' : '' ?><?= $change['percent'] ?>%
+                        </span>
+                        <button onclick="removeWatchlist(<?= $ws['id'] ?>, '<?= str_replace(["'", '"'], '', $ws['symbol']) ?>')" class="text-red-400 hover:text-red-300 text-xs" title="Remove from watchlist">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
             <?php endforeach; ?>
         </div>
     </div>
+    <?php endif; ?>
+
 </section>
 
 <script>
@@ -205,10 +237,6 @@
 
     var CSRF_NAME = '<?= csrf_token() ?>';
     var CSRF_HASH = '<?= csrf_hash() ?>';
-    var dashSearch = document.getElementById('dashStockSearch');
-    var dashDropdown = document.getElementById('dashSearchDropdown');
-    var dashTimer = null;
-    if (!dashSearch) return;
 
     function escHtml(str) {
         if (!str) return '';
@@ -237,64 +265,26 @@
             });
     }
 
-    dashSearch.addEventListener('input', function() {
-        var val = this.value.trim();
-        if (dashTimer) clearTimeout(dashTimer);
-        if (val.length < 2) {
-            dashDropdown.classList.add('hidden');
-            return;
-        }
-        dashTimer = setTimeout(function() {
-            fetch('/api/search?q=' + encodeURIComponent(val))
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (!data.results || data.results.length === 0) {
-                        dashDropdown.innerHTML = '<div class="p-3 text-gray-400 text-sm text-center">No results found</div>';
-                        dashDropdown.classList.remove('hidden');
-                        return;
-                    }
-                    var html = '';
-                    data.results.forEach(function(s) {
-                        var priceStr = s.price ? '\u20B9' + parseFloat(s.price).toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '—';
-                        var changeStr = '';
-                        if (s.change_percent !== null) {
-                            var cls = s.change_percent >= 0 ? 'text-green-400' : 'text-red-400';
-                            changeStr = '<span class="' + cls + ' text-xs">' + (s.change_percent >= 0 ? '+' : '') + s.change_percent + '%</span>';
-                        }
-                        html += '<div class="flex justify-between items-center px-4 py-3 hover:bg-navy border-b border-gray-700/50 last:border-0 transition">' +
-                            '<div>' +
-                            '<span class="text-white text-sm font-semibold">' + escHtml(s.symbol) + '</span>' +
-                            '<div class="text-gray-500 text-xs">' + escHtml(s.name) + '</div>' +
-                            '</div>' +
-                            '<div class="text-right flex items-center space-x-2">' +
-                            '<div>' +
-                            '<div class="text-white text-sm">' + priceStr + '</div>' +
-                            changeStr +
-                            '</div>';
-                        if (s.from_yahoo) {
-                            html += '<button data-import="' + escHtml(s.symbol) + '" onclick="importStock(\'' + escHtml(s.symbol) + '\')" class="text-xs px-2 py-1 rounded bg-gold text-navy font-semibold hover:bg-gold2 transition whitespace-nowrap">+ Add</button>';
-                        } else {
-                            html += '<a href="/stocks/' + s.id + '" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
-                        }
-                        html += '</div>' +
-                            '</div>';
-                    });
-                    dashDropdown.innerHTML = html;
-                    dashDropdown.classList.remove('hidden');
-                })
-                .catch(function() { dashDropdown.classList.add('hidden'); });
-        }, 250);
-    });
-
-    dashSearch.addEventListener('blur', function() {
-        setTimeout(function() { dashDropdown.classList.add('hidden'); }, 200);
-    });
-
-    dashSearch.addEventListener('focus', function() {
-        if (dashDropdown.children.length > 0) {
-            dashDropdown.classList.remove('hidden');
-        }
-    });
-
+    window.removeWatchlist = function(id, symbol) {
+        if (!confirm('Remove ' + symbol + ' from watchlist?')) return;
+        var csrfInput = document.querySelector('input[name="' + CSRF_NAME + '"]') || document.querySelector('input[name^="csrf_"]');
+        var bodyStr = (CSRF_NAME || 'csrf_test_name') + '=' + encodeURIComponent(csrfInput ? csrfInput.value : '');
+        fetch('/watchlist/toggle/' + id, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+            body: bodyStr
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.watched) {
+                var card = document.querySelector('.wl-card[data-wlid="' + id + '"]');
+                if (card) {
+                    card.style.transition = 'opacity 0.3s';
+                    card.style.opacity = '0';
+                    setTimeout(function() { card.remove(); }, 300);
+                }
+            }
+        });
+    };
 })();
 </script>

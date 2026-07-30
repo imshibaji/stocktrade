@@ -11,11 +11,11 @@ class WatchlistModel extends Model
     protected $allowedFields = ['user_id', 'stock_id', 'bucket_id'];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
-    protected $updatedField = false;
+    protected $updatedField = '';
 
     public function getUserWatchlist(int $userId)
     {
-        return $this->select('watchlist.*, stocks.symbol, stocks.name, stocks.sector, stocks.current_price, stocks.previous_close, stocks.pe_ratio')
+        return $this->select('watchlist.*, stocks.symbol, stocks.name, stocks.sector, stocks.current_price, stocks.previous_close, stocks.pe_ratio, stocks.exchange')
             ->join('stocks', 'stocks.id = watchlist.stock_id')
             ->where('watchlist.user_id', $userId)
             ->findAll();

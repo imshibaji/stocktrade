@@ -72,7 +72,6 @@ class Api extends BaseController
 
     public function search()
     {
-        $this->setApiCache(30);
         $query = $this->request->getGet('q');
         $exchange = strtoupper(trim($this->request->getGet('exchange') ?? 'NSE'));
         if (!$query || trim($query) === '') {
@@ -221,19 +220,15 @@ class Api extends BaseController
             'week_52_low'    => $d['fiftyTwoWeekLow'],
             'dividend_yield' => $d['trailingAnnualDividendYield'],
             'beta'           => null,
-            'created_at'     => $now,
-            'updated_at'     => $now,
         ]);
 
         generate_price_history($stockId, $price);
         generate_predictions($stockId, $price);
 
-        $now = date('Y-m-d H:i:s');
         $watchlistModel = new \App\Models\WatchlistModel();
         $watchlistModel->insert([
-            'user_id'    => current_user_id(),
-            'stock_id'   => $stockId,
-            'created_at' => $now,
+            'user_id'  => current_user_id(),
+            'stock_id' => $stockId,
         ]);
 
         return $this->response->setJSON([

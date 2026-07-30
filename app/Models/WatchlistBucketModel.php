@@ -11,7 +11,7 @@ class WatchlistBucketModel extends Model
     protected $allowedFields = ['user_id', 'name'];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
-    protected $updatedField = false;
+    protected $updatedField = '';
 
     public function getUserBuckets(int $userId): array
     {
