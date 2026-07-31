@@ -107,13 +107,33 @@ class Stocks extends BaseController
             return redirect()->to('/stocks')->with('error', 'Stock not found.');
         }
 
-        $priceData = [];
+        try {
+            $yahoo   = new \App\Libraries\YahooFinanceService();
+            $quote   = $yahoo->getQuote($stock['symbol'], $stock['exchange']);
+            if ($quote) {
+                $q = $yahoo->quoteToArray($quote);
+                $stock['open_price']          = $q['regularMarketOpen'] ?? $stock['open_price'] ?? null;
+                $stock['day_high']            = $q['regularMarketDayHigh'] ?? $stock['day_high'] ?? null;
+                $stock['day_low']             = $q['regularMarketDayLow'] ?? $stock['day_low'] ?? null;
+                $stock['volume']              = $q['regularMarketVolume'] ?? $stock['volume'] ?? null;
+                $stock['bid']                 = $q['bid'] ?? $stock['bid'] ?? null;
+                $stock['ask']                 = $q['ask'] ?? $stock['ask'] ?? null;
+                $stock['current_price']       = $q['regularMarketPrice'] ?? $stock['current_price'];
+                $stock['previous_close']      = $q['regularMarketPreviousClose'] ?? $stock['previous_close'];
+                if (!$stock['market_cap'] && isset($q['marketCap'])) $stock['market_cap'] = $q['marketCap'];
+                if (!$stock['avg_volume'] && isset($q['averageDailyVolume3Month'])) $stock['avg_volume'] = $q['averageDailyVolume3Month'];
+                if (!$stock['pe_ratio'] && isset($q['trailingPE'])) $stock['pe_ratio'] = $q['trailingPE'];
+                if (!$stock['week_52_high'] && isset($q['fiftyTwoWeekHigh'])) $stock['week_52_high'] = $q['fiftyTwoWeekHigh'];
+                if (!$stock['week_52_low'] && isset($q['fiftyTwoWeekLow'])) $stock['week_52_low'] = $q['fiftyTwoWeekLow'];
+                if (!($stock['dividend_yield'] ?? 0) && isset($q['dividendYield'])) $stock['dividend_yield'] = $q['dividendYield'];
+                if (!($stock['beta'] ?? 0) && isset($q['beta'])) $stock['beta'] = $q['beta'];
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Live quote fetch failed: ' . $e->getMessage());
+        }
+
         $predictionData = [];
         $predictionDates = [];
-
-        foreach ($stock['price_history'] as $p) {
-            $priceData[] = (float) $p['close'];
-        }
 
         foreach ($stock['predictions'] as $p) {
             $predictionData[] = (float) $p['predicted_price'];
@@ -135,11 +155,9 @@ class Stocks extends BaseController
             'title'           => $stock['symbol'] . ' - StockTrade Tips',
             'stock'           => $stock,
             'priceChange'     => $priceChange,
-            'priceData'       => $priceData,
             'predictionData'  => $predictionData,
             'predictionDates' => $predictionDates,
             'isWatched'       => $isWatched,
-            'showChartJs'     => true,
         ];
 
         return view('templates/header', $data)

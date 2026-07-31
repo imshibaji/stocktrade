@@ -9,6 +9,10 @@ $routes->get('/about', 'About::index');
 $routes->get('/contact', 'Contact::index');
 $routes->post('/contact/send', 'Contact::send');
 
+$routes->get('/stocks', 'Stocks::index');
+$routes->get('/stocks/(:num)', 'Stocks::show/$1');
+$routes->get('/stocks/(:num)/predictions', 'Stocks::predictions/$1');
+
 $routes->get('/page/(:any)', 'Page::show/$1');
 
 $routes->get('/login', 'Auth::login', ['filter' => 'guest']);
@@ -37,16 +41,16 @@ $routes->group('admin', ['filter' => 'admin'], static function ($routes) {
 });
 
 $routes->get('/api', 'Api::index');
-$routes->get('/api/search', 'Api::search', ['filter' => 'auth']);
+$routes->get('/api/search', 'Api::search');
 $routes->get('/api/quote/(:any)/(:any)', 'Api::getQuote/$1/$2', ['filter' => 'auth']);
 $routes->get('/api/quote/(:any)', 'Api::lookup/$1', ['filter' => 'auth']);
 $routes->get('/api/quotes/(:any)/(:any)', 'Api::getQuotes/$1/$2', ['filter' => 'auth']);
-$routes->get('/api/historical/(:any)/(:any)/(:any)', 'Api::getHistorical/$1/$2/$3', ['filter' => 'auth']);
-$routes->get('/api/dividends/(:any)/(:any)/(:any)', 'Api::getDividends/$1/$2/$3', ['filter' => 'auth']);
-$routes->get('/api/splits/(:any)/(:any)/(:any)', 'Api::getSplits/$1/$2/$3', ['filter' => 'auth']);
+$routes->get('/api/historical/(:any)/(:any)/(:any)', 'Api::getHistorical/$1/$2/$3');
+$routes->get('/api/dividends/(:any)/(:any)/(:any)', 'Api::getDividends/$1/$2/$3');
+$routes->get('/api/splits/(:any)/(:any)/(:any)', 'Api::getSplits/$1/$2/$3');
 $routes->get('/api/exchange/(:any)/(:any)', 'Api::getExchangeRate/$1/$2', ['filter' => 'auth']);
-$routes->get('/api/options/(:any)/(:any)', 'Api::getOptionChain/$1/$2', ['filter' => 'auth']);
-$routes->get('/api/summary/(:any)/(:any)', 'Api::getSummary/$1/$2', ['filter' => 'auth']);
+$routes->get('/api/options/(:any)/(:any)', 'Api::getOptionChain/$1/$2');
+$routes->get('/api/summary/(:any)/(:any)', 'Api::getSummary/$1/$2');
 $routes->get('/api/news/(:any)', 'Api::getNewsStream/$1', ['filter' => 'auth']);
 $routes->get('/api/search/(:any)', 'Api::getSearch/$1', ['filter' => 'auth']);
 $routes->post('/api/stocks/import', 'Api::importStock', ['filter' => 'auth']);
@@ -55,14 +59,11 @@ $routes->post('/api/stocks/refresh', 'Api::refreshStock', ['filter' => 'auth']);
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/predictions', static fn() => redirect()->to('/stocks'));
     $routes->get('/dashboard', 'Dashboard::index');
-    $routes->get('/stocks', 'Stocks::index');
     $routes->post('/stocks/create', 'Stocks::create');
     $routes->get('/stocks/search', 'Stocks::search');
-    $routes->get('/stocks/(:num)', 'Stocks::show/$1');
     $routes->get('/stocks/(:num)/edit', 'Stocks::edit/$1');
     $routes->post('/stocks/(:num)/edit', 'Stocks::update/$1');
     $routes->post('/stocks/(:num)/delete', 'Stocks::delete/$1');
-    $routes->get('/stocks/(:num)/predictions', 'Stocks::predictions/$1');
     $routes->get('/watchlist', 'Watchlist::index');
     $routes->get('/watchlist/add/(:num)', 'Watchlist::add/$1');
     $routes->get('/watchlist/remove/(:num)', 'Watchlist::remove/$1');

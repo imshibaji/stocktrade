@@ -52,9 +52,9 @@
                             $actualPlPct = (float) $inv['buy_price'] > 0 ? (((float) $inv['sell_price'] - (float) $inv['buy_price']) / (float) $inv['buy_price']) * 100 : 0;
                         }
                         ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
+                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
-                            <a href="/stocks/<?= $inv['stock_id'] ?>" class="text-white font-semibold hover:text-gold"><?= esc($inv['symbol']) ?></a>
+                            <a href="/stocks/<?= $inv['stock_id'] ?>" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold"><?= esc($inv['symbol']) ?></a>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
                         <td class="px-6 py-4 text-gray-300"><?= date('M d, Y', strtotime($inv['buy_date'])) ?></td>

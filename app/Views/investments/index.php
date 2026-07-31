@@ -103,9 +103,9 @@
 <?php foreach ($investments as $inv): 
     $pl = $investmentPl[(int) $inv['id']] ?? [];
 ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
+                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
-                            <a href="/stocks/<?= $inv['stock_id'] ?>" class="text-white font-semibold hover:text-gold"><?= esc($inv['symbol']) ?></a>
+                            <a href="/stocks/<?= $inv['stock_id'] ?>" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold"><?= esc($inv['symbol']) ?></a>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
                         <td class="px-6 py-4 text-right text-gray-300 inv-buy-price"><?= format_price($inv['buy_price']) ?></td>
@@ -126,7 +126,7 @@
                         </td>
                         <td class="px-6 py-4 text-center">
                             <?php if ($inv['status'] === 'active'): ?>
-                            <a href="/investments/<?= $inv['id'] ?>/sell" class="text-red-400 hover:text-red-300 text-xs font-semibold bg-red-900/20 px-3 py-1.5 rounded-lg border border-red-900/30 hover:bg-red-900/40 transition">
+                            <a href="/investments/<?= $inv['id'] ?>/sell" onclick="event.stopPropagation()" class="text-red-400 hover:text-red-300 text-xs font-semibold bg-red-900/20 px-3 py-1.5 rounded-lg border border-red-900/30 hover:bg-red-900/40 transition">
                                 <i class="fas fa-dollar-sign mr-1"></i>Sell
                             </a>
                             <?php else: ?>
@@ -135,12 +135,12 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end space-x-3">
-                                <a href="/investments/<?= $inv['id'] ?>/edit" class="text-gray-400 hover:text-gold text-xs" title="Edit">
+                                <a href="/investments/<?= $inv['id'] ?>/edit" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form action="/investments/<?= $inv['id'] ?>/delete" method="post" class="inline" onsubmit="return confirm('Delete this investment?')">
                                     <?= csrf_field() ?>
-                                    <button type="submit" class="text-red-400 hover:text-red-300 text-xs" title="Delete">
+                                    <button type="submit" onclick="event.stopPropagation()" class="text-red-400 hover:text-red-300 text-xs" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -241,6 +241,16 @@
     var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024' };
     function stockCurrency(exch) { return (exch && (exch.indexOf('NS')>=0||exch.indexOf('BSE')>=0)) ? 'INR' : 'USD'; }
     function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var preselectedStockId = urlParams.get('stock_id');
+    if (preselectedStockId) {
+        var stockSelect = document.getElementById('invStockSelect');
+        if (stockSelect) {
+            stockSelect.value = preselectedStockId;
+            stockSelect.dispatchEvent(new Event('change'));
+        }
+    }
 
 })();
 </script>

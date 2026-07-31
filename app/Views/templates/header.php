@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title ?? 'StockTrade Tips') ?></title>
+    <title><?= esc($title ?? 'AIStockTrader') ?></title>
     <meta name="theme-color" id="metaThemeColor" content="#0a1929">
     <script>
     (function() {
@@ -20,7 +20,7 @@
         }
     })();
     </script>
-    <link rel="stylesheet" href="/css/tailwind.css">
+    <link rel="stylesheet" href="/css/style.css">
     <?php if (!empty($showChartJs)): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <?php endif; ?>
@@ -58,7 +58,7 @@
                     <a href="/dashboard" class="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-navy transition items-center">
                         <i class="fas fa-tachometer-alt mr-1.5"></i>Dashboard
                     </a>
-                    <div class="hidden md:block theme-switch" data-theme-switch-wrap>
+                    <div class="hidden md:flex theme-switch" data-theme-switch-wrap>
                         <button type="button" data-theme-switch="day" onclick="setTheme('day')" title="Light theme" aria-label="Switch to light theme">
                             <i class="fa-regular fa-sun icon-off"></i><i class="fa-solid fa-sun icon-on"></i>
                         </button>
@@ -223,14 +223,14 @@
                                     var cl = s.change_percent >= 0 ? 'text-green-400' : 'text-red-400';
                                     cs = '<span class="' + cl + ' text-xs">' + (s.change_percent >= 0 ? '+' : '') + s.change_percent + '%</span>';
                                 }
-                                h += '<div class="flex justify-between items-center px-4 py-3 hover:bg-navy border-b border-gray-700/50 last:border-0">' +
+                                h += '<div class="flex justify-between items-center px-4 py-3 hover:bg-navy border-b border-gray-700/50 last:border-0' + (s.from_yahoo ? '' : ' cursor-pointer') + '"' + (s.from_yahoo ? '' : ' onclick="location.href=\'/stocks/' + s.id + '\'"') + '>' +
                                     '<div class="min-w-0 flex-1"><span class="text-white text-sm font-semibold">' + eh(s.symbol) + '</span> <span class="text-gray-500 text-xs truncate">' + eh(s.name) + '</span></div>' +
                                     '<div class="text-right ml-3 flex items-center space-x-2">' +
                                     '<div><span class="text-white text-sm">' + ps + '</span> ' + cs + '</div>';
                                 if (s.from_yahoo) {
                                     h += '<button onclick="importStock(\'' + eh(s.symbol) + '\', \'' + eh(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-gold text-navy font-semibold hover:bg-gold2 transition whitespace-nowrap">+ Add</button>';
                                 } else {
-                                    h += '<a href="/stocks/' + s.id + '" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
+                                    h += '<a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
                                 }
                                 h += '</div></div>';
                             });
@@ -257,16 +257,17 @@
                 <div class="flex items-center space-x-8">
                     <a href="/" class="flex items-center space-x-2">
                         <i class="fas fa-chart-line text-gold text-2xl"></i>
-                        <span class="text-xl font-bold text-gold">StockTrade<span class="text-white">Tips</span></span>
+                        <span class="text-xl font-bold text-gold">AIStock<span class="text-white">Trader</span></span>
                     </a>
                     <div class="hidden md:flex space-x-1">
                         <a href="/" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">Home</a>
+                        <a href="/stocks" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">Stocks</a>
                         <a href="/about" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">About</a>
                         <a href="/contact" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">Contact</a>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <div class="hidden md:block theme-switch" data-theme-switch-wrap>
+                    <div class="hidden md:flex theme-switch" data-theme-switch-wrap>
                         <button type="button" data-theme-switch="day" onclick="setTheme('day')" title="Light theme" aria-label="Switch to light theme">
                             <i class="fa-regular fa-sun icon-off"></i><i class="fa-solid fa-sun icon-on"></i>
                         </button>
@@ -288,6 +289,7 @@
         <div id="mobile-menu" class="hidden md:hidden border-t border-gray-700">
             <div class="px-4 py-3 space-y-1">
                 <a href="/" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">Home</a>
+                <a href="/stocks" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">Stocks</a>
                 <a href="/about" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">About</a>
                 <a href="/contact" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">Contact</a>
                 <hr class="border-gray-700 my-2">
@@ -375,7 +377,7 @@
                             var cls = s.change_percent >= 0 ? 'text-green-400' : 'text-red-400';
                             changeStr = '<span class="' + cls + ' text-xs">' + (s.change_percent >= 0 ? '+' : '') + s.change_percent + '%</span>';
                         }
-                        html += '<div class="flex justify-between items-center px-4 py-3 hover:bg-navy border-b border-gray-700/50 last:border-0">' +
+                        html += '<div class="flex justify-between items-center px-4 py-3 hover:bg-navy border-b border-gray-700/50 last:border-0' + (s.from_yahoo ? '' : ' cursor-pointer') + '"' + (s.from_yahoo ? '' : ' onclick="location.href=\'/stocks/' + s.id + '\'"') + '>' +
                             '<div class="min-w-0 flex-1">' +
                             '<span class="text-white text-sm font-semibold">' + escHtml(s.symbol) + '</span> ' +
                             '<span class="text-gray-500 text-xs truncate">' + escHtml(s.name) + '</span>' +
@@ -385,7 +387,7 @@
                         if (s.from_yahoo) {
                             html += '<button data-import="' + escHtml(s.symbol) + '" onclick="importStock(\'' + escHtml(s.symbol) + '\', \'' + escHtml(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-gold text-navy font-semibold hover:bg-gold2 transition whitespace-nowrap">+ Add</button>';
                         } else {
-                            html += '<a href="/stocks/' + s.id + '" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
+                            html += '<a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
                         }
                         html += '</div>' +
                             '</div>';

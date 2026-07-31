@@ -92,7 +92,7 @@
                     <?php foreach ($portfolio['investments'] as $item): 
                         $inv = $item['stock'];
                     ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
+                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>

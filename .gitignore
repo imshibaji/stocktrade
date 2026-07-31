@@ -90,7 +90,6 @@ vendor/
 # Node / Tailwind
 #-------------------------
 node_modules/
-src/
 
 #-------------------------
 # IDE / Development Files

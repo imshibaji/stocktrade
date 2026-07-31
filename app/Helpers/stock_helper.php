@@ -11,9 +11,9 @@ if (!function_exists('format_price')) {
     function format_price($price, string $currency = 'INR'): string
     {
         $symbols = [
-            'INR' => '&#8377;', 'USD' => '&#36;', 'EUR' => '&#8364;',
-            'GBP' => '&#163;', 'JPY' => '&#165;', 'AUD' => 'A&#36;',
-            'CAD' => 'C&#36;', 'CHF' => 'CHF ', 'CNY' => '&#165;', 'SGD' => 'S&#36;',
+            'INR' => '₹', 'USD' => '$', 'EUR' => '€',
+            'GBP' => '£', 'JPY' => '¥', 'AUD' => 'A$',
+            'CAD' => 'C$', 'CHF' => 'CHF ', 'CNY' => '¥', 'SGD' => 'S$',
         ];
         $symbol = $symbols[$currency] ?? ($currency . ' ');
         return $symbol . number_format((float) $price, 2);
@@ -58,12 +58,12 @@ if (!function_exists('tax_bracket_info')) {
             'stcg' => [
                 'rate' => $stcgRate . '%',
                 'rate_val' => $stcgRate / 100,
-                'description' => 'Short Term Capital Gains Tax (held &lt; 1 year)',
+                'description' => 'Short Term Capital Gains Tax (held < 1 year)',
             ],
             'ltcg' => [
                 'rate' => $ltcgRate . '%',
                 'rate_val' => $ltcgRate / 100,
-                'description' => 'Long Term Capital Gains Tax (held &gt; 1 year). Exemption up to &#8377;1,00,000.',
+                'description' => 'Long Term Capital Gains Tax (held > 1 year). Exemption up to ₹1,00,000.',
             ],
         ];
     }

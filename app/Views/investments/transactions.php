@@ -69,7 +69,7 @@
                         $net = (float) ($tx['net_profit_loss'] ?? 0);
                         $ret = (float) $tx['cost_basis'] > 0 ? ($net / (float) $tx['cost_basis']) * 100 : 0;
                     ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
+                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $tx['stock_id'] ?>'">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($tx['symbol']) ?></span>
                         </td>

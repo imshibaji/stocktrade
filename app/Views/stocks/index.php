@@ -19,12 +19,15 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <button onclick="toggleAddForm()" class="bg-navy2 border border-gold text-gold hover:bg-gold hover:text-navy font-semibold px-4 py-2 rounded-lg transition text-sm">
+            <?php if (is_logged_in()): ?>
+            <button onclick="toggleAddForm()" class="bg-navy2 hover:bg-gold2 text-gold border border-gold font-semibold px-4 py-2 rounded-lg transition text-sm">
                 <i class="fas fa-plus mr-1"></i> New
             </button>
+            <?php endif; ?>
         </div>
     </div>
 
+    <?php if (is_logged_in()): ?>
     <div id="addStockForm" class="hidden bg-navy2 rounded-xl border border-gray-700 p-6 mb-6">
         <h3 class="text-lg font-semibold text-white mb-4">Add New Stock</h3>
         <form id="addStockFormEl" onsubmit="return false;">
@@ -61,7 +64,7 @@
                 </div>
             </div>
             <div class="flex justify-end mt-4 space-x-3">
-                <button type="button" onclick="toggleAddForm()" class="px-4 py-2 rounded-lg bg-navy border border-gray-600 text-gray-300 hover:text-white transition">
+                <button type="button" onclick="toggleAddForm()" class="px-4 py-2 rounded-lg bg-navy border border-gray-600 text-gray-300 hover:text-white dark:text-gray-300 dark:hover:text-white transition">
                     Cancel
                 </button>
                 <button type="button" id="addSubmitBtn" class="px-6 py-2 rounded-lg bg-gold hover:bg-gold2 text-navy font-semibold transition" disabled onclick="window.importStockFromForm()">
@@ -70,6 +73,7 @@
             </div>
         </form>
     </div>
+    <?php endif; ?>
 
     <div class="flex flex-wrap gap-2 mb-6">
         <a href="/stocks" class="sector-filter px-4 py-2 rounded-lg text-sm transition <?= !$sector ? 'bg-gold text-navy font-semibold' : 'bg-navy2 text-gray-300 border border-gray-600 hover:border-gold' ?>" data-sector="">
@@ -102,6 +106,7 @@
             <?php $cur = stock_currency($stock['exchange'] ?? null); ?>
             <div class="stock-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition relative group" data-sid="<?= $stock['id'] ?>">
                 <div class="p-6 cursor-pointer" onclick="goToStock(<?= $stock['id'] ?>)">
+                    <?php if (is_logged_in()): ?>
                     <button class="watch-btn absolute top-3 right-3 text-xl transition"
                         data-sid="<?= $stock['id'] ?>"
                         data-watched="<?= $isWatched ? '1' : '0' ?>"
@@ -109,6 +114,7 @@
                         title="<?= $isWatched ? 'Remove from watchlist' : 'Add to watchlist' ?>">
                         <i class="<?= $isWatched ? 'fas fa-star text-gold' : 'far fa-star text-gray-500 hover:text-gold' ?>"></i>
                     </button>
+                    <?php endif; ?>
                     <div class="flex justify-between items-start mb-3">
                         <div>
                             <h3 class="text-white font-bold text-lg"><?= esc($stock['symbol']) ?></h3>
@@ -133,6 +139,7 @@
                         </div>
                     </div>
                 </div>
+                <?php if (is_logged_in()): ?>
                 <div class="border-t border-gray-700 flex">
                     <a href="/stocks/<?= $stock['id'] ?>/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
                         <i class="fas fa-edit mr-1"></i>Edit
@@ -144,6 +151,7 @@
                         </button>
                     </form>
                 </div>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
@@ -155,6 +163,7 @@
 (function() {
     var CSRF_NAME = '<?= csrf_token() ?>';
     var CSRF_HASH = '<?= csrf_hash() ?>';
+    var IS_LOGGED_IN = <?= is_logged_in() ? 'true' : 'false' ?>;
     var searchInput = document.getElementById('stockSearch');
     var searchClear = document.getElementById('searchClear');
     var searchStatus = document.getElementById('searchStatus');
@@ -209,11 +218,22 @@
         }
 
         var sym = escHtml(s.symbol);
-        return '<div class="stock-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition relative group" data-sid="' + s.id + '">' +
-            '<div class="p-6 cursor-pointer" onclick="goToStock(' + s.id + ')">' +
+        var watchBtnHtml = IS_LOGGED_IN ?
             '<button class="watch-btn absolute top-3 right-3 text-xl transition z-10" data-sid="' + s.id + '" data-watched="0" onclick="event.stopPropagation(); toggleWatch(this)" title="Add to watchlist">' +
             '<i class="far fa-star text-gray-500 hover:text-gold"></i>' +
-            '</button>' +
+            '</button>' : '';
+        var actionsHtml = IS_LOGGED_IN ?
+            '<div class="border-t border-gray-700 flex">' +
+            '<a href="/stocks/' + s.id + '/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">' +
+            '<i class="fas fa-edit mr-1"></i>Edit</a>' +
+            '<form action="/stocks/' + s.id + '/delete" method="post" class="flex-1" onsubmit="return confirm(\'Delete ' + sym + '? This will remove all related data.\');">' +
+            '<input type="hidden" name="' + CSRF_NAME + '" value="' + CSRF_HASH + '" />' +
+            '<button type="submit" class="w-full text-center py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 text-sm transition" onclick="event.stopPropagation()">' +
+            '<i class="fas fa-trash mr-1"></i>Remove</button></form>' +
+            '</div>' : '';
+        return '<div class="stock-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition relative group" data-sid="' + s.id + '">' +
+            '<div class="p-6 cursor-pointer" onclick="goToStock(' + s.id + ')">' +
+            watchBtnHtml +
             '<div class="flex justify-between items-start mb-3">' +
             '<div>' +
             '<h3 class="text-white font-bold text-lg">' + sym + '</h3>' +
@@ -231,14 +251,7 @@
             '</div>' +
             '</div>' +
             '</div>' +
-            '<div class="border-t border-gray-700 flex">' +
-            '<a href="/stocks/' + s.id + '/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">' +
-            '<i class="fas fa-edit mr-1"></i>Edit</a>' +
-            '<form action="/stocks/' + s.id + '/delete" method="post" class="flex-1" onsubmit="return confirm(\'Delete ' + sym + '? This will remove all related data.\');">' +
-            '<input type="hidden" name="' + CSRF_NAME + '" value="' + CSRF_HASH + '" />' +
-            '<button type="submit" class="w-full text-center py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 text-sm transition" onclick="event.stopPropagation()">' +
-            '<i class="fas fa-trash mr-1"></i>Remove</button></form>' +
-            '</div>' +
+            actionsHtml +
             '</div>';
     }
 

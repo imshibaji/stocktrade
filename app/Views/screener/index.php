@@ -257,6 +257,7 @@
                             <th class="text-right px-6 py-3">Volume</th>
                             <th class="text-right px-6 py-3">14D Hist</th>
                             <th class="text-right px-6 py-3">Summary</th>
+                            <th class="text-center px-6 py-3">Actions</th>
                         </tr>
                             </thead>
                             <tbody id="resultsBody"></tbody>
@@ -526,7 +527,7 @@ var FILTER_FIELDS = [
             if (!data.success) {
                 document.getElementById('manualResultCount').innerHTML = '<span class="text-red-400">' + escHtml(data.message) + '</span>';
                 var tbody = document.getElementById('resultsBody');
-                tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-red-400">' + escHtml(data.message) + '</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-8 text-center text-red-400">' + escHtml(data.message) + '</td></tr>';
                 document.getElementById('resultsContainer').classList.remove('hidden');
                 return;
             }
@@ -536,15 +537,17 @@ var FILTER_FIELDS = [
             var tbody = document.getElementById('resultsBody');
             tbody.innerHTML = '';
             if (data.stocks.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-gray-500">No stocks match your query.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-8 text-center text-gray-500">No stocks match your query.</td></tr>';
             } else {
                 data.stocks.forEach(function(s) {
                     var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
                     var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
                     var tr = document.createElement('tr');
                     tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                    tr.style.cursor = 'pointer';
+                    tr.onclick = function() { location.href = '/stocks/' + s.id; };
                     tr.innerHTML =
-                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
                         '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
                         '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
                         '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
@@ -553,8 +556,13 @@ var FILTER_FIELDS = [
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>';
+                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
+                        '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
+                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-gold text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                            '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
+                        '</div></td>';
                     tbody.appendChild(tr);
                 });
             }
@@ -827,15 +835,17 @@ var FILTER_FIELDS = [
                 var tbody = document.getElementById('resultsBody');
                 tbody.innerHTML = '';
                 if (data.stocks.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-gray-500">No stocks match your criteria.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-8 text-center text-gray-500">No stocks match your criteria.</td></tr>';
                 } else {
                     data.stocks.forEach(function(s) {
                         var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
                         var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
                         var tr = document.createElement('tr');
                         tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                        tr.style.cursor = 'pointer';
+                        tr.onclick = function() { location.href = '/stocks/' + s.id; };
                         tr.innerHTML =
-                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
                             '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
                             '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
                             '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
@@ -844,8 +854,13 @@ var FILTER_FIELDS = [
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>';
+                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
+                        '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
+                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-gold text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                            '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
+                        '</div></td>';
                     tbody.appendChild(tr);
                 });
             }
@@ -948,8 +963,10 @@ var FILTER_FIELDS = [
                         var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
                         var tr = document.createElement('tr');
                         tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                        tr.style.cursor = 'pointer';
+                        tr.onclick = function() { location.href = '/stocks/' + s.id; };
                         tr.innerHTML =
-                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
                             '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
                             '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
                             '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
@@ -958,8 +975,13 @@ var FILTER_FIELDS = [
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
                              '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                             '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
-                             '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>';
+                             '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
+                             '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
+                             '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
+                                '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-gold text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                                '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                                '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
+                             '</div></td>';
                         tbody.appendChild(tr);
                     });
                     document.getElementById('resultsContainer').classList.remove('hidden');
@@ -1029,8 +1051,10 @@ var FILTER_FIELDS = [
                     var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
                     var tr = document.createElement('tr');
                     tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                    tr.style.cursor = 'pointer';
+                    tr.onclick = function() { location.href = '/stocks/' + s.id; };
                     tr.innerHTML =
-                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
                         '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
                         '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
                         '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
@@ -1039,8 +1063,13 @@ var FILTER_FIELDS = [
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>';
+                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
+                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
+                        '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
+                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-gold text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                            '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
+                        '</div></td>';
                     tbody.appendChild(tr);
                 });
                 document.getElementById('resultsContainer').classList.remove('hidden');
@@ -1087,5 +1116,31 @@ var FILTER_FIELDS = [
     }
 
     addFundamentalFilter();
+
+    window.toggleScreenerWatch = function(btn, stockId) {
+        var icon = btn.querySelector('i');
+        var isWatched = icon.classList.contains('fas');
+        var formData = new FormData();
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+        fetch('/watchlist/toggle/' + stockId, {
+            method: 'POST',
+            body: formData
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            if (data.watched !== undefined) {
+                if (data.watched) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    btn.classList.remove('text-gray-400');
+                    btn.classList.add('text-gold');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    btn.classList.remove('text-gold');
+                    btn.classList.add('text-gray-400');
+                }
+            }
+        }).catch(function() {});
+    };
+
 })();
 </script>

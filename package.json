@@ -7,8 +7,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "npx tailwindcss -i src/tailwind.css -o public/css/tailwind.css --content 'app/Views/**/*.php'"
+    "dev": "npx tailwindcss -i src/tailwind.css -o public/css/style.css --watch --content 'app/Views/**/*.php'",
+    "build:css": "npx tailwindcss -i src/tailwind.css -o public/css/style.css --minify --content 'app/Views/**/*.php'"
   },
   "repository": {
     "type": "git",

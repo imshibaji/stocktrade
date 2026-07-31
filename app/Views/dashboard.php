@@ -88,7 +88,7 @@
                         $currency = $inv['currency'] ?? 'INR';
                         $baseCurrency = $inv['base_currency'] ?? 'INR';
                     ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
+                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
@@ -178,9 +178,9 @@
                 $pred = $watchlistPredictions[$sid] ?? null;
                 $cur = stock_currency($ws['exchange'] ?? null);
             ?>
-            <div class="wl-card p-4 bg-navy rounded-lg border border-transparent hover:border-gold transition" data-wlid="<?= $ws['id'] ?>">
+            <div class="wl-card p-4 bg-navy rounded-lg border border-transparent hover:border-gold transition cursor-pointer" onclick="location.href='/stocks/<?= $sid ?>'" data-wlid="<?= $ws['id'] ?>">
                 <div class="flex justify-between items-start mb-2">
-                    <a href="/stocks/<?= $sid ?>" class="min-w-0 flex-1">
+                    <a href="/stocks/<?= $sid ?>" onclick="event.stopPropagation()" class="min-w-0 flex-1">
                         <p class="text-white font-semibold truncate"><?= esc($ws['symbol']) ?></p>
                         <p class="text-gray-500 text-xs truncate"><?= esc($ws['name']) ?></p>
                     </a>
@@ -218,7 +218,7 @@
                         <span class="px-2 py-0.5 rounded text-xs font-semibold <?= $change['change'] >= 0 ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400' ?>">
                             <?= $change['change'] >= 0 ? '+' : '' ?><?= $change['percent'] ?>%
                         </span>
-                        <button onclick="removeWatchlist(<?= $ws['id'] ?>, '<?= str_replace(["'", '"'], '', $ws['symbol']) ?>')" class="text-red-400 hover:text-red-300 text-xs" title="Remove from watchlist">
+                        <button onclick="event.stopPropagation(); removeWatchlist(<?= $ws['id'] ?>, '<?= str_replace(["'", '"'], '', $ws['symbol']) ?>')" class="text-red-400 hover:text-red-300 text-xs" title="Remove from watchlist">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>

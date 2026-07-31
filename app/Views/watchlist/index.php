@@ -44,10 +44,10 @@ function renderWatchlistCard($stock, $predictions)
     $watchlistId = (int) $stock['id'];
     ob_start();
 ?>
-<div class="wl-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition" data-sid="<?= $sid ?>" data-wlid="<?= $watchlistId ?>">
+<div class="wl-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition cursor-pointer" onclick="location.href='/stocks/<?= $sid ?>'" data-sid="<?= $sid ?>" data-wlid="<?= $watchlistId ?>">
     <div class="p-6">
         <div class="flex justify-between items-start mb-3">
-            <a href="/stocks/<?= $sid ?>" class="hover:text-gold">
+            <a href="/stocks/<?= $sid ?>" onclick="event.stopPropagation()" class="hover:text-gold">
                 <h3 class="text-white font-bold text-lg"><?= esc($stock['symbol']) ?></h3>
                 <p class="text-gray-400 text-sm"><?= esc($stock['name']) ?></p>
             </a>
@@ -103,13 +103,13 @@ function renderWatchlistCard($stock, $predictions)
         </div>
     </div>
     <div class="border-t border-gray-700 flex">
-        <a href="/stocks/<?= $sid ?>" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
+        <a href="/stocks/<?= $sid ?>" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
             <i class="fas fa-chart-line mr-1"></i>View
         </a>
-        <a href="/stocks/<?= $sid ?>/predictions" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
+        <a href="/stocks/<?= $sid ?>/predictions" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
             <i class="fas fa-chart-simple mr-1"></i>Predict
         </a>
-        <button data-sid="<?= $sid ?>" data-symbol="<?= str_replace(['"', "'"], ['', '`'], $stock['symbol']) ?>" onclick="removeWatchlist(this.dataset.sid, this.dataset.symbol)" class="flex-1 text-center py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 text-sm transition">
+        <button data-sid="<?= $sid ?>" data-symbol="<?= str_replace(['"', "'"], ['', '`'], $stock['symbol']) ?>" onclick="event.stopPropagation(); removeWatchlist(this.dataset.sid, this.dataset.symbol)" class="flex-1 text-center py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 text-sm transition">
             <i class="fas fa-trash mr-1"></i>Remove
         </button>
     </div>

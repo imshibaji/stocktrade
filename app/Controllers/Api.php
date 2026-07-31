@@ -419,7 +419,17 @@ class Api extends BaseController
 
             $records = $yahoo->getHistorical($symbol, '1d', $startDate, $endDate, $exchange);
 
-            return $this->response->setStatusCode(200)->setJSON($records);
+            $rows = array_map(static fn($r) => [
+                'date'    => $r->getDate()->format('Y-m-d'),
+                'open'    => $r->getOpen(),
+                'high'    => $r->getHigh(),
+                'low'     => $r->getLow(),
+                'close'   => $r->getClose(),
+                'adjClose' => $r->getAdjClose(),
+                'volume'  => $r->getVolume(),
+            ], $records);
+
+            return $this->response->setStatusCode(200)->setJSON($rows);
         } catch (\Exception $e) {
             return $this->response->setStatusCode(500)->setJSON([
                 "error"   => "Fetch failed",
@@ -438,7 +448,12 @@ class Api extends BaseController
 
             $records = $yahoo->getDividends($symbol, $startDate, $endDate, $exchange);
 
-            return $this->response->setStatusCode(200)->setJSON($records);
+            $rows = array_map(static fn($r) => [
+                'date'     => $r->getDate()->format('Y-m-d'),
+                'dividend' => $r->getDividends(),
+            ], $records);
+
+            return $this->response->setStatusCode(200)->setJSON($rows);
         } catch (\Exception $e) {
             return $this->response->setStatusCode(500)->setJSON([
                 "error"   => "Fetch failed",
@@ -457,7 +472,12 @@ class Api extends BaseController
 
             $records = $yahoo->getSplits($symbol, $startDate, $endDate, $exchange);
 
-            return $this->response->setStatusCode(200)->setJSON($records);
+            $rows = array_map(static fn($r) => [
+                'date'  => $r->getDate()->format('Y-m-d'),
+                'split' => $r->getStockSplits(),
+            ], $records);
+
+            return $this->response->setStatusCode(200)->setJSON($rows);
         } catch (\Exception $e) {
             return $this->response->setStatusCode(500)->setJSON([
                 "error"   => "Fetch failed",
@@ -496,7 +516,43 @@ class Api extends BaseController
             $yahoo  = new YahooFinanceService();
             $options = $yahoo->getOptionChain($symbol, $exchange);
 
-            return $this->response->setStatusCode(200)->setJSON($options);
+            $chains = array_map(static function ($chain) {
+                $fmtDate = static fn($d) => $d instanceof \DateTimeInterface ? $d->format('Y-m-d') : $d;
+                $fmtContract = static function ($c) use ($fmtDate) {
+                    return [
+                        'contractSymbol' => $c->getContractSymbol(),
+                        'strike'         => $c->getStrike(),
+                        'currency'       => $c->getCurrency(),
+                        'lastPrice'      => $c->getLastPrice(),
+                        'change'         => $c->getChange(),
+                        'percentChange'  => $c->getPercentChange(),
+                        'volume'         => $c->getVolume(),
+                        'openInterest'   => $c->getOpenInterest(),
+                        'bid'            => $c->getBid(),
+                        'ask'            => $c->getAsk(),
+                        'contractSize'   => $c->getContractSize(),
+                        'expiration'     => $fmtDate($c->getExpiration()),
+                        'lastTradeDate'  => $fmtDate($c->getLastTradeDate()),
+                        'impliedVolatility' => $c->getImpliedVolatility(),
+                        'inTheMoney'     => $c->getInTheMoney(),
+                    ];
+                };
+                $fmtOption = static fn($o) => [
+                    'expirationDate' => $fmtDate($o->getExpirationDate()),
+                    'hasMiniOptions' => $o->getHasMiniOptions(),
+                    'calls' => array_map($fmtContract, $o->getCalls()),
+                    'puts'  => array_map($fmtContract, $o->getPuts()),
+                ];
+                return [
+                    'underlyingSymbol' => $chain->getUnderlyingSymbol(),
+                    'expirationDates'  => array_map($fmtDate, $chain->getExpirationDates()),
+                    'strikes'          => $chain->getStrikes() ?? [],
+                    'hasMiniOptions'   => $chain->getHasMiniOptions(),
+                    'options'          => array_map($fmtOption, $chain->getOptions() ?? []),
+                ];
+            }, $options);
+
+            return $this->response->setStatusCode(200)->setJSON($chains);
         } catch (\Exception $e) {
             return $this->response->setStatusCode(500)->setJSON([
                 "error"   => "Fetch failed",
