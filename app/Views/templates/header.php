@@ -3,12 +3,28 @@ $siteName = site_name();
 $siteParts = explode(' ', trim($siteName), 2);
 $brandHead = $siteParts[0] !== '' ? $siteParts[0] : 'StockTrade';
 $brandTail = $siteParts[1] ?? '';
-$pageTitle = $title ?? $siteName;
-$pageTitle = str_ireplace([' - AIStockTrader', ' - StockTrade Tips'], '', $pageTitle);
-$pageTitle = trim($pageTitle);
-if ($pageTitle !== '' && strcasecmp($pageTitle, $siteName) !== 0) {
-    $pageTitle .= ' - ' . $siteName;
+$seoTitle = seo_setting('seo_meta_title', $siteName);
+$rawTitle = (string) ($title ?? '');
+if ($rawTitle !== '') {
+    $pageTitle = str_ireplace([' - AIStockTrader', ' - StockTrade Tips'], '', $rawTitle);
+    $pageTitle = trim($pageTitle);
+    if ($pageTitle !== '' && strcasecmp($pageTitle, $siteName) !== 0) {
+        $pageTitle .= ' - ' . $siteName;
+    }
+} else {
+    $pageTitle = $seoTitle !== '' ? $seoTitle : $siteName;
 }
+
+$metaDescription = (string) ($metaDescription ?? seo_setting('seo_meta_description', ''));
+$metaKeywords    = (string) ($metaKeywords ?? seo_setting('seo_meta_keywords', ''));
+$ogTitle         = (string) ($ogTitle ?? $seoTitle);
+$ogDescription   = (string) ($ogDescription ?? seo_setting('seo_og_description', $metaDescription));
+$ogImage         = (string) ($ogImage ?? seo_setting('seo_og_image', ''));
+$canonical       = (string) ($canonical ?? seo_setting('seo_canonical_url', ''));
+$robots          = (string) ($robots ?? seo_setting('seo_robots', 'index, follow'));
+$author          = (string) ($author ?? seo_setting('seo_author', ''));
+$ogUrl           = (string) ($canonical !== '' ? $canonical : current_url());
+$ogType          = (string) ($ogType ?? 'website');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,6 +33,37 @@ if ($pageTitle !== '' && strcasecmp($pageTitle, $siteName) !== 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($pageTitle) ?></title>
     <meta name="theme-color" id="metaThemeColor" content="#141413">
+    <?php if ($metaDescription !== ''): ?>
+    <meta name="description" content="<?= esc($metaDescription) ?>">
+    <?php endif; ?>
+    <?php if ($metaKeywords !== ''): ?>
+    <meta name="keywords" content="<?= esc($metaKeywords) ?>">
+    <?php endif; ?>
+    <meta name="robots" content="<?= esc($robots) ?>">
+    <?php if ($author !== ''): ?>
+    <meta name="author" content="<?= esc($author) ?>">
+    <?php endif; ?>
+    <?php if ($canonical !== ''): ?>
+    <link rel="canonical" href="<?= esc($canonical) ?>">
+    <?php endif; ?>
+    <meta property="og:type" content="<?= esc($ogType) ?>">
+    <meta property="og:site_name" content="<?= esc($siteName) ?>">
+    <meta property="og:title" content="<?= esc($ogTitle) ?>">
+    <meta property="og:url" content="<?= esc($ogUrl) ?>">
+    <?php if ($ogDescription !== ''): ?>
+    <meta property="og:description" content="<?= esc($ogDescription) ?>">
+    <?php endif; ?>
+    <?php if ($ogImage !== ''): ?>
+    <meta property="og:image" content="<?= esc($ogImage) ?>">
+    <?php endif; ?>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= esc($ogTitle) ?>">
+    <?php if ($ogDescription !== ''): ?>
+    <meta name="twitter:description" content="<?= esc($ogDescription) ?>">
+    <?php endif; ?>
+    <?php if ($ogImage !== ''): ?>
+    <meta name="twitter:image" content="<?= esc($ogImage) ?>">
+    <?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">

@@ -23,6 +23,9 @@
             <button onclick="toggleAddForm()" class="bg-surface hover:bg-accent-2 text-accent border border-accent font-semibold px-4 py-2 rounded-lg transition text-sm">
                 <i class="fas fa-plus mr-1"></i> New
             </button>
+            <button id="bulkToggleBtn" onclick="toggleBulkForm()" class="bg-surface hover:bg-accent-2 text-accent border border-accent font-semibold px-4 py-2 rounded-lg transition text-sm">
+                <i class="fas fa-cloud-upload-alt mr-1"></i> Bulk
+            </button>
             <?php endif; ?>
         </div>
     </div>
@@ -73,6 +76,38 @@
             </div>
         </form>
     </div>
+
+    <div id="bulkImportForm" class="hidden bg-surface rounded-xl border border-gray-700 p-6 mb-6">
+        <div class="flex items-start justify-between mb-2">
+            <div>
+                <h3 class="text-lg font-semibold text-white">Bulk Import Stocks</h3>
+                <p class="text-gray-400 text-sm mt-1">Paste stock symbols separated by commas, spaces, or new lines. Each stock is fetched live from Yahoo Finance with full data (price history + 30-day predictions) and added to your watchlist.</p>
+            </div>
+            <button type="button" onclick="toggleBulkForm()" class="text-gray-500 hover:text-white text-lg" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <label class="block text-gray-400 text-sm mb-1">Symbols <span class="text-gray-600">(max 30 per batch)</span></label>
+        <textarea id="bulkSymbols" rows="5" placeholder="RELIANCE, TCS, HDFCBANK
+INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-none font-mono uppercase"></textarea>
+        <div class="flex flex-wrap items-center gap-3 mt-3">
+            <div>
+                <label class="block text-gray-400 text-sm mb-1">Exchange</label>
+                <select id="bulkExchange" class="bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-none">
+                    <option value="NSE" selected>NSE</option>
+                    <option value="BSE">BSE</option>
+                    <option value="GLOBAL">GLOBAL</option>
+                </select>
+            </div>
+            <div class="flex gap-3 ml-auto">
+                <button type="button" onclick="toggleBulkForm()" class="px-4 py-2 rounded-lg bg-page border border-gray-600 text-gray-300 hover:text-white transition">Cancel</button>
+                <button type="button" id="bulkSubmitBtn" onclick="window.runBulkImport()" class="px-6 py-2 rounded-lg bg-accent hover:bg-accent-2 text-on-accent font-semibold transition">
+                    <i class="fas fa-cloud-upload-alt mr-1"></i> Bulk Import
+                </button>
+            </div>
+        </div>
+        <div id="bulkResults" class="mt-4"></div>
+    </div>
     <?php endif; ?>
 
     <div class="flex flex-wrap gap-2 mb-6">
@@ -117,7 +152,10 @@
                     <?php endif; ?>
                     <div class="flex justify-between items-start mb-3">
                         <div>
-                            <h3 class="text-white font-bold text-lg"><?= esc($stock['symbol']) ?></h3>
+                            <h3 class="text-white font-bold text-lg">
+                                <?= esc($stock['symbol']) ?>
+                                <span class="ml-2 text-xs font-semibold px-2 py-0.5 rounded bg-page border border-gray-600 text-gray-400 align-middle"><?= esc(exchange_display($stock['exchange'] ?? null, $stock['exchange_display'] ?? null)) ?></span>
+                            </h3>
                             <p class="text-gray-400 text-sm"><?= esc($stock['name']) ?></p>
                         </div>
                         <span class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300 mr-8"><?= esc($stock['sector']) ?></span>
@@ -176,8 +214,16 @@
             || document.querySelector('input[name^="csrf_"]');
     }
 
-    var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024' };
-    function stockCurrency(exch) { return (exch && (exch.indexOf('NS')>=0||exch.indexOf('BSE')>=0)) ? 'INR' : 'USD'; }
+    var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024', 'HKD': 'HK\u0024', 'KRW': '\u20A9', 'MXN': 'Mex\u0024', 'BRL': 'R\u0024', 'NZD': 'NZ\u0024', 'ZAR': 'R', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr', 'PLN': 'z\u0142', 'CZK': 'K\u010D', 'HUF': 'Ft', 'RUB': '\u20BD', 'TRY': '\u20BA', 'ILS': '\u20AA', 'THB': '\u0E3F', 'MYR': 'RM', 'IDR': 'Rp', 'PHP': '\u20B1', 'TWD': 'NT\u0024', 'VND': '\u20AB', 'AED': 'د.إ', 'SAR': '\u0631.\u0639', 'QAR': 'QR', 'KWD': 'KD', 'OMR': '\u0631.\u0639', 'BHD': '.\u062f.\u0628' };
+    function stockCurrency(exch) {
+        var m = { 'NSE': 'INR', 'BSE': 'INR', 'NSI': 'INR',
+                  'LSE': 'GBP', 'TSE': 'JPY', 'HKEX': 'HKD',
+                  'KRX': 'KRW', 'TSX': 'CAD', 'ASX': 'AUD',
+                  'SWX': 'CHF', 'FRA': 'EUR', 'ETR': 'EUR',
+                  'Euronext': 'EUR', 'MEX': 'MXN', 'BVMF': 'BRL',
+                  'NMS': 'USD', 'NYQ': 'USD', 'NGM': 'USD' };
+        return m[exch] || 'USD';
+    }
     function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
     function buildCardHtml(s) {
@@ -203,7 +249,7 @@
                 '<div class="p-6 cursor-pointer" onclick="importStock(this.parentElement.dataset.sym, this.parentElement.dataset.exch)">' +
                 '<div class="flex justify-between items-start mb-3">' +
                 '<div>' +
-                '<h3 class="text-white font-bold text-lg">' + escHtml(s.symbol) + '</h3>' +
+                '<h3 class="text-white font-bold text-lg">' + escHtml(s.symbol) + ' <span class="ml-2 text-xs font-semibold px-2 py-0.5 rounded bg-page border border-gray-600 text-gray-400 align-middle">' + escHtml(s.exchange || 'NSE') + '</span></h3>' +
                 '<p class="text-gray-400 text-sm">' + escHtml(s.name || '') + '</p>' +
                 '</div>' +
                 '<span class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300">' + escHtml(s.sector || '') + '</span>' +
@@ -236,7 +282,7 @@
             watchBtnHtml +
             '<div class="flex justify-between items-start mb-3">' +
             '<div>' +
-            '<h3 class="text-white font-bold text-lg">' + sym + '</h3>' +
+            '<h3 class="text-white font-bold text-lg">' + sym + ' <span class="ml-2 text-xs font-semibold px-2 py-0.5 rounded bg-page border border-gray-600 text-gray-400 align-middle">' + escHtml(s.exchange || 'NSE') + '</span></h3>' +
             '<p class="text-gray-400 text-sm">' + escHtml(s.name) + '</p>' +
             '</div>' +
             '<span class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300 mr-8">' + escHtml(s.sector) + '</span>' +
@@ -519,6 +565,65 @@
     window.toggleAddForm = function() {
         var form = document.getElementById('addStockForm');
         form.classList.toggle('hidden');
+    };
+
+    window.toggleBulkForm = function() {
+        var form = document.getElementById('bulkImportForm');
+        if (form.classList.contains('hidden')) {
+            document.getElementById('bulkSymbols').value = '';
+            document.getElementById('bulkResults').innerHTML = '';
+        }
+        form.classList.toggle('hidden');
+    };
+
+    window.runBulkImport = function() {
+        var symbols = document.getElementById('bulkSymbols').value.trim();
+        var exchange = document.getElementById('bulkExchange').value;
+        var resultsEl = document.getElementById('bulkResults');
+        var btn = document.getElementById('bulkSubmitBtn');
+        if (!symbols) {
+            resultsEl.innerHTML = '<div class="text-red-400 text-sm"><i class="fas fa-exclamation-circle mr-1"></i>Enter at least one symbol.</div>';
+            return;
+        }
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Importing...';
+        resultsEl.innerHTML = '<div class="text-gray-400 text-sm py-2"><i class="fas fa-spinner fa-spin mr-2"></i>Importing from Yahoo Finance... this may take a moment.</div>';
+        var body = CSRF_NAME + '=' + encodeURIComponent(CSRF_HASH) + '&symbols=' + encodeURIComponent(symbols) + '&exchange=' + encodeURIComponent(exchange);
+        fetch('/api/stocks/bulk-import', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.message && !d.summary) {
+                    resultsEl.innerHTML = '<div class="text-red-400 text-sm"><i class="fas fa-exclamation-circle mr-1"></i>' + escHtml(d.message) + '</div>';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> Bulk Import';
+                    return;
+                }
+                var html = '';
+                var summary = d.summary || { imported: 0, skipped: 0, failed: 0 };
+                html += '<div class="flex flex-wrap gap-3 mb-3">' +
+                    '<span class="text-xs px-3 py-1 rounded bg-green-900/30 text-green-400 border border-green-700"><i class="fas fa-check-circle mr-1"></i>' + summary.imported + ' Imported</span>' +
+                    '<span class="text-xs px-3 py-1 rounded bg-page text-gray-300 border border-gray-600"><i class="fas fa-minus-circle mr-1"></i>' + summary.skipped + ' Skipped</span>' +
+                    '<span class="text-xs px-3 py-1 rounded bg-red-900/30 text-red-400 border border-red-700"><i class="fas fa-exclamation-circle mr-1"></i>' + summary.failed + ' Failed</span>' +
+                    '</div>';
+                if (d.imported && d.imported.length) {
+                    html += '<div class="bg-page rounded-lg border border-gray-700 divide-y divide-gray-700/50 mb-3">' + d.imported.map(function(s) {
+                        return '<div class="flex justify-between px-4 py-2 text-sm"><span class="text-white font-mono">' + escHtml(s.symbol) + '</span><a href="/stocks/' + s.id + '" class="text-accent hover:text-accent-2">View &rarr;</a></div>';
+                    }).join('') + '</div>';
+                }
+                if (d.failed && d.failed.length) {
+                    html += '<div class="bg-page rounded-lg border border-red-800/50 divide-y divide-gray-700/50">' + d.failed.map(function(s) {
+                        return '<div class="flex justify-between px-4 py-2 text-sm"><span class="text-white font-mono">' + escHtml(s.symbol) + '</span><span class="text-red-400 text-xs self-center">' + escHtml(s.reason) + '</span></div>';
+                    }).join('') + '</div>';
+                }
+                resultsEl.innerHTML = html;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> Bulk Import';
+            })
+            .catch(function() {
+                resultsEl.innerHTML = '<div class="text-red-400 text-sm">Import failed. Please try again.</div>';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> Bulk Import';
+            });
     };
 })();
 </script>

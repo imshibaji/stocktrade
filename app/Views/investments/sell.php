@@ -15,7 +15,7 @@
         <div class="bg-page rounded-xl p-6 mb-6 border border-gray-700">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h3 class="text-white font-bold text-lg"><?= esc($investment['symbol']) ?></h3>
+                    <h3 class="text-white font-bold text-lg"><?= esc($investment['symbol']) ?> <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle"><?= esc(exchange_display($investment['exchange'] ?? null, $investment['exchange_display'] ?? null)) ?></span> <span class="text-xs text-gray-500 align-middle ml-1"><?= currency_symbol(stock_currency($investment['exchange'] ?? null)) ?> <?= stock_currency($investment['exchange'] ?? null) ?></span></h3>
                     <p class="text-gray-400 text-sm"><?= esc($investment['name']) ?></p>
                 </div>
                 <span class="px-3 py-1 rounded bg-green-900/30 text-green-400 text-xs">Active</span>

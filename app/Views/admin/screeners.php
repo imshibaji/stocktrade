@@ -1,22 +1,3 @@
-<section class="min-h-screen">
-    <div class="flex">
-        <!-- Admin Sidebar -->
-        <div class="w-64 bg-surface border-r border-gray-700 min-h-screen">
-            <div class="p-4 border-b border-gray-700">
-                <h2 class="text-white font-bold text-lg">Admin Panel</h2>
-            </div>
-            <nav class="p-2">
-                <a href="/admin" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Dashboard</a>
-                <a href="/admin/users" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Users</a>
-                <a href="/admin/stocks" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Stocks</a>
-                <a href="/admin/screeners" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition text-white bg-page">Screeners</a>
-                <a href="/admin/pages" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Pages</a>
-                <a href="/admin/settings" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Website Settings</a>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 p-6">
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h1 class="text-2xl font-bold text-white">Screeners</h1>
@@ -38,6 +19,8 @@
                             <th class="text-left px-4 py-3 text-gray-300 font-medium">ID</th>
                             <th class="text-left px-4 py-3 text-gray-300 font-medium">Name</th>
                             <th class="text-left px-4 py-3 text-gray-300 font-medium">User</th>
+                            <th class="text-left px-4 py-3 text-gray-300 font-medium">Stocks</th>
+                            <th class="text-left px-4 py-3 text-gray-300 font-medium">Visibility</th>
                             <th class="text-left px-4 py-3 text-gray-300 font-medium">Created</th>
                         </tr>
                     </thead>
@@ -47,12 +30,17 @@
                                 <td class="px-4 py-3 text-gray-400"><?= $screener['id'] ?></td>
                                 <td class="px-4 py-3 text-white"><?= esc($screener['name']) ?></td>
                                 <td class="px-4 py-3 text-gray-400">User #<?= $screener['user_id'] ?></td>
+                                <td class="px-4 py-3 text-gray-400"><?= (int) $screener['stock_count'] ?></td>
+                                <td class="px-4 py-3">
+                                    <?php if (!empty($screener['is_public'])): ?>
+                                        <span class="text-xs px-2 py-1 rounded bg-green-900/30 border border-green-700 text-green-300"><i class="fas fa-globe mr-1"></i>Public</span>
+                                    <?php else: ?>
+                                        <span class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-400"><i class="fas fa-lock mr-1"></i>Private</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="px-4 py-3 text-gray-400 text-sm"><?= esc($screener['created_at']) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-</section>

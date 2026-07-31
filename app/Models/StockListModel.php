@@ -8,7 +8,7 @@ class StockListModel extends Model
 {
     protected $table = 'stock_lists';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['user_id', 'name', 'criteria', 'technical_criteria', 'stock_ids', 'stock_symbols', 'stock_count'];
+    protected $allowedFields = ['user_id', 'name', 'criteria', 'technical_criteria', 'stock_ids', 'stock_symbols', 'stock_count', 'is_public'];
     protected $useTimestamps = true;
     protected $returnType = 'array';
 

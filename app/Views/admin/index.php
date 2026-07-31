@@ -1,34 +1,3 @@
-<section class="min-h-screen">
-    <div class="flex">
-        <!-- Admin Sidebar -->
-        <div class="w-64 bg-surface border-r border-gray-700 min-h-screen">
-            <div class="p-4 border-b border-gray-700">
-                <h2 class="text-white font-bold text-lg">Admin Panel</h2>
-            </div>
-            <nav class="p-2">
-                <a href="/admin" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">
-                    <i class="fas fa-tachometer-alt"></i>Dashboard
-                </a>
-                <a href="/admin/users" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">
-                    <i class="fas fa-users"></i>Users
-                </a>
-                <a href="/admin/stocks" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">
-                    <i class="fas fa-chart-line"></i>Stocks
-                </a>
-                <a href="/admin/screeners" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">
-                    <i class="fas fa-filter"></i>Screeners
-                </a>
-                <a href="/admin/pages" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">
-                    <i class="fas fa-file-alt"></i>Pages
-                </a>
-                <a href="/admin/settings" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">
-                    <i class="fas fa-cog"></i>Website Settings
-                </a>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 p-6">
             <div class="mb-6">
                 <h1 class="text-2xl font-bold text-white">Admin Dashboard</h1>
                 <p class="text-gray-400 mt-1">Overview of your <?= esc(site_name()) ?> platform</p>
@@ -94,6 +63,3 @@
                     <a href="/admin/settings" class="bg-page border border-gray-600 text-gray-300 hover:text-white hover:border-accent px-4 py-2 rounded-lg text-sm transition">Website Settings</a>
                 </div>
             </div>
-        </div>
-    </div>
-</section>

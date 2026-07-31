@@ -72,6 +72,8 @@
                     <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $tx['stock_id'] ?>'">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($tx['symbol']) ?></span>
+                            <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle ml-1"><?= esc(exchange_display($tx['exchange'] ?? null, $tx['exchange_display'] ?? null)) ?></span>
+                            <span class="text-xs text-gray-500 align-middle ml-1"><?= currency_symbol(stock_currency($tx['exchange'] ?? null)) ?> <?= stock_currency($tx['exchange'] ?? null) ?></span>
                         </td>
                         <td class="px-6 py-4 text-right text-gray-300"><?= (int) $tx['shares'] ?></td>
                         <td class="px-6 py-4 text-right text-gray-300"><?= format_price($tx['buy_price']) ?></td>

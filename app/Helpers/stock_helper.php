@@ -3,7 +3,47 @@
 if (!function_exists('stock_currency')) {
     function stock_currency(?string $exchange): string
     {
-        return in_array($exchange ?? 'NSE', ['NSE', 'BSE']) ? 'INR' : 'USD';
+        $ex = strtoupper(trim($exchange ?? 'NSE'));
+        static $map = [
+            'NSE' => 'INR', 'BSE' => 'INR', 'NSI' => 'INR',
+            'LSE' => 'GBP', 'TSE' => 'JPY', 'HKEX' => 'HKD',
+            'KRX' => 'KRW', 'TSX' => 'CAD', 'ASX' => 'AUD',
+            'SWX' => 'CHF', 'FRA' => 'EUR', 'ETR' => 'EUR',
+            'Euronext' => 'EUR', 'MEX' => 'MXN', 'BVMF' => 'BRL',
+            'NMS' => 'USD', 'NYQ' => 'USD', 'NGM' => 'USD',
+        ];
+        return $map[$ex] ?? 'USD';
+    }
+}
+
+if (!function_exists('exchange_display')) {
+    function exchange_display(?string $stored, ?string $api = null): string
+    {
+        if ($api) return $api;
+        return match ($stored) {
+            'NSE' => 'NSI',
+            'BSE' => 'BSE',
+            default => (string) ($stored ?? ''),
+        };
+    }
+}
+
+if (!function_exists('currency_symbol')) {
+    function currency_symbol(string $currency): string
+    {
+        $symbols = [
+            'INR' => '₹', 'USD' => '$', 'EUR' => '€',
+            'GBP' => '£', 'JPY' => '¥', 'AUD' => 'A$',
+            'CAD' => 'C$', 'CHF' => 'CHF', 'CNY' => '¥', 'SGD' => 'S$',
+            'HKD' => 'HK$', 'KRW' => '₩', 'MXN' => 'Mex$', 'BRL' => 'R$',
+            'NZD' => 'NZ$', 'ZAR' => 'R', 'SEK' => 'kr', 'NOK' => 'kr',
+            'DKK' => 'kr', 'PLN' => 'zł', 'CZK' => 'Kč', 'HUF' => 'Ft',
+            'RUB' => '₽', 'TRY' => '₺', 'ILS' => '₪', 'THB' => '฿',
+            'MYR' => 'RM', 'IDR' => 'Rp', 'PHP' => '₱', 'TWD' => 'NT$',
+            'VND' => '₫', 'AED' => 'د.إ', 'SAR' => '﷼', 'QAR' => 'QR',
+            'KWD' => 'KD', 'OMR' => 'ر.ع.', 'BHD' => '.د.ب',
+        ];
+        return $symbols[$currency] ?? ($currency . ' ');
     }
 }
 
@@ -14,6 +54,13 @@ if (!function_exists('format_price')) {
             'INR' => '₹', 'USD' => '$', 'EUR' => '€',
             'GBP' => '£', 'JPY' => '¥', 'AUD' => 'A$',
             'CAD' => 'C$', 'CHF' => 'CHF ', 'CNY' => '¥', 'SGD' => 'S$',
+            'HKD' => 'HK$', 'KRW' => '₩', 'MXN' => 'Mex$', 'BRL' => 'R$',
+            'NZD' => 'NZ$', 'ZAR' => 'R', 'SEK' => 'kr', 'NOK' => 'kr',
+            'DKK' => 'kr', 'PLN' => 'zł', 'CZK' => 'Kč', 'HUF' => 'Ft',
+            'RUB' => '₽', 'TRY' => '₺', 'ILS' => '₪', 'THB' => '฿',
+            'MYR' => 'RM', 'IDR' => 'Rp', 'PHP' => '₱', 'TWD' => 'NT$',
+            'VND' => '₫', 'AED' => 'د.إ', 'SAR' => '﷼', 'QAR' => 'QR',
+            'KWD' => 'KD', 'OMR' => 'ر.ع.', 'BHD' => '.د.ب',
         ];
         $symbol = $symbols[$currency] ?? ($currency . ' ');
         return $symbol . number_format((float) $price, 2);
@@ -42,6 +89,26 @@ if (!function_exists('get_price_change')) {
         $change = $current - $previous;
         $percent = $previous > 0 ? ($change / $previous) * 100 : 0;
         return ['change' => round($change, 2), 'percent' => round($percent, 2)];
+    }
+}
+
+if (!function_exists('sparkline_points')) {
+    function sparkline_points(array $values, int $width = 100, int $height = 28): string
+    {
+        if (empty($values)) {
+            return '';
+        }
+        $count = count($values);
+        $min = min($values);
+        $max = max($values);
+        $range = ($max - $min) ?: 1;
+        $points = [];
+        foreach ($values as $i => $v) {
+            $x = ($count === 1) ? 0 : ($i / ($count - 1)) * $width;
+            $y = $height - (($v - $min) / $range) * $height;
+            $points[] = round($x, 1) . ',' . round($y, 1);
+        }
+        return implode(' ', $points);
     }
 }
 

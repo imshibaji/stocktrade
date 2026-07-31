@@ -95,6 +95,8 @@
                     <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
+                            <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle ml-1"><?= esc(exchange_display($inv['exchange'] ?? null, $inv['exchange_display'] ?? null)) ?></span>
+                            <span class="text-xs text-gray-500 align-middle ml-1"><?= currency_symbol(stock_currency($inv['exchange'] ?? null)) ?> <?= stock_currency($inv['exchange'] ?? null) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
                         <td class="px-6 py-4 text-right text-gray-300"><?= format_price($inv['buy_price']) ?></td>

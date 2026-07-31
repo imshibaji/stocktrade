@@ -29,7 +29,7 @@ class Admin extends BaseController
         ];
 
         return view('templates/header', $data)
-            . view('admin/index', $data)
+            . view('admin/layout', ['activePage' => 'dashboard', 'content' => view('admin/index', $data)])
             . view('templates/footer');
     }
 
@@ -44,7 +44,7 @@ class Admin extends BaseController
         ];
 
         return view('templates/header', $data)
-            . view('admin/users', $data)
+            . view('admin/layout', ['activePage' => 'users', 'content' => view('admin/users', $data)])
             . view('templates/footer');
     }
 
@@ -80,7 +80,7 @@ class Admin extends BaseController
         ];
 
         return view('templates/header', $data)
-            . view('admin/stocks', $data)
+            . view('admin/layout', ['activePage' => 'stocks', 'content' => view('admin/stocks', $data)])
             . view('templates/footer');
     }
 
@@ -111,7 +111,7 @@ class Admin extends BaseController
         ];
 
         return view('templates/header', $data)
-            . view('admin/screeners', $data)
+            . view('admin/layout', ['activePage' => 'screeners', 'content' => view('admin/screeners', $data)])
             . view('templates/footer');
     }
 
@@ -133,7 +133,7 @@ class Admin extends BaseController
         ];
 
         return view('templates/header', $data)
-            . view('admin/pages', $data)
+            . view('admin/layout', ['activePage' => 'pages', 'content' => view('admin/pages', $data)])
             . view('templates/footer');
     }
 
@@ -148,7 +148,7 @@ class Admin extends BaseController
         ];
 
         return view('templates/header', $data)
-            . view('admin/edit_page', $data)
+            . view('admin/layout', ['activePage' => 'pages', 'content' => view('admin/edit_page', $data)])
             . view('templates/footer');
     }
 
@@ -193,7 +193,7 @@ class Admin extends BaseController
         ];
 
         return view('templates/header', $data)
-            . view('admin/settings', $data)
+            . view('admin/layout', ['activePage' => 'settings', 'content' => view('admin/settings', $data)])
             . view('templates/footer');
     }
 
@@ -212,5 +212,82 @@ class Admin extends BaseController
         }
 
         return redirect()->back()->with('success', 'Settings updated.');
+    }
+
+    public function featuredStocks(): string
+    {
+        $stockModel = new StockModel();
+        $stocks = $stockModel->orderBy('market_cap', 'DESC')->findAll();
+
+        $selected = [];
+        $raw = (new SettingModel())->getValue('home_featured_stocks');
+        if (is_string($raw) && $raw !== '') {
+            foreach (explode(',', $raw) as $id) {
+                $id = (int) trim($id);
+                if ($id > 0) {
+                    $selected[] = $id;
+                }
+            }
+        }
+
+        $stocksById = [];
+        foreach ($stocks as $stock) {
+            $stocksById[(int) $stock['id']] = $stock;
+        }
+
+        $data = [
+            'title'      => 'Featured Home Stocks - Admin - StockTrade Tips',
+            'stocks'     => $stocks,
+            'stocksById' => $stocksById,
+            'selected'   => $selected,
+            'maxCount'   => 6,
+        ];
+
+        return view('templates/header', $data)
+            . view('admin/layout', ['activePage' => 'featured', 'content' => view('admin/featured_stocks', $data)])
+            . view('templates/footer');
+    }
+
+    public function saveFeaturedStocks()
+    {
+        $ids = $this->request->getPost('ids');
+        $positions = $this->request->getPost('positions');
+
+        $ids = is_array($ids) ? $ids : [];
+        $positions = is_array($positions) ? $positions : [];
+
+        $entries = [];
+        foreach ($ids as $stockId) {
+            $stockId = (int) $stockId;
+            if ($stockId <= 0) {
+                continue;
+            }
+            $pos = (int) ($positions[$stockId] ?? 0);
+            $entries[] = ['id' => $stockId, 'pos' => $pos];
+        }
+
+        usort($entries, static fn($a, $b) => $a['pos'] <=> $b['pos']);
+
+        $max = max(1, (int) $this->request->getPost('max_count'));
+        $ordered = array_slice(array_column($entries, 'id'), 0, $max);
+
+        (new SettingModel())
+            ->set('value', implode(',', $ordered))
+            ->where('key', 'home_featured_stocks')
+            ->update();
+
+        return redirect()->to('/admin/featured-stocks')
+            ->with('success', count($ordered) . ' stock(s) set as featured on the home page.');
+    }
+
+    public function clearFeaturedStocks()
+    {
+        (new SettingModel())
+            ->set('value', '')
+            ->where('key', 'home_featured_stocks')
+            ->update();
+
+        return redirect()->to('/admin/featured-stocks')
+            ->with('success', 'Featured stocks cleared. Home page now uses automatic top-by-market-cap.');
     }
 }

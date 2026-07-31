@@ -119,7 +119,7 @@ class Investment extends BaseController
         $userId = current_user_id();
         $investmentModel = new InvestmentModel();
 
-        $investment = $investmentModel->select('investments.*, stocks.symbol, stocks.name, stocks.current_price, stocks.exchange')
+        $investment = $investmentModel->select('investments.*, stocks.symbol, stocks.name, stocks.current_price, stocks.exchange, stocks.exchange_display')
             ->join('stocks', 'stocks.id = investments.stock_id')
             ->where('investments.id', (int) $id)
             ->where('investments.user_id', $userId)

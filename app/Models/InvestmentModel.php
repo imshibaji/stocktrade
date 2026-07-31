@@ -16,7 +16,7 @@ class InvestmentModel extends Model
 
     public function getUserInvestments(int $userId)
     {
-        return $this->select('investments.*, stocks.symbol, stocks.name, stocks.current_price')
+        return $this->select('investments.*, stocks.symbol, stocks.name, stocks.current_price, stocks.exchange, stocks.exchange_display')
             ->join('stocks', 'stocks.id = investments.stock_id')
             ->where('investments.user_id', $userId)
             ->orderBy('investments.created_at', 'DESC')
@@ -25,7 +25,7 @@ class InvestmentModel extends Model
 
     public function getActiveInvestments(int $userId)
     {
-        return $this->select('investments.*, stocks.symbol, stocks.name, stocks.current_price')
+        return $this->select('investments.*, stocks.symbol, stocks.name, stocks.current_price, stocks.exchange, stocks.exchange_display')
             ->join('stocks', 'stocks.id = investments.stock_id')
             ->where('investments.user_id', $userId)
             ->where('investments.status', 'active')

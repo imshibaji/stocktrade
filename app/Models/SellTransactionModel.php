@@ -21,9 +21,11 @@ class SellTransactionModel extends Model
 
     public function getUserTransactions(int $userId): array
     {
-        return $this->where('user_id', $userId)
-            ->orderBy('sell_date', 'DESC')
-            ->orderBy('created_at', 'DESC')
+        return $this->select('sell_transactions.*, stocks.exchange, stocks.exchange_display')
+            ->join('stocks', 'stocks.id = sell_transactions.stock_id')
+            ->where('sell_transactions.user_id', $userId)
+            ->orderBy('sell_transactions.sell_date', 'DESC')
+            ->orderBy('sell_transactions.created_at', 'DESC')
             ->findAll();
     }
 }

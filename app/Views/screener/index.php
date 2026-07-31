@@ -282,6 +282,10 @@
         <div class="bg-surface rounded-xl border border-gray-700 p-6 w-full max-w-md">
             <h3 class="text-white font-bold text-lg mb-4">Save Screener List</h3>
             <input type="text" id="listNameInput" placeholder="Enter list name..." class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white text-sm focus:border-accent focus:outline-none mb-4">
+            <label class="flex items-center gap-2 text-sm text-gray-300 mb-4">
+                <input type="checkbox" id="listPublicInput" class="h-4 w-4 rounded accent-accent">
+                Make this list public (shown on the home page)
+            </label>
             <div class="flex justify-end gap-3">
                 <button onclick="closeSaveDialog()" class="border border-gray-600 text-gray-300 px-4 py-2 rounded-lg text-sm">Cancel</button>
                 <button onclick="saveList()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">Save</button>
@@ -887,6 +891,7 @@ var FILTER_FIELDS = [
         var formData = new FormData();
         formData.append('name', name);
         formData.append('match_mode', document.getElementById('matchMode').value);
+        formData.append('is_public', document.getElementById('listPublicInput').checked ? '1' : '0');
         if (isManualQuery) {
             formData.append('query_text', document.getElementById('manualQuery').value.trim());
             formData.append('stock_ids', JSON.stringify(lastResults.map(function(s) { return s.id; })));
@@ -936,6 +941,7 @@ var FILTER_FIELDS = [
                             '<p class="text-gray-500 text-xs">' + l.stock_count + ' stocks \u00B7 ' + new Date(l.created_at).toLocaleDateString() + '</p>' +
                         '</div>' +
                         '<div class="flex gap-1 ml-2">' +
+                            '<button onclick="togglePublic(' + l.id + ')" class="' + (l.is_public ? 'text-green-400 hover:text-green-300 border-green-400/40' : 'text-gray-500 hover:text-gray-300 border-gray-600') + ' text-xs px-2 py-1 rounded border transition" title="' + (l.is_public ? 'Public \u2014 click to make private' : 'Private \u2014 click to make public') + '"><i class="fas ' + (l.is_public ? 'fa-globe' : 'fa-lock') + '"></i></button>' +
                             '<button onclick="loadList(' + l.id + ')" class="text-accent hover:text-accent-2 text-xs px-2 py-1 rounded border border-accent/30 hover:border-accent transition" title="Load"><i class="fas fa-upload"></i></button>' +
                             '<button onclick="deleteList(' + l.id + ')" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded border border-red-400/30 hover:border-red-400 transition" title="Delete"><i class="fas fa-trash"></i></button>' +
                         '</div>' +
@@ -1089,6 +1095,18 @@ var FILTER_FIELDS = [
                 if (data.success) { loadSavedLists(); var c = document.getElementById('savedCount'); c.textContent = Math.max(0, parseInt(c.textContent || '0', 10) - 1); }
                 else { alert(data.message); }
             }).catch(function() { alert('Delete failed'); });
+    };
+
+    window.togglePublic = function(id) {
+        var formData = new FormData();
+        formData.append('id', id);
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+        fetch('/api/screener/toggle-public', { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) { loadSavedLists(); }
+                else { alert(data.message); }
+            }).catch(function() { alert('Toggle failed'); });
     };
 
     function buildIndicatorOptions() {

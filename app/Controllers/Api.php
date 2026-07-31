@@ -137,7 +137,7 @@ class Api extends BaseController
                 'symbol' => $s['symbol'],
                 'name'   => $s['name'],
                 'sector' => $s['sector'],
-                'exchange' => $s['exchange'] ?? $exchange,
+                'exchange' => $s['exchange_display'] ?? $s['exchange'] ?? $exchange,
                 'price'  => $s['current_price'] ? (float) $s['current_price'] : null,
                 'change' => null,
                 'change_percent' => null,
@@ -211,6 +211,7 @@ class Api extends BaseController
             'name'           => $name,
             'sector'         => $sector,
             'exchange'       => $exchange,
+            'exchange_display' => $d['exchange'] ?? $d['fullExchangeName'] ?? $exchange,
             'current_price'  => $d['regularMarketPrice'],
             'previous_close' => $d['regularMarketPreviousClose'] ?? round($price * 0.99, 2),
             'market_cap'     => $d['marketCap'],
@@ -241,6 +242,121 @@ class Api extends BaseController
         ]);
     }
 
+    public function bulkImport()
+    {
+        $raw = trim((string) $this->request->getPost('symbols'));
+        $exchange = strtoupper(trim($this->request->getPost('exchange') ?? 'NSE'));
+
+        if ($raw === '') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Enter at least one stock symbol.',
+            ])->setStatusCode(400);
+        }
+
+        $symbols = preg_split('/[\s,;]+/', $raw);
+        $symbols = array_values(array_filter(array_map(static function ($s) {
+            return strtoupper(preg_replace('/[^A-Z0-9.\-]/', '', trim($s)));
+        }, $symbols)));
+
+        if (empty($symbols)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No valid stock symbols provided.',
+            ])->setStatusCode(400);
+        }
+
+        $symbols = array_values(array_unique(array_slice($symbols, 0, 30)));
+
+        $stockModel = new StockModel();
+        $existingBySymbol = [];
+        foreach ($stockModel->select('symbol, id')->findAll() as $existing) {
+            $existingBySymbol[strtoupper($existing['symbol'])] = (int) $existing['id'];
+        }
+
+        $yahoo = new YahooFinanceService();
+        $watchlistModel = new \App\Models\WatchlistModel();
+        $userId = current_user_id();
+
+        $imported = [];
+        $skipped = [];
+        $failed = [];
+
+        foreach ($symbols as $symbol) {
+            if (isset($existingBySymbol[$symbol])) {
+                $skipped[] = [
+                    'symbol' => $symbol,
+                    'id'     => $existingBySymbol[$symbol],
+                    'reason' => 'Already in database',
+                ];
+                continue;
+            }
+
+            try {
+                $quote = $yahoo->getQuote($symbol, $exchange);
+                if (!$quote) {
+                    $failed[] = ['symbol' => $symbol, 'reason' => 'Not found on Yahoo Finance'];
+                    continue;
+                }
+
+                $d = $yahoo->quoteToArray($quote);
+
+                $price = (float) ($d['regularMarketPrice'] ?? 0);
+                if ($price <= 0) {
+                    $failed[] = ['symbol' => $symbol, 'reason' => 'No price data available'];
+                    continue;
+                }
+
+                $stockId = $stockModel->insert([
+                    'symbol'         => $symbol,
+                    'name'           => $d['longName'] ?? $d['shortName'] ?? $symbol,
+                    'sector'         => $d['fullExchangeName'] ?? 'N/A',
+                    'exchange'       => $exchange,
+                    'exchange_display' => $d['exchange'] ?? $d['fullExchangeName'] ?? $exchange,
+                    'current_price'  => $d['regularMarketPrice'],
+                    'previous_close' => $d['regularMarketPreviousClose'] ?? round($price * 0.99, 2),
+                    'market_cap'     => $d['marketCap'],
+                    'avg_volume'     => $d['averageDailyVolume3Month'],
+                    'pe_ratio'       => $d['trailingPE'],
+                    'week_52_high'   => $d['fiftyTwoWeekHigh'],
+                    'week_52_low'    => $d['fiftyTwoWeekLow'],
+                    'dividend_yield' => $d['trailingAnnualDividendYield'],
+                    'beta'           => null,
+                ]);
+
+                generate_price_history($stockId, $price);
+                generate_predictions($stockId, $price);
+
+                $watchlistModel->insert([
+                    'user_id'  => $userId,
+                    'stock_id' => $stockId,
+                ]);
+
+                $existingBySymbol[$symbol] = (int) $stockId;
+                $imported[] = [
+                    'symbol' => $symbol,
+                    'id'     => (int) $stockId,
+                    'name'   => $d['longName'] ?? $d['shortName'] ?? $symbol,
+                ];
+            } catch (\Throwable $e) {
+                log_message('error', 'Bulk import failed for ' . $symbol . ': ' . $e->getMessage());
+                $failed[] = ['symbol' => $symbol, 'reason' => 'Import error'];
+            }
+        }
+
+        return $this->response->setJSON([
+            'success'  => count($imported) > 0,
+            'imported' => $imported,
+            'skipped'  => $skipped,
+            'failed'   => $failed,
+            'summary'  => [
+                'imported' => count($imported),
+                'skipped'  => count($skipped),
+                'failed'   => count($failed),
+            ],
+        ]);
+    }
+
     public function refreshStock()
     {
         $id = (int) $this->request->getPost('id');
@@ -264,8 +380,9 @@ class Api extends BaseController
 
         $now = date('Y-m-d H:i:s');
         $update = [
-            'name'           => $d['longName'] ?? $d['shortName'] ?? $stock['name'],
-            'current_price'  => $d['regularMarketPrice'] ?? $stock['current_price'],
+            'name'             => $d['longName'] ?? $d['shortName'] ?? $stock['name'],
+            'exchange_display' => $d['exchange'] ?? $d['fullExchangeName'] ?? $stock['exchange_display'] ?? $stock['exchange'],
+            'current_price'    => $d['regularMarketPrice'] ?? $stock['current_price'],
             'previous_close' => $d['regularMarketPreviousClose'] ?? $stock['previous_close'],
             'market_cap'     => $d['marketCap'] ?? $stock['market_cap'],
             'avg_volume'     => $d['averageDailyVolume3Month'] ?? $stock['avg_volume'],

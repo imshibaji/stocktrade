@@ -1,22 +1,3 @@
-<section class="min-h-screen">
-    <div class="flex">
-        <!-- Admin Sidebar -->
-        <div class="w-64 bg-surface border-r border-gray-700 min-h-screen">
-            <div class="p-4 border-b border-gray-700">
-                <h2 class="text-white font-bold text-lg">Admin Panel</h2>
-            </div>
-            <nav class="p-2">
-                <a href="/admin" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Dashboard</a>
-                <a href="/admin/users" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Users</a>
-                <a href="/admin/stocks" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition text-white bg-page">Stocks</a>
-                <a href="/admin/screeners" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Screeners</a>
-                <a href="/admin/pages" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Pages</a>
-                <a href="/admin/settings" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Website Settings</a>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 p-6">
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h1 class="text-2xl font-bold text-white">Stocks</h1>
@@ -59,6 +40,3 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-</section>

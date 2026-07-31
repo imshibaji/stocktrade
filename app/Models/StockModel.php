@@ -12,7 +12,7 @@ class StockModel extends Model
     protected $allowedFields = [
         'symbol', 'name', 'sector', 'current_price', 'previous_close',
         'market_cap', 'avg_volume', 'pe_ratio', 'week_52_high',
-        'week_52_low', 'dividend_yield', 'beta', 'exchange'
+        'week_52_low', 'dividend_yield', 'beta', 'exchange', 'exchange_display'
     ];
     protected $useTimestamps = true;
 

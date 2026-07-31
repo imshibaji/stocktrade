@@ -164,6 +164,7 @@ class Screener extends BaseController
                 'stock_ids'          => json_encode($stockIds),
                 'stock_symbols'      => json_encode($stockSymbols),
                 'stock_count'        => count($results),
+                'is_public'          => $this->request->getPost('is_public') ? 1 : 0,
             ]);
             $response['saved'] = true;
         }
@@ -334,6 +335,7 @@ class Screener extends BaseController
         $stockIds      = $this->request->getPost('stock_ids');
         $stockSymbols  = $this->request->getPost('stock_symbols');
         $queryText     = $this->request->getPost('query_text');
+        $isPublic      = $this->request->getPost('is_public') ? 1 : 0;
 
         if (empty($name)) {
             return $this->response->setJSON(['success' => false, 'message' => 'List name is required']);
@@ -355,6 +357,7 @@ class Screener extends BaseController
             'stock_ids'          => is_array($stockIds) ? json_encode($stockIds) : $stockIds,
             'stock_symbols'      => is_array($stockSymbols) ? json_encode($stockSymbols) : $stockSymbols,
             'stock_count'        => is_array($stockIds) ? count($stockIds) : count((array) json_decode($stockIds ?? '[]', true)),
+            'is_public'          => $isPublic,
         ]);
 
         return $this->response->setJSON(['success' => true, 'message' => 'List saved']);
@@ -424,6 +427,47 @@ class Screener extends BaseController
         }
         $model->delete($listId);
         return $this->response->setJSON(['success' => true, 'message' => 'Deleted']);
+    }
+
+    public function togglePublic()
+    {
+        $listId = (int) $this->request->getPost('id');
+        if ($listId <= 0) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid ID']);
+        }
+        $userId = current_user_id();
+        $model  = new StockListModel();
+        $list   = $model->where('id', $listId)->where('user_id', $userId)->first();
+        if (!$list) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Not found']);
+        }
+        $newState = $list['is_public'] ? 0 : 1;
+        $model->update($listId, ['is_public' => $newState]);
+        return $this->response->setJSON(['success' => true, 'is_public' => $newState]);
+    }
+
+    public function publicList($listId = null)
+    {
+        $listId = (int) ($listId ?? $this->request->getGet('id'));
+        if ($listId <= 0) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid ID']);
+        }
+        $model = new StockListModel();
+        $list  = $model->where('id', $listId)->where('is_public', 1)->first();
+        if (!$list) {
+            return $this->response->setJSON(['success' => false, 'message' => 'List not found']);
+        }
+
+        $stockIds = json_decode($list['stock_ids'] ?? '[]', true);
+        $stocks = !empty($stockIds)
+            ? (new StockModel())->whereIn('id', $stockIds)->findAll()
+            : [];
+
+        return $this->response->setJSON([
+            'success' => true,
+            'list'    => $list,
+            'stocks'  => array_values($stocks),
+        ]);
     }
 
     // ------------------------------------------------------------------ //

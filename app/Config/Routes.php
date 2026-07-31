@@ -38,6 +38,9 @@ $routes->group('admin', ['filter' => 'admin'], static function ($routes) {
     $routes->get('pages/delete/(:num)', 'Admin::deletePage/$1');
     $routes->get('settings', 'Admin::settings');
     $routes->post('settings/update', 'Admin::updateSettings');
+    $routes->get('featured-stocks', 'Admin::featuredStocks');
+    $routes->get('featured-stocks/clear', 'Admin::clearFeaturedStocks');
+    $routes->post('featured-stocks/save', 'Admin::saveFeaturedStocks');
 });
 
 $routes->get('/api', 'Api::index');
@@ -51,9 +54,11 @@ $routes->get('/api/splits/(:any)/(:any)/(:any)', 'Api::getSplits/$1/$2/$3');
 $routes->get('/api/exchange/(:any)/(:any)', 'Api::getExchangeRate/$1/$2', ['filter' => 'auth']);
 $routes->get('/api/options/(:any)/(:any)', 'Api::getOptionChain/$1/$2');
 $routes->get('/api/summary/(:any)/(:any)', 'Api::getSummary/$1/$2');
+$routes->get('/api/screener/public-list/(:num)', 'Screener::publicList/$1');
 $routes->get('/api/news/(:any)', 'Api::getNewsStream/$1', ['filter' => 'auth']);
 $routes->get('/api/search/(:any)', 'Api::getSearch/$1', ['filter' => 'auth']);
 $routes->post('/api/stocks/import', 'Api::importStock', ['filter' => 'auth']);
+$routes->post('/api/stocks/bulk-import', 'Api::bulkImport', ['filter' => 'auth']);
 $routes->post('/api/stocks/refresh', 'Api::refreshStock', ['filter' => 'auth']);
 
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
@@ -80,6 +85,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/api/screener/lists', 'Screener::lists');
     $routes->get('/api/screener/load-list', 'Screener::loadList');
     $routes->post('/api/screener/delete-list', 'Screener::deleteList');
+    $routes->post('/api/screener/toggle-public', 'Screener::togglePublic');
     $routes->get('/investments', 'Investment::index');
     $routes->post('/investments/create', 'Investment::create');
     $routes->get('/investments/(:num)/sell', 'Investment::sellForm/$1');
