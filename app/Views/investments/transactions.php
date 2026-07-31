@@ -5,10 +5,10 @@
             <p class="text-gray-400 mt-1">All completed sell transactions with booked profit/loss</p>
         </div>
         <div class="flex space-x-3 mt-4 md:mt-0">
-            <a href="/investments" class="border border-gold text-gold hover:bg-gold/10 px-4 py-2 rounded-lg text-sm transition">
+            <a href="/investments" class="border border-accent text-accent hover:bg-accent/10 px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-plus mr-2"></i>New Investment
             </a>
-            <a href="/investments/history" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-2 rounded-lg text-sm transition">
+            <a href="/investments/history" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-history mr-2"></i>Portfolio History
             </a>
         </div>
@@ -16,25 +16,25 @@
 
     <?php if (!empty($transactions)): ?>
     <div class="grid grid-cols-5 gap-4 mb-6">
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-4 text-center">
+        <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Sells</p>
             <p class="text-white font-bold text-xl"><?= count($transactions) ?></p>
         </div>
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-4 text-center">
+        <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Sale Value</p>
             <p class="text-white font-bold text-xl"><?= format_price($totalSellValue) ?></p>
         </div>
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-4 text-center">
+        <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Gross P/L</p>
             <p class="font-bold text-xl <?= $totalGross >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                 <?= $totalGross >= 0 ? '+' : '' ?><?= format_price($totalGross) ?>
             </p>
         </div>
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-4 text-center">
+        <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Fees + Tax</p>
             <p class="font-bold text-xl text-yellow-400"><?= format_price($totalFees + $totalTax) ?></p>
         </div>
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-4 text-center">
+        <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Net P/L</p>
             <p class="font-bold text-xl <?= $totalNet >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                 <?= $totalNet >= 0 ? '+' : '' ?><?= format_price($totalNet) ?>
@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    <div class="bg-navy2 rounded-xl border border-gray-700 overflow-hidden">
+    <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -69,7 +69,7 @@
                         $net = (float) ($tx['net_profit_loss'] ?? 0);
                         $ret = (float) $tx['cost_basis'] > 0 ? ($net / (float) $tx['cost_basis']) * 100 : 0;
                     ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $tx['stock_id'] ?>'">
+                    <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $tx['stock_id'] ?>'">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($tx['symbol']) ?></span>
                         </td>
@@ -97,11 +97,11 @@
         </div>
     </div>
     <?php else: ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-12 text-center">
+    <div class="bg-surface rounded-xl border border-gray-700 p-12 text-center">
         <i class="fas fa-exchange-alt text-6xl text-gray-600 mb-4"></i>
         <h3 class="text-white text-xl font-semibold mb-2">No transactions yet</h3>
         <p class="text-gray-400 mb-6">When you sell investments, the completed transactions will appear here.</p>
-        <a href="/investments" class="bg-gold hover:bg-gold2 text-navy font-semibold px-8 py-3 rounded-lg transition inline-block">
+        <a href="/investments" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-8 py-3 rounded-lg transition inline-block">
             View Investments
         </a>
     </div>

@@ -13,14 +13,14 @@
             <div class="relative" id="searchContainer">
                 <input type="text" id="stockSearch" value="<?= esc($search) ?>" placeholder="Search by symbol or name..."
                     autocomplete="off"
-                    class="bg-navy2 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:border-gold focus:outline-none w-40 md:w-72">
+                    class="bg-surface border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:border-accent focus:outline-none w-40 md:w-72">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
                 <button id="searchClear" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-sm">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <?php if (is_logged_in()): ?>
-            <button onclick="toggleAddForm()" class="bg-navy2 hover:bg-gold2 text-gold border border-gold font-semibold px-4 py-2 rounded-lg transition text-sm">
+            <button onclick="toggleAddForm()" class="bg-surface hover:bg-accent-2 text-accent border border-accent font-semibold px-4 py-2 rounded-lg transition text-sm">
                 <i class="fas fa-plus mr-1"></i> New
             </button>
             <?php endif; ?>
@@ -28,20 +28,20 @@
     </div>
 
     <?php if (is_logged_in()): ?>
-    <div id="addStockForm" class="hidden bg-navy2 rounded-xl border border-gray-700 p-6 mb-6">
+    <div id="addStockForm" class="hidden bg-surface rounded-xl border border-gray-700 p-6 mb-6">
         <h3 class="text-lg font-semibold text-white mb-4">Add New Stock</h3>
         <form id="addStockFormEl" onsubmit="return false;">
             <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Symbol *</label>
                     <input type="text" id="addSymbol" placeholder="e.g. RELIANCE"
-                        class="w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-gold focus:outline-none uppercase">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-none uppercase">
                     <p id="addSymbolStatus" class="text-xs mt-1 hidden"></p>
                 </div>
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Exchange</label>
                     <select id="addExchange"
-                        class="w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-gold focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-none">
                         <option value="NSE" selected>NSE</option>
                         <option value="BSE">BSE</option>
                         <option value="GLOBAL">GLOBAL</option>
@@ -50,24 +50,24 @@
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Name</label>
                     <input type="text" id="addName" placeholder="Auto-filled from Yahoo"
-                        class="w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-white" readonly>
+                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white" readonly>
                 </div>
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Sector</label>
                     <input type="text" id="addSector" placeholder="Auto-filled from Yahoo"
-                        class="w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-white" readonly>
+                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white" readonly>
                 </div>
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Current Price (₹)</label>
                     <input type="text" id="addPrice" placeholder="Auto-filled from Yahoo"
-                        class="w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-white" readonly>
+                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white" readonly>
                 </div>
             </div>
             <div class="flex justify-end mt-4 space-x-3">
-                <button type="button" onclick="toggleAddForm()" class="px-4 py-2 rounded-lg bg-navy border border-gray-600 text-gray-300 hover:text-white dark:text-gray-300 dark:hover:text-white transition">
+                <button type="button" onclick="toggleAddForm()" class="px-4 py-2 rounded-lg bg-page border border-gray-600 text-gray-300 hover:text-white dark:text-gray-300 dark:hover:text-white transition">
                     Cancel
                 </button>
-                <button type="button" id="addSubmitBtn" class="px-6 py-2 rounded-lg bg-gold hover:bg-gold2 text-navy font-semibold transition" disabled onclick="window.importStockFromForm()">
+                <button type="button" id="addSubmitBtn" class="px-6 py-2 rounded-lg bg-accent hover:bg-accent-2 text-on-accent font-semibold transition" disabled onclick="window.importStockFromForm()">
                     <i class="fas fa-plus mr-1"></i> Add Stock
                 </button>
             </div>
@@ -76,12 +76,12 @@
     <?php endif; ?>
 
     <div class="flex flex-wrap gap-2 mb-6">
-        <a href="/stocks" class="sector-filter px-4 py-2 rounded-lg text-sm transition <?= !$sector ? 'bg-gold text-navy font-semibold' : 'bg-navy2 text-gray-300 border border-gray-600 hover:border-gold' ?>" data-sector="">
+        <a href="/stocks" class="sector-filter px-4 py-2 rounded-lg text-sm transition <?= !$sector ? 'bg-accent text-on-accent font-semibold' : 'bg-surface text-gray-300 border border-gray-600 hover:border-accent' ?>" data-sector="">
             All
         </a>
         <?php foreach ($sectors as $s): ?>
         <a href="/stocks?sector=<?= urlencode($s['sector']) ?>"
-           class="sector-filter px-4 py-2 rounded-lg text-sm transition <?= $sector === $s['sector'] ? 'bg-gold text-navy font-semibold' : 'bg-navy2 text-gray-300 border border-gray-600 hover:border-gold' ?>" data-sector="<?= esc($s['sector']) ?>">
+           class="sector-filter px-4 py-2 rounded-lg text-sm transition <?= $sector === $s['sector'] ? 'bg-accent text-on-accent font-semibold' : 'bg-surface text-gray-300 border border-gray-600 hover:border-accent' ?>" data-sector="<?= esc($s['sector']) ?>">
             <?= esc($s['sector']) ?>
         </a>
         <?php endforeach; ?>
@@ -93,7 +93,7 @@
 
     <div id="searchResults">
         <?php if (empty($stocks)): ?>
-        <div id="emptyState" class="bg-navy2 rounded-xl border border-gray-700 p-12 text-center">
+        <div id="emptyState" class="bg-surface rounded-xl border border-gray-700 p-12 text-center">
             <i class="fas fa-search text-5xl text-gray-600 mb-4"></i>
             <h3 class="text-white text-lg font-semibold mb-2">No stocks found</h3>
             <p class="text-gray-400">Try adjusting your search or filter criteria.</p>
@@ -104,7 +104,7 @@
             <?php $change = get_price_change((float) $stock['current_price'], (float) $stock['previous_close']); ?>
             <?php $isWatched = isset($watchlistMap[(int) $stock['id']]); ?>
             <?php $cur = stock_currency($stock['exchange'] ?? null); ?>
-            <div class="stock-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition relative group" data-sid="<?= $stock['id'] ?>">
+            <div class="stock-card bg-surface rounded-xl border border-gray-700 hover:border-accent transition relative group" data-sid="<?= $stock['id'] ?>">
                 <div class="p-6 cursor-pointer" onclick="goToStock(<?= $stock['id'] ?>)">
                     <?php if (is_logged_in()): ?>
                     <button class="watch-btn absolute top-3 right-3 text-xl transition"
@@ -112,7 +112,7 @@
                         data-watched="<?= $isWatched ? '1' : '0' ?>"
                         onclick="event.stopPropagation(); toggleWatch(this)"
                         title="<?= $isWatched ? 'Remove from watchlist' : 'Add to watchlist' ?>">
-                        <i class="<?= $isWatched ? 'fas fa-star text-gold' : 'far fa-star text-gray-500 hover:text-gold' ?>"></i>
+                        <i class="<?= $isWatched ? 'fas fa-star text-accent' : 'far fa-star text-gray-500 hover:text-accent' ?>"></i>
                     </button>
                     <?php endif; ?>
                     <div class="flex justify-between items-start mb-3">
@@ -120,7 +120,7 @@
                             <h3 class="text-white font-bold text-lg"><?= esc($stock['symbol']) ?></h3>
                             <p class="text-gray-400 text-sm"><?= esc($stock['name']) ?></p>
                         </div>
-                        <span class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 mr-8"><?= esc($stock['sector']) ?></span>
+                        <span class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300 mr-8"><?= esc($stock['sector']) ?></span>
                     </div>
                     <div class="flex justify-between items-end mt-4">
                         <div>
@@ -141,7 +141,7 @@
                 </div>
                 <?php if (is_logged_in()): ?>
                 <div class="border-t border-gray-700 flex">
-                    <a href="/stocks/<?= $stock['id'] ?>/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
+                    <a href="/stocks/<?= $stock['id'] ?>/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-accent hover:bg-page text-sm transition border-r border-gray-700">
                         <i class="fas fa-edit mr-1"></i>Edit
                     </a>
                     <form action="/stocks/<?= $stock['id'] ?>/delete" method="post" class="flex-1" onsubmit="return confirm('Delete <?= esc($stock['symbol']) ?>? This will remove all related data.');">
@@ -199,14 +199,14 @@
                 yahooPriceHtml = '<p class="price-value text-2xl font-bold text-white">' + formatPrice(s.price, sc) + '</p>';
                 yahooChangeHtml = '<span class="change-badge px-3 py-1 rounded text-sm font-semibold ' + yahooChangeClass + '">' + yahooChangePct + '</span>';
             }
-            return '<div class="stock-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition relative group yahoo-result" data-sym="' + (s.symbol || '') + '" data-exch="' + (s.exchange || 'NSE') + '">' +
+            return '<div class="stock-card bg-surface rounded-xl border border-gray-700 hover:border-accent transition relative group yahoo-result" data-sym="' + (s.symbol || '') + '" data-exch="' + (s.exchange || 'NSE') + '">' +
                 '<div class="p-6 cursor-pointer" onclick="importStock(this.parentElement.dataset.sym, this.parentElement.dataset.exch)">' +
                 '<div class="flex justify-between items-start mb-3">' +
                 '<div>' +
                 '<h3 class="text-white font-bold text-lg">' + escHtml(s.symbol) + '</h3>' +
                 '<p class="text-gray-400 text-sm">' + escHtml(s.name || '') + '</p>' +
                 '</div>' +
-                '<span class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300">' + escHtml(s.sector || '') + '</span>' +
+                '<span class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300">' + escHtml(s.sector || '') + '</span>' +
                 '</div>' +
                 (yahooPriceHtml ? '<div class="flex justify-between items-end mt-4"><div>' + yahooPriceHtml + '</div><div class="text-right">' + yahooChangeHtml + '</div></div>' : '') +
                 '<div class="text-center py-4 import-msg">' +
@@ -220,18 +220,18 @@
         var sym = escHtml(s.symbol);
         var watchBtnHtml = IS_LOGGED_IN ?
             '<button class="watch-btn absolute top-3 right-3 text-xl transition z-10" data-sid="' + s.id + '" data-watched="0" onclick="event.stopPropagation(); toggleWatch(this)" title="Add to watchlist">' +
-            '<i class="far fa-star text-gray-500 hover:text-gold"></i>' +
+            '<i class="far fa-star text-gray-500 hover:text-accent"></i>' +
             '</button>' : '';
         var actionsHtml = IS_LOGGED_IN ?
             '<div class="border-t border-gray-700 flex">' +
-            '<a href="/stocks/' + s.id + '/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">' +
+            '<a href="/stocks/' + s.id + '/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-accent hover:bg-page text-sm transition border-r border-gray-700">' +
             '<i class="fas fa-edit mr-1"></i>Edit</a>' +
             '<form action="/stocks/' + s.id + '/delete" method="post" class="flex-1" onsubmit="return confirm(\'Delete ' + sym + '? This will remove all related data.\');">' +
             '<input type="hidden" name="' + CSRF_NAME + '" value="' + CSRF_HASH + '" />' +
             '<button type="submit" class="w-full text-center py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 text-sm transition" onclick="event.stopPropagation()">' +
             '<i class="fas fa-trash mr-1"></i>Remove</button></form>' +
             '</div>' : '';
-        return '<div class="stock-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition relative group" data-sid="' + s.id + '">' +
+        return '<div class="stock-card bg-surface rounded-xl border border-gray-700 hover:border-accent transition relative group" data-sid="' + s.id + '">' +
             '<div class="p-6 cursor-pointer" onclick="goToStock(' + s.id + ')">' +
             watchBtnHtml +
             '<div class="flex justify-between items-start mb-3">' +
@@ -239,7 +239,7 @@
             '<h3 class="text-white font-bold text-lg">' + sym + '</h3>' +
             '<p class="text-gray-400 text-sm">' + escHtml(s.name) + '</p>' +
             '</div>' +
-            '<span class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 mr-8">' + escHtml(s.sector) + '</span>' +
+            '<span class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300 mr-8">' + escHtml(s.sector) + '</span>' +
             '</div>' +
             '<div class="flex justify-between items-end mt-4">' +
             '<div>' +
@@ -291,7 +291,7 @@
 
     function renderResults(data) {
         if (data.results.length === 0) {
-            searchResults.innerHTML = '<div class="bg-navy2 rounded-xl border border-gray-700 p-12 text-center">' +
+            searchResults.innerHTML = '<div class="bg-surface rounded-xl border border-gray-700 p-12 text-center">' +
                 '<i class="fas fa-search text-5xl text-gray-600 mb-4"></i>' +
                 '<h3 class="text-white text-lg font-semibold mb-2">No stocks found</h3>' +
                 '<p class="text-gray-400">No results for "' + escHtml(data.query) + '". Try a different symbol or name.</p>' +
@@ -365,11 +365,11 @@
               if (data.watched) {
                   btn.setAttribute('data-watched', '1');
                   btn.title = 'Remove from watchlist';
-                  icon.className = 'fas fa-star text-gold';
+                  icon.className = 'fas fa-star text-accent';
               } else {
                   btn.setAttribute('data-watched', '0');
                   btn.title = 'Add to watchlist';
-                  icon.className = 'far fa-star text-gray-500 hover:text-gold';
+                  icon.className = 'far fa-star text-gray-500 hover:text-accent';
               }
           });
     };

@@ -7,7 +7,7 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
             <div class="flex items-center space-x-3">
-                <h1 class="text-3xl font-bold text-white"><?= esc($stock['symbol']) ?> <span class="text-gold">Predictions</span></h1>
+                <h1 class="text-3xl font-bold text-white"><?= esc($stock['symbol']) ?> <span class="text-accent">Predictions</span></h1>
                 <span id="marketBadge" class="text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400">
                     <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>
                 </span>
@@ -15,7 +15,7 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
             <p class="text-gray-400 mt-1">30-Day forecast using Monte Carlo & EMA analysis</p>
         </div>
         <div class="flex space-x-3 mt-4 md:mt-0">
-            <a href="/stocks/<?= $stock['id'] ?>" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-2 rounded-lg text-sm transition">
+            <a href="/stocks/<?= $stock['id'] ?>" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-arrow-left mr-1"></i> Back to Stock
             </a>
             <?php if (is_logged_in()): ?>
@@ -24,7 +24,7 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
                     <i class="fas fa-star mr-1"></i> Unwatch
                 </a>
                 <?php else: ?>
-                <a href="/watchlist/add/<?= $stock['id'] ?>" class="border border-gold text-gold hover:bg-gold/10 px-4 py-2 rounded-lg text-sm transition">
+                <a href="/watchlist/add/<?= $stock['id'] ?>" class="border border-accent text-accent hover:bg-accent/10 px-4 py-2 rounded-lg text-sm transition">
                     <i class="far fa-star mr-1"></i> Watch
                 </a>
                 <?php endif; ?>
@@ -33,17 +33,17 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div class="lg:col-span-2 bg-navy2 rounded-xl border border-gray-700 p-6">
+        <div class="lg:col-span-2 bg-surface rounded-xl border border-gray-700 p-6">
             <h3 class="text-white font-semibold mb-4">Price Prediction Chart</h3>
             <div class="h-72">
                 <canvas id="predictionChart"></canvas>
             </div>
             <div class="flex justify-center space-x-6 mt-4 text-sm">
                 <div class="flex items-center"><div class="w-3 h-3 bg-blue-400 rounded mr-2"></div> Historical</div>
-                <div class="flex items-center"><div class="w-3 h-3 bg-gold rounded mr-2"></div> Predicted</div>
+                <div class="flex items-center"><div class="w-3 h-3 bg-accent rounded mr-2"></div> Predicted</div>
             </div>
         </div>
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+        <div class="bg-surface rounded-xl border border-gray-700 p-6">
             <h3 class="text-white font-semibold mb-4">Prediction Summary</h3>
             <?php 
             $currentPrice = (float) $stock['current_price'];
@@ -88,7 +88,7 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
         </div>
     </div>
 
-    <div class="bg-navy2 rounded-xl border border-gray-700 overflow-hidden mb-8">
+    <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden mb-8">
         <div class="px-6 py-4 border-b border-gray-700">
             <h3 class="text-white font-bold text-lg">Daily Predictions (Next 30 Days)</h3>
         </div>
@@ -109,7 +109,7 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
                         $change = (float) $p['predicted_price'] - $currentPrice;
                         $changePct = $currentPrice > 0 ? ($change / $currentPrice) * 100 : 0;
                     ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
+                    <tr class="border-b border-gray-700/50 hover:bg-page/50">
                         <td class="px-6 py-3 text-gray-300"><?= date('M d, Y', strtotime($p['predicted_date'])) ?></td>
                         <td class="px-6 py-3 text-right text-white font-medium"><?= format_price($p['predicted_price'], $cur) ?></td>
                         <td class="px-6 py-3 text-right <?= $change >= 0 ? 'text-green-400' : 'text-red-400' ?>">
@@ -135,7 +135,7 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
         </div>
     </div>
 
-    <div class="bg-navy2 rounded-xl border border-yellow-700/50 p-6">
+    <div class="bg-surface rounded-xl border border-yellow-700/50 p-6">
         <div class="flex items-start space-x-3">
             <i class="fas fa-exclamation-triangle text-yellow-400 text-xl mt-1"></i>
             <div>
@@ -184,7 +184,7 @@ function renderPredictionChart() {
         }, {
             label: 'Predicted',
             data: <?= json_encode(array_merge([$lastPrice], $predictionPrices)) ?>,
-            borderColor: chartCssColor('--gold-text'),
+            borderColor: chartCssColor('--accent'),
             borderDash: [5, 5],
             backgroundColor: 'transparent',
             tension: 0.3,
@@ -199,8 +199,8 @@ function renderPredictionChart() {
                 }
                 echo json_encode(array_merge([$lastPrice], $upperBound));
             ?>,
-            borderColor: chartCssColor('--gold-text', 0.2),
-            backgroundColor: chartCssColor('--gold-text', 0.05),
+            borderColor: chartCssColor('--accent', 0.2),
+            backgroundColor: chartCssColor('--accent', 0.05),
             fill: 2,
             tension: 0.3,
             pointRadius: 0,
@@ -214,8 +214,8 @@ function renderPredictionChart() {
                 }
                 echo json_encode(array_merge([$lastPrice], $lowerBound));
             ?>,
-            borderColor: chartCssColor('--gold-text', 0.2),
-            backgroundColor: chartCssColor('--gold-text', 0.05),
+            borderColor: chartCssColor('--accent', 0.2),
+            backgroundColor: chartCssColor('--accent', 0.05),
             tension: 0.3,
             pointRadius: 0,
             borderWidth: 0.5,

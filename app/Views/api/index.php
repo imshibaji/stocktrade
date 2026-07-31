@@ -123,7 +123,7 @@
         ?>
 
         <?php foreach ($endpoints as $key => $ep): ?>
-        <div class="bg-navy2 rounded-xl border border-gray-700 overflow-hidden api-card" data-key="<?= $key ?>">
+        <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden api-card" data-key="<?= $key ?>">
             <div class="px-5 py-4 border-b border-gray-700 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <span class="px-2 py-0.5 rounded text-xs font-mono font-bold
@@ -135,11 +135,11 @@
                     <span class="px-1.5 py-0.5 rounded text-[10px] bg-blue-900/50 text-blue-400 font-mono">AUTH</span>
                     <?php endif; ?>
                 </div>
-                <button onclick="toggleApiCard('<?= $key ?>')" class="text-gray-500 hover:text-gold transition">
+                <button onclick="toggleApiCard('<?= $key ?>')" class="text-gray-500 hover:text-accent transition">
                     <i class="fas fa-chevron-down"></i>
                 </button>
             </div>
-            <div class="px-5 py-3 bg-navy/30">
+            <div class="px-5 py-3 bg-page/30">
                 <p class="text-gray-400 text-sm"><?= esc($ep['desc']) ?></p>
             </div>
             <div id="apiBody_<?= $key ?>" class="hidden">
@@ -156,11 +156,11 @@
                             value="<?= esc($param['default'] ?? '') ?>"
                             data-in="<?= $param['in'] ?? 'path' ?>"
                             data-name="<?= $param['name'] ?>"
-                            class="api-param w-full bg-navy border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:border-gold focus:outline-none font-mono">
+                            class="api-param w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:border-accent focus:outline-none font-mono">
                     </div>
                     <?php endforeach; ?>
                     <button onclick="tryEndpoint('<?= $key ?>')"
-                        class="w-full bg-gold hover:bg-gold2 text-navy font-semibold px-4 py-2 rounded-lg text-sm transition flex items-center justify-center space-x-2">
+                        class="w-full bg-accent hover:bg-accent-2 text-on-accent font-semibold px-4 py-2 rounded-lg text-sm transition flex items-center justify-center space-x-2">
                         <i class="fas fa-play"></i>
                         <span>Try It</span>
                     </button>

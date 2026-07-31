@@ -10,56 +10,56 @@
             <p class="text-gray-400 mt-1">Complete overview of your investment portfolio with tax calculations</p>
         </div>
         <div class="flex space-x-3 mt-4 md:mt-0">
-            <a href="/investments" class="bg-gold hover:bg-gold2 text-navy font-semibold px-4 py-2 rounded-lg text-sm transition">
+            <a href="/investments" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-plus mr-2"></i>Add Investment
             </a>
-            <a href="/investments/history" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-2 rounded-lg text-sm transition">
+            <a href="/investments/history" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-history mr-2"></i>History
             </a>
         </div>
     </div>
 
     <?php if (empty($portfolio['investments'])): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-12 text-center">
+    <div class="bg-surface rounded-xl border border-gray-700 p-12 text-center">
         <i class="fas fa-chart-pie text-6xl text-gray-600 mb-4"></i>
         <h3 class="text-white text-xl font-semibold mb-2">No investments yet</h3>
         <p class="text-gray-400 mb-6">Add investments to see your portfolio summary with profit/loss analysis.</p>
-        <a href="/investments" class="bg-gold hover:bg-gold2 text-navy font-semibold px-8 py-3 rounded-lg transition inline-block">
+        <a href="/investments" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-8 py-3 rounded-lg transition inline-block">
             Start Investing
         </a>
     </div>
     <?php else: ?>
 
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8" id="portfolioCards">
-        <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
+        <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Invested</p>
             <p id="totalInvested" class="text-xl font-bold text-white"><?= format_price($portfolio['total_invested']) ?></p>
         </div>
-        <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
+        <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Current Value</p>
             <p id="totalValue" class="text-xl font-bold text-white"><?= format_price($portfolio['total_current_value']) ?></p>
         </div>
-        <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
+        <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Gross P/L</p>
             <p id="totalGross" class="text-xl font-bold <?= $portfolio['total_gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                 <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_gross_profit']) ?>
             </p>
         </div>
-        <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
+        <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Fees</p>
             <p id="totalFeesCard" class="text-xl font-bold text-orange-400"><?= format_price($portfolio['total_fees'] ?? 0) ?></p>
         </div>
-        <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
+        <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Tax</p>
             <p id="totalTax" class="text-xl font-bold text-yellow-400"><?= format_price($portfolio['total_tax']) ?></p>
         </div>
-        <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
+        <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Net P/L</p>
             <p id="totalNet" class="text-xl font-bold <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                 <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_net_profit']) ?>
             </p>
         </div>
-        <div class="bg-navy2 rounded-xl p-5 border border-gray-700 text-center">
+        <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Net Return</p>
             <p id="totalReturn" class="text-xl font-bold <?= $portfolio['total_invested'] > 0 && $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                 <?= $portfolio['total_invested'] > 0 ? round(($portfolio['total_net_profit'] / $portfolio['total_invested']) * 100, 2) : 0 ?>%
@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    <div class="bg-navy2 rounded-xl border border-gray-700 overflow-hidden mb-8">
+    <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden mb-8">
         <div class="px-6 py-4 border-b border-gray-700">
             <h2 class="text-white font-bold text-lg">Investment Breakdown</h2>
         </div>
@@ -92,7 +92,7 @@
                     <?php foreach ($portfolio['investments'] as $item): 
                         $inv = $item['stock'];
                     ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
+                    <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
@@ -118,7 +118,7 @@
                         </td>
                     </tr>
                     <?php endforeach; ?>
-                    <tr class="bg-navy">
+                    <tr class="bg-page">
                         <td class="px-6 py-4 font-bold text-white" colspan="4">TOTAL</td>
                         <td class="px-6 py-4 text-right text-white font-bold" id="totalInvFooter"><?= format_price($portfolio['total_invested']) ?></td>
                         <td class="px-6 py-4 text-right text-white font-bold" id="totalValFooter"><?= format_price($portfolio['total_current_value']) ?></td>
@@ -138,7 +138,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-navy2 rounded-xl border border-yellow-700/50 p-6">
+        <div class="bg-surface rounded-xl border border-yellow-700/50 p-6">
             <h3 class="text-yellow-400 font-semibold text-lg mb-3">Short Term Capital Gains (STCG)</h3>
             <p class="text-gray-400 text-sm mb-2">Applied when shares are held less than 1 year.</p>
             <ul class="space-y-2 text-sm text-gray-300">
@@ -147,7 +147,7 @@
                 <li><i class="fas fa-check text-green-500 mr-2"></i>Holding period: &lt; 365 days</li>
             </ul>
         </div>
-        <div class="bg-navy2 rounded-xl border border-blue-700/50 p-6">
+        <div class="bg-surface rounded-xl border border-blue-700/50 p-6">
             <h3 class="text-blue-400 font-semibold text-lg mb-3">Long Term Capital Gains (LTCG)</h3>
             <p class="text-gray-400 text-sm mb-2">Applied when shares are held more than 1 year.</p>
             <ul class="space-y-2 text-sm text-gray-300">

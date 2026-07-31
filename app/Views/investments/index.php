@@ -10,10 +10,10 @@
             <p class="text-gray-400 mt-1">Track and manage your stock investments</p>
         </div>
         <div class="flex space-x-3 mt-4 md:mt-0">
-            <a href="/portfolio" class="border border-gold text-gold hover:bg-gold/10 px-4 py-2 rounded-lg text-sm transition">
+            <a href="/portfolio" class="border border-accent text-accent hover:bg-accent/10 px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-chart-pie mr-2"></i>Portfolio Summary
             </a>
-            <a href="/investments/history" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-2 rounded-lg text-sm transition">
+            <a href="/investments/history" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-history mr-2"></i>History
             </a>
         </div>
@@ -21,13 +21,13 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="lg:col-span-2">
-            <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+            <div class="bg-surface rounded-xl border border-gray-700 p-6">
                 <h2 class="text-white font-bold text-lg mb-6">Add New Investment</h2>
                 <form action="/investments/create" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     <?= csrf_field() ?>
                     <div>
                         <label class="block text-gray-300 mb-2 text-sm">Select Stock</label>
-                        <select name="stock_id" id="invStockSelect" required class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none">
+                        <select name="stock_id" id="invStockSelect" required class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
                             <option value="">Choose a stock...</option>
                             <?php foreach ($stocks as $s): ?>
                             <option value="<?= $s['id'] ?>" data-price="<?= $s['current_price'] ?>" data-currency="<?= stock_currency($s['exchange'] ?? null) ?>"><?= esc($s['symbol']) ?> - <?= esc($s['name']) ?> (<?= format_price($s['current_price'], stock_currency($s['exchange'] ?? null)) ?>)</option>
@@ -37,33 +37,33 @@
                     </div>
                     <div class="flex flex-col">
                         <div class="flex border border-gray-600 rounded-lg overflow-hidden mb-2">
-                            <button type="button" id="inputTypeAmount" class="input-type-btn flex-1 py-2 px-3 text-sm font-semibold bg-gold text-navy transition">Amount</button>
+                            <button type="button" id="inputTypeAmount" class="input-type-btn flex-1 py-2 px-3 text-sm font-semibold bg-accent text-on-accent transition">Amount</button>
                             <button type="button" id="inputTypeQuantity" class="input-type-btn flex-1 py-2 px-3 text-sm text-gray-400 hover:text-white transition">Quantity</button>
                         </div>
                         <input type="hidden" name="input_type" id="inputType" value="amount">
                         <div id="amountInput">
                             <label class="block text-gray-300 mb-2 text-sm">Investment Amount (Rs)</label>
                             <input type="number" name="amount" min="1" step="0.01" required
-                                class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none"
+                                class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
                                 placeholder="e.g. 50000">
                         </div>
                         <div id="quantityInput" class="hidden">
                             <label class="block text-gray-300 mb-2 text-sm">Number of Shares</label>
                             <input type="number" name="quantity" min="1" step="1"
-                                class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none"
+                                class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
                                 placeholder="e.g. 10">
                         </div>
                         <div id="calcResult" class="text-gray-400 text-xs mt-2 hidden"></div>
                     </div>
                     <div>
-                        <button type="submit" class="w-full bg-gold hover:bg-gold2 text-navy font-bold py-3 rounded-lg transition">
+                        <button type="submit" class="w-full bg-accent hover:bg-accent-2 text-on-accent font-bold py-3 rounded-lg transition">
                             <i class="fas fa-plus mr-2"></i>Add Investment
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+        <div class="bg-surface rounded-xl border border-gray-700 p-6">
             <h3 class="text-white font-semibold mb-4">Tax Information</h3>
             <div class="space-y-4">
                 <div class="bg-yellow-900/20 border border-yellow-700/50 rounded-lg p-4">
@@ -79,7 +79,7 @@
     </div>
 
     <?php if (!empty($investments)): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 overflow-hidden">
+    <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-700">
             <h2 class="text-white font-bold text-lg">All Investments</h2>
         </div>
@@ -103,9 +103,9 @@
 <?php foreach ($investments as $inv): 
     $pl = $investmentPl[(int) $inv['id']] ?? [];
 ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
+                    <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
-                            <a href="/stocks/<?= $inv['stock_id'] ?>" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold"><?= esc($inv['symbol']) ?></a>
+                            <a href="/stocks/<?= $inv['stock_id'] ?>" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent"><?= esc($inv['symbol']) ?></a>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
                         <td class="px-6 py-4 text-right text-gray-300 inv-buy-price"><?= format_price($inv['buy_price']) ?></td>
@@ -135,7 +135,7 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end space-x-3">
-                                <a href="/investments/<?= $inv['id'] ?>/edit" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs" title="Edit">
+                                <a href="/investments/<?= $inv['id'] ?>/edit" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form action="/investments/<?= $inv['id'] ?>/delete" method="post" class="inline" onsubmit="return confirm('Delete this investment?')">
@@ -216,8 +216,8 @@
         document.getElementById('inputType').value = type;
         document.getElementById('amountInput').classList.toggle('hidden', type !== 'amount');
         document.getElementById('quantityInput').classList.toggle('hidden', type !== 'quantity');
-        document.getElementById('inputTypeAmount').className = 'input-type-btn flex-1 py-2 px-3 text-sm font-semibold transition ' + (type === 'amount' ? 'bg-gold text-navy' : 'text-gray-400 hover:text-white');
-        document.getElementById('inputTypeQuantity').className = 'input-type-btn flex-1 py-2 px-3 text-sm font-semibold transition ' + (type === 'quantity' ? 'bg-gold text-navy' : 'text-gray-400 hover:text-white');
+        document.getElementById('inputTypeAmount').className = 'input-type-btn flex-1 py-2 px-3 text-sm font-semibold transition ' + (type === 'amount' ? 'bg-accent text-on-accent' : 'text-gray-400 hover:text-white');
+        document.getElementById('inputTypeQuantity').className = 'input-type-btn flex-1 py-2 px-3 text-sm font-semibold transition ' + (type === 'quantity' ? 'bg-accent text-on-accent' : 'text-gray-400 hover:text-white');
         var amountInput = document.querySelector('input[name="amount"]');
         var qtyInput = document.querySelector('input[name="quantity"]');
         if (type === 'quantity') {

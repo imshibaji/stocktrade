@@ -1,17 +1,17 @@
 <section class="min-h-screen">
     <div class="flex">
         <!-- Admin Sidebar -->
-        <div class="w-64 bg-navy2 border-r border-gray-700 min-h-screen">
+        <div class="w-64 bg-surface border-r border-gray-700 min-h-screen">
             <div class="p-4 border-b border-gray-700">
                 <h2 class="text-white font-bold text-lg">Admin Panel</h2>
             </div>
             <nav class="p-2">
-                <a href="/admin" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Dashboard</a>
-                <a href="/admin/users" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Users</a>
-                <a href="/admin/stocks" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Stocks</a>
-                <a href="/admin/screeners" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition text-white bg-navy">Screeners</a>
-                <a href="/admin/pages" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Pages</a>
-                <a href="/admin/settings" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Website Settings</a>
+                <a href="/admin" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Dashboard</a>
+                <a href="/admin/users" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Users</a>
+                <a href="/admin/stocks" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Stocks</a>
+                <a href="/admin/screeners" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition text-white bg-page">Screeners</a>
+                <a href="/admin/pages" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Pages</a>
+                <a href="/admin/settings" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Website Settings</a>
             </nav>
         </div>
 
@@ -31,10 +31,10 @@
                 </div>
             <?php endif; ?>
 
-            <div class="bg-navy2 rounded-xl border border-gray-700 overflow-x-auto">
+            <div class="bg-surface rounded-xl border border-gray-700 overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                        <tr class="bg-navy border-b border-gray-700">
+                        <tr class="bg-page border-b border-gray-700">
                             <th class="text-left px-4 py-3 text-gray-300 font-medium">ID</th>
                             <th class="text-left px-4 py-3 text-gray-300 font-medium">Name</th>
                             <th class="text-left px-4 py-3 text-gray-300 font-medium">User</th>

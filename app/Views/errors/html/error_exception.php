@@ -11,17 +11,18 @@
             theme: {
                 extend: {
                     colors: {
-                        navy: '#0B1220',
-                        navy2: '#111827',
-                        gold: '#D4A853',
-                        gold2: '#E8C56D',
+                        page: '#141413',
+                        surface: '#1c1c1b',
+                        accent: '#D97757',
+                        'accent-2': '#E29376',
+                        'on-accent': '#141413',
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-navy text-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-page text-gray-100 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-4xl">
         <div class="text-center mb-8">
             <i class="fas fa-<?= $icon ?? 'exclamation-circle' ?> text-<?= $color ?? 'yellow' ?>-500 text-8xl opacity-80"></i>
@@ -32,10 +33,10 @@
             <?= esc($message ?? 'Something went wrong. Please try again or contact support.') ?>
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <button onclick="window.location.reload()" class="bg-gold hover:bg-gold2 text-navy font-semibold px-6 py-3 rounded-lg transition">
+            <button onclick="window.location.reload()" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-6 py-3 rounded-lg transition">
                 <i class="fas fa-sync-alt mr-2"></i>Retry
             </button>
-            <a href="/dashboard" class="border border-gold text-gold hover:bg-gold/10 font-semibold px-6 py-3 rounded-lg transition">
+            <a href="/dashboard" class="border border-accent text-accent hover:bg-accent/10 font-semibold px-6 py-3 rounded-lg transition">
                 <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
             </a>
             <a href="/" class="text-gray-400 hover:text-white text-sm self-center">
@@ -44,7 +45,7 @@
         </div>
         
         <?php if (ENVIRONMENT !== 'production' && isset($exception)): ?>
-        <div class="text-left p-4 bg-navy2 rounded-lg border border-gray-700 overflow-hidden">
+        <div class="text-left p-4 bg-surface rounded-lg border border-gray-700 overflow-hidden">
             <p class="text-red-400 text-xs mb-2">Debug Information (Development Only)</p>
             <pre class="text-xs text-gray-400 overflow-x-auto whitespace-pre-wrap"><?= esc((string)$exception) ?></pre>
         </div>

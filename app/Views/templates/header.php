@@ -1,10 +1,25 @@
+<?php
+$siteName = site_name();
+$siteParts = explode(' ', trim($siteName), 2);
+$brandHead = $siteParts[0] !== '' ? $siteParts[0] : 'StockTrade';
+$brandTail = $siteParts[1] ?? '';
+$pageTitle = $title ?? $siteName;
+$pageTitle = str_ireplace([' - AIStockTrader', ' - StockTrade Tips'], '', $pageTitle);
+$pageTitle = trim($pageTitle);
+if ($pageTitle !== '' && strcasecmp($pageTitle, $siteName) !== 0) {
+    $pageTitle .= ' - ' . $siteName;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title ?? 'AIStockTrader') ?></title>
-    <meta name="theme-color" id="metaThemeColor" content="#0a1929">
+    <title><?= esc($pageTitle) ?></title>
+    <meta name="theme-color" id="metaThemeColor" content="#141413">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
     (function() {
         try {
@@ -26,19 +41,19 @@
     <?php endif; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-navy text-gray-100 min-h-screen">
+<body class="bg-page text-gray-100 min-h-screen">
 
 <?php if (is_logged_in()): ?>
 
-    <nav class="bg-navy2 border-b border-gray-700 sticky top-0 z-50">
+    <nav class="bg-surface border-b border-gray-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex items-center justify-between h-16">
 
                 <!-- Left: Logo + market badge -->
                 <div class="flex items-center space-x-4 shrink-0">
                     <a href="/dashboard" class="flex items-center space-x-2">
-                        <i class="fas fa-chart-line text-gold text-2xl"></i>
-                        <span class="text-xl font-bold text-gold hidden sm:inline">StockTrade<span class="text-white">Tips</span></span>
+                        <i class="fas fa-chart-line text-accent text-2xl"></i>
+                        <span class="text-xl font-bold text-accent hidden sm:inline"><?= esc($brandHead) ?><?php if ($brandTail !== ''): ?><span class="text-white"><?= esc($brandTail) ?></span><?php endif; ?></span>
                     </a>
                 </div>
 
@@ -47,15 +62,15 @@
                     <div class="relative">
                         <input type="text" id="navSearch" placeholder="Search symbol, name or exchange..."
                             autocomplete="off"
-                            class="w-full bg-navy border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-gold focus:outline-none">
+                            class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                        <div id="navSearchDropdown" class="hidden absolute top-full left-0 mt-1 w-full bg-navy2 border border-gray-600 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"></div>
+                        <div id="navSearchDropdown" class="hidden absolute top-full left-0 mt-1 w-full bg-surface border border-gray-600 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"></div>
                     </div>
                 </div>
 
                 <!-- Right: Dashboard + User dropdown + hamburger -->
                 <div class="flex items-center space-x-2">
-                    <a href="/dashboard" class="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-navy transition items-center">
+                    <a href="/dashboard" class="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-page transition items-center">
                         <i class="fas fa-tachometer-alt mr-1.5"></i>Dashboard
                     </a>
                     <div class="hidden md:flex theme-switch" data-theme-switch-wrap>
@@ -70,39 +85,39 @@
                         </button>
                     </div>
                     <div class="relative hidden md:block" id="userDropdown">
-                        <button onclick="toggleUserNav()" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-navy transition">
-                            <i class="fas fa-user-circle text-gold"></i>
+                        <button onclick="toggleUserNav()" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-page transition">
+                            <i class="fas fa-user-circle text-accent"></i>
                             <span class="max-w-[100px] truncate"><?= esc(current_user()['name']) ?></span>
                             <i class="fas fa-chevron-down text-[10px]"></i>
                         </button>
-                        <div id="userDropdownMenu" class="hidden absolute top-full right-0 mt-1 w-52 bg-navy2 border border-gray-600 rounded-lg shadow-xl z-50 py-1">
-                            <a href="/watchlist" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-navy transition">
+                        <div id="userDropdownMenu" class="hidden absolute top-full right-0 mt-1 w-52 bg-surface border border-gray-600 rounded-lg shadow-xl z-50 py-1">
+                            <a href="/watchlist" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-star w-5 mr-2 text-yellow-400"></i>Watchlist
                             </a>
-                            <a href="/investments" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-navy transition">
+                            <a href="/investments" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-briefcase w-5 mr-2 text-blue-400"></i>Investments
                             </a>
-                            <a href="/portfolio" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-navy transition">
+                            <a href="/portfolio" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-chart-pie w-5 mr-2 text-purple-400"></i>Portfolio
                             </a>
-                            <a href="/investments/transactions" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-navy transition">
+                            <a href="/investments/transactions" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-exchange-alt w-5 mr-2 text-teal-400"></i>Transactions
                             </a>
-                            <a href="/screener" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-navy transition">
+                            <a href="/screener" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-filter w-5 mr-2 text-indigo-400"></i>Screener
                             </a>
-                            <a href="/stocks" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-navy transition">
+                            <a href="/stocks" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-search w-5 mr-2 text-green-400"></i>Stocks
                             </a>
                             <hr class="border-gray-700 my-1">
-                            <a href="/api-playground" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-navy transition">
-                                <i class="fas fa-code w-5 mr-2 text-gold"></i>API Docs
+                            <a href="/api-playground" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
+                                <i class="fas fa-code w-5 mr-2 text-accent"></i>API Docs
                             </a>
                             <hr class="border-gray-700 my-1">
-                            <a href="/settings" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-navy transition">
+                            <a href="/settings" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-cog w-5 mr-2 text-gray-400"></i>Settings
                             </a>
-                            <a href="/logout" class="flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-navy transition">
+                            <a href="/logout" class="flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-page transition">
                                 <i class="fas fa-sign-out-alt w-5 mr-2"></i>Logout
                             </a>
                         </div>
@@ -118,15 +133,15 @@
         <div id="mobile-menu" class="hidden md:hidden border-t border-gray-700">
             <div class="px-4 py-3">
                 <div class="flex items-center space-x-3 mb-3">
-                    <i class="fas fa-chart-line text-gold text-xl"></i>
-                    <span class="text-lg font-bold text-gold">StockTrade<span class="text-white">Tips</span></span>
+                    <i class="fas fa-chart-line text-accent text-xl"></i>
+                    <span class="text-lg font-bold text-accent"><?= esc($brandHead) ?><?php if ($brandTail !== ''): ?><span class="text-white"><?= esc($brandTail) ?></span><?php endif; ?></span>
                 </div>
                 <div class="relative mb-3">
                     <input type="text" id="mobileSearch" placeholder="Search symbol, name or exchange..."
                         autocomplete="off"
-                        class="w-full bg-navy border border-gray-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-gold focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none">
                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                    <div id="mobileSearchDropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-navy2 border border-gray-600 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto"></div>
+                    <div id="mobileSearchDropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-surface border border-gray-600 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto"></div>
                 </div>
                 <div class="theme-segmented mb-3" data-theme-segment-wrap>
                     <button type="button" data-theme-segment="day" onclick="setTheme('day')">
@@ -141,36 +156,36 @@
                 </div>
                 <hr class="border-gray-700 my-2">
                 <div class="space-y-1">
-                    <a href="/dashboard" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
+                    <a href="/dashboard" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-tachometer-alt w-5 mr-2"></i>Dashboard
                     </a>
-                    <a href="/watchlist" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
+                    <a href="/watchlist" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-star w-5 mr-2 text-yellow-400"></i>Watchlist
                     </a>
-                    <a href="/investments" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
+                    <a href="/investments" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-briefcase w-5 mr-2 text-blue-400"></i>Investments
                     </a>
-                    <a href="/portfolio" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
+                    <a href="/portfolio" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-chart-pie w-5 mr-2 text-purple-400"></i>Portfolio
                     </a>
-                    <a href="/investments/transactions" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
+                    <a href="/investments/transactions" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-exchange-alt w-5 mr-2 text-teal-400"></i>Transactions
                     </a>
-                    <a href="/screener" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
+                    <a href="/screener" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-filter w-5 mr-2 text-indigo-400"></i>Screener
                     </a>
-                    <a href="/stocks" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
+                    <a href="/stocks" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-search w-5 mr-2 text-green-400"></i>Stocks
                     </a>
                     <hr class="border-gray-700 my-2">
-                    <a href="/api-playground" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
-                        <i class="fas fa-code w-5 mr-2 text-gold"></i>API Docs
+                    <a href="/api-playground" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
+                        <i class="fas fa-code w-5 mr-2 text-accent"></i>API Docs
                     </a>
                     <hr class="border-gray-700 my-2">
-                    <a href="/settings" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">
+                    <a href="/settings" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-cog w-5 mr-2"></i>Settings
                     </a>
-                    <a href="/logout" class="flex items-center px-3 py-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-navy">
+                    <a href="/logout" class="flex items-center px-3 py-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-page">
                         <i class="fas fa-sign-out-alt w-5 mr-2"></i>Logout
                     </a>
                 </div>
@@ -223,14 +238,14 @@
                                     var cl = s.change_percent >= 0 ? 'text-green-400' : 'text-red-400';
                                     cs = '<span class="' + cl + ' text-xs">' + (s.change_percent >= 0 ? '+' : '') + s.change_percent + '%</span>';
                                 }
-                                h += '<div class="flex justify-between items-center px-4 py-3 hover:bg-navy border-b border-gray-700/50 last:border-0' + (s.from_yahoo ? '' : ' cursor-pointer') + '"' + (s.from_yahoo ? '' : ' onclick="location.href=\'/stocks/' + s.id + '\'"') + '>' +
+                                h += '<div class="flex justify-between items-center px-4 py-3 hover:bg-page border-b border-gray-700/50 last:border-0' + (s.from_yahoo ? '' : ' cursor-pointer') + '"' + (s.from_yahoo ? '' : ' onclick="location.href=\'/stocks/' + s.id + '\'"') + '>' +
                                     '<div class="min-w-0 flex-1"><span class="text-white text-sm font-semibold">' + eh(s.symbol) + '</span> <span class="text-gray-500 text-xs truncate">' + eh(s.name) + '</span></div>' +
                                     '<div class="text-right ml-3 flex items-center space-x-2">' +
                                     '<div><span class="text-white text-sm">' + ps + '</span> ' + cs + '</div>';
                                 if (s.from_yahoo) {
-                                    h += '<button onclick="importStock(\'' + eh(s.symbol) + '\', \'' + eh(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-gold text-navy font-semibold hover:bg-gold2 transition whitespace-nowrap">+ Add</button>';
+                                    h += '<button onclick="importStock(\'' + eh(s.symbol) + '\', \'' + eh(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-accent text-on-accent font-semibold hover:bg-accent-2 transition whitespace-nowrap">+ Add</button>';
                                 } else {
-                                    h += '<a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
+                                    h += '<a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
                                 }
                                 h += '</div></div>';
                             });
@@ -251,19 +266,19 @@
 
 <?php else: ?>
 
-    <nav class="bg-navy2 border-b border-gray-700 sticky top-0 z-50">
+    <nav class="bg-surface border-b border-gray-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-8">
                     <a href="/" class="flex items-center space-x-2">
-                        <i class="fas fa-chart-line text-gold text-2xl"></i>
-                        <span class="text-xl font-bold text-gold">AIStock<span class="text-white">Trader</span></span>
+                        <i class="fas fa-chart-line text-accent text-2xl"></i>
+                        <span class="text-xl font-bold text-accent"><?= esc($brandHead) ?><?php if ($brandTail !== ''): ?><span class="text-white"><?= esc($brandTail) ?></span><?php endif; ?></span>
                     </a>
                     <div class="hidden md:flex space-x-1">
-                        <a href="/" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">Home</a>
-                        <a href="/stocks" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">Stocks</a>
-                        <a href="/about" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">About</a>
-                        <a href="/contact" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">Contact</a>
+                        <a href="/" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Home</a>
+                        <a href="/stocks" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Stocks</a>
+                        <a href="/about" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">About</a>
+                        <a href="/contact" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Contact</a>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -278,8 +293,8 @@
                             <i class="fa-regular fa-moon icon-off"></i><i class="fa-solid fa-moon icon-on"></i>
                         </button>
                     </div>
-                    <a href="/login" class="px-4 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">Login</a>
-                    <a href="/register" class="bg-gold hover:bg-gold2 text-navy font-semibold px-4 py-2 rounded-lg text-sm transition">Get Started</a>
+                    <a href="/login" class="px-4 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Login</a>
+                    <a href="/register" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-4 py-2 rounded-lg text-sm transition">Get Started</a>
                     <button class="md:hidden text-gray-300" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
@@ -288,13 +303,13 @@
         </div>
         <div id="mobile-menu" class="hidden md:hidden border-t border-gray-700">
             <div class="px-4 py-3 space-y-1">
-                <a href="/" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">Home</a>
-                <a href="/stocks" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">Stocks</a>
-                <a href="/about" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">About</a>
-                <a href="/contact" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">Contact</a>
+                <a href="/" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Home</a>
+                <a href="/stocks" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Stocks</a>
+                <a href="/about" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">About</a>
+                <a href="/contact" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Contact</a>
                 <hr class="border-gray-700 my-2">
-                <a href="/login" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-navy">Login</a>
-                <a href="/register" class="block px-3 py-2 rounded-lg text-gold hover:text-gold2 hover:bg-navy font-semibold">Get Started</a>
+                <a href="/login" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Login</a>
+                <a href="/register" class="block px-3 py-2 rounded-lg text-accent hover:text-accent-2 hover:bg-page font-semibold">Get Started</a>
             </div>
         </div>
     </nav>
@@ -377,7 +392,7 @@
                             var cls = s.change_percent >= 0 ? 'text-green-400' : 'text-red-400';
                             changeStr = '<span class="' + cls + ' text-xs">' + (s.change_percent >= 0 ? '+' : '') + s.change_percent + '%</span>';
                         }
-                        html += '<div class="flex justify-between items-center px-4 py-3 hover:bg-navy border-b border-gray-700/50 last:border-0' + (s.from_yahoo ? '' : ' cursor-pointer') + '"' + (s.from_yahoo ? '' : ' onclick="location.href=\'/stocks/' + s.id + '\'"') + '>' +
+                        html += '<div class="flex justify-between items-center px-4 py-3 hover:bg-page border-b border-gray-700/50 last:border-0' + (s.from_yahoo ? '' : ' cursor-pointer') + '"' + (s.from_yahoo ? '' : ' onclick="location.href=\'/stocks/' + s.id + '\'"') + '>' +
                             '<div class="min-w-0 flex-1">' +
                             '<span class="text-white text-sm font-semibold">' + escHtml(s.symbol) + '</span> ' +
                             '<span class="text-gray-500 text-xs truncate">' + escHtml(s.name) + '</span>' +
@@ -385,9 +400,9 @@
                             '<div class="text-right ml-3 flex items-center space-x-2">' +
                             '<div><span class="text-white text-sm">' + priceStr + '</span> ' + changeStr + '</div>';
                         if (s.from_yahoo) {
-                            html += '<button data-import="' + escHtml(s.symbol) + '" onclick="importStock(\'' + escHtml(s.symbol) + '\', \'' + escHtml(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-gold text-navy font-semibold hover:bg-gold2 transition whitespace-nowrap">+ Add</button>';
+                            html += '<button data-import="' + escHtml(s.symbol) + '" onclick="importStock(\'' + escHtml(s.symbol) + '\', \'' + escHtml(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-accent text-on-accent font-semibold hover:bg-accent-2 transition whitespace-nowrap">+ Add</button>';
                         } else {
-                            html += '<a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-xs px-2 py-1 rounded bg-navy border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
+                            html += '<a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
                         }
                         html += '</div>' +
                             '</div>';
@@ -446,7 +461,7 @@
         root.setAttribute('data-theme', eff);
         root.setAttribute('data-theme-mode', mode);
         var meta = document.getElementById('metaThemeColor');
-        if (meta) meta.setAttribute('content', eff === 'day' ? '#f2f6fa' : '#0a1929');
+        if (meta) meta.setAttribute('content', eff === 'day' ? '#faf9f5' : '#141413');
 
         document.querySelectorAll('[data-theme-switch]').forEach(function(btn) {
             var on = btn.getAttribute('data-theme-switch') === mode;

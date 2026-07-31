@@ -5,30 +5,30 @@
             <p class="text-gray-400 mt-1">Filter stocks by fundamental and technical criteria</p>
         </div>
         <div class="flex space-x-3">
-            <button onclick="toggleGuide()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-2 rounded-lg text-sm transition">
+            <button onclick="toggleGuide()" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-book mr-2"></i>Guide
             </button>
             <a href="/screener/docs" class="border border-blue-400 text-blue-400 hover:bg-blue-400/10 px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-file-alt mr-2"></i>Documentation
             </a>
-            <button onclick="toggleSavedLists()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-2 rounded-lg text-sm transition">
+            <button onclick="toggleSavedLists()" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-save mr-2"></i>Saved Lists
-                <span id="savedCount" class="ml-1 text-gold text-xs"><?= count($savedLists) ?></span>
+                <span id="savedCount" class="ml-1 text-accent text-xs"><?= count($savedLists) ?></span>
             </button>
-            <a href="/stocks" class="border border-gold text-gold hover:bg-gold/10 px-4 py-2 rounded-lg text-sm transition">
+            <a href="/stocks" class="border border-accent text-accent hover:bg-accent/10 px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-list mr-2"></i>All Stocks
             </a>
         </div>
     </div>
 
-    <div id="screenerGuide" class="hidden bg-navy2 rounded-xl border border-gray-700 p-6 mb-6">
+    <div id="screenerGuide" class="hidden bg-surface rounded-xl border border-gray-700 p-6 mb-6">
         <div class="flex justify-between items-start mb-4">
             <h2 class="text-white font-bold text-lg">Screener Guide</h2>
             <button onclick="toggleGuide()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-sm">
             <div>
-                <h3 class="text-gold font-semibold mb-3">Fundamental Fields</h3>
+                <h3 class="text-accent font-semibold mb-3">Fundamental Fields</h3>
                 <table class="w-full text-gray-300">
                      <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">price</td><td class="py-1.5 text-gray-500">Current market price</td></tr>
                      <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">previous_close</td><td class="py-1.5 text-gray-500">Previous day close</td></tr>
@@ -63,13 +63,13 @@
                      <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">sector</td><td class="py-1.5 text-gray-500" style="color:rgb(var(--indigo))">String: Sector name</td></tr>
                      <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">name</td><td class="py-1.5 text-gray-500" style="color:rgb(var(--indigo))">String: Company name</td></tr>
                 </table>
-                <h3 class="text-gold font-semibold mt-4 mb-2">Math Operators</h3>
+                <h3 class="text-accent font-semibold mt-4 mb-2">Math Operators</h3>
                 <p class="text-gray-400 text-xs">Transform a field value before comparing:</p>
                 <code class="text-gray-300 text-xs">price × 2 > 5000</code><br>
                 <code class="text-gray-300 text-xs">market_cap / 10000000 > 100</code>
             </div>
             <div>
-                <h3 class="text-gold font-semibold mb-3">Technical Indicators</h3>
+                <h3 class="text-accent font-semibold mb-3">Technical Indicators</h3>
                 <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
                     <div><p class="text-green-400 text-xs font-semibold mb-1">Overlay & Trend</p><code class="text-gray-400 text-xs">sma_pct, ema_pct, vwap_ratio, macd, macd_signal, macd_histogram</code></div>
                     <div><p class="text-green-400 text-xs font-semibold mb-1">Volatility & Channels</p><code class="text-gray-400 text-xs">atr, natr, bb_pct, bb_width, kc_pct, dc_pct</code></div>
@@ -86,25 +86,25 @@
                 </div>
             </div>
             <div>
-                <h3 class="text-gold font-semibold mb-3">Match Mode</h3>
+                <h3 class="text-accent font-semibold mb-3">Match Mode</h3>
                 <p class="text-gray-400 text-xs mb-2">Choose how conditions are combined:</p>
                 <p class="text-gray-300 text-xs mb-3"><span class="text-green-400">All (AND)</span> &mdash; every condition must pass</p>
                 <p class="text-gray-300 text-xs mb-3"><span class="text-green-400">Any (OR)</span> &mdash; at least one condition passes</p>
-                <h3 class="text-gold font-semibold mb-3">Example Queries</h3>
+                <h3 class="text-accent font-semibold mb-3">Example Queries</h3>
                 <div class="space-y-3">
-                    <div class="bg-navy rounded-lg p-3 border border-gray-700">
+                    <div class="bg-page rounded-lg p-3 border border-gray-700">
                         <p class="text-green-400 text-xs mb-1">Oversold Bounce (AND)</p>
                         <code class="text-gray-300 text-xs">rsi &lt; 30 AND<br>stoch_k &lt; 20 AND<br>volume_ratio &gt; 1.5</code>
                     </div>
-                    <div class="bg-navy rounded-lg p-3 border border-gray-700">
+                    <div class="bg-page rounded-lg p-3 border border-gray-700">
                         <p class="text-green-400 text-xs mb-1">Value OR Momentum (OR)</p>
                         <code class="text-gray-300 text-xs">pe_ratio &lt; 12 OR<br>rsi &gt; 60</code>
                     </div>
-                    <div class="bg-navy rounded-lg p-3 border border-gray-700">
+                    <div class="bg-page rounded-lg p-3 border border-gray-700">
                         <p class="text-green-400 text-xs mb-1">Math Transform</p>
                         <code class="text-gray-300 text-xs">price &times; 2 &gt; 5000</code>
                     </div>
-                    <div class="bg-navy rounded-lg p-3 border border-gray-700">
+                    <div class="bg-page rounded-lg p-3 border border-gray-700">
                         <p class="text-green-400 text-xs mb-1">String Comparison</p>
                         <code class="text-gray-300 text-xs">exchange == 'NSE'</code><br>
                         <code class="text-gray-300 text-xs">currency != 'USD'</code><br>
@@ -117,35 +117,35 @@
 
     <div class="flex gap-6">
         <div class="flex-1 min-w-0">
-            <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-6">
+            <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-6">
              <div class="flex items-center justify-between mb-4">
                         <h2 class="text-white font-bold text-lg">Filter Criteria</h2>
                         <div class="flex items-center gap-4">
                             <label class="text-gray-400 text-xs">Match:</label>
-                            <select id="matchMode" class="bg-navy border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:border-gold focus:outline-none">
+                            <select id="matchMode" class="bg-page border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:border-accent focus:outline-none">
                                 <option value="all">All (AND)</option>
                                 <option value="any">Any (OR)</option>
                             </select>
                         </div>
                     </div>
                     <div class="flex gap-3 mb-4">
-                        <button onclick="switchScreenerTab('fundamental')" id="tab-fundamental" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy">Fundamental</button>
-                        <button onclick="switchScreenerTab('technical')" id="tab-technical" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Technical Analysis</button>
-                        <button onclick="switchScreenerTab('historical')" id="tab-historical" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Historical Data</button>
-                        <button onclick="switchScreenerTab('summaries')" id="tab-summaries" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Summaries</button>
-                        <button onclick="switchScreenerTab('manual')" id="tab-manual" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Manual Query</button>
+                        <button onclick="switchScreenerTab('fundamental')" id="tab-fundamental" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-accent text-on-accent">Fundamental</button>
+                        <button onclick="switchScreenerTab('technical')" id="tab-technical" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-page border border-gray-600 text-gray-300 hover:text-white">Technical Analysis</button>
+                        <button onclick="switchScreenerTab('historical')" id="tab-historical" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-page border border-gray-600 text-gray-300 hover:text-white">Historical Data</button>
+                        <button onclick="switchScreenerTab('summaries')" id="tab-summaries" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-page border border-gray-600 text-gray-300 hover:text-white">Summaries</button>
+                        <button onclick="switchScreenerTab('manual')" id="tab-manual" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-page border border-gray-600 text-gray-300 hover:text-white">Manual Query</button>
                     </div>
 <div id="filtersPanel">
                         <div id="fundamentalPanel">
                             <div id="filterList" class="space-y-3 mb-4"></div>
-                            <button onclick="addFundamentalFilter()" class="border border-gray-600 text-gray-300 hover:border-gold hover:text-gold px-4 py-2 rounded-lg text-sm transition mb-4">
+                            <button onclick="addFundamentalFilter()" class="border border-gray-600 text-gray-300 hover:border-accent hover:text-accent px-4 py-2 rounded-lg text-sm transition mb-4">
                                 <i class="fas fa-plus mr-1"></i>Add Filter
                             </button>
                             <div class="flex items-center gap-3">
-                                <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                <button onclick="runScreener()" class="bg-accent hover:bg-accent-2 text-on-accent font-bold px-6 py-3 rounded-lg transition">
                                     <i class="fas fa-search mr-2"></i>Run Screener
                                 </button>
-                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-3 rounded-lg text-sm transition">
                                     <i class="fas fa-undo mr-1"></i>Clear All
                                 </button>
                                 <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
@@ -156,14 +156,14 @@
                         </div>
                         <div id="technicalPanel" class="hidden">
                             <div id="techFilterList" class="space-y-3 mb-4"></div>
-                            <button onclick="addTechnicalFilter()" class="border border-gray-600 text-gray-300 hover:border-gold hover:text-gold px-4 py-2 rounded-lg text-sm transition mb-4">
+                            <button onclick="addTechnicalFilter()" class="border border-gray-600 text-gray-300 hover:border-accent hover:text-accent px-4 py-2 rounded-lg text-sm transition mb-4">
                                 <i class="fas fa-plus mr-1"></i>Add Filter
                             </button>
                             <div class="flex items-center gap-3">
-                                <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                <button onclick="runScreener()" class="bg-accent hover:bg-accent-2 text-on-accent font-bold px-6 py-3 rounded-lg transition">
                                     <i class="fas fa-search mr-2"></i>Run Screener
                                 </button>
-                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-3 rounded-lg text-sm transition">
                                     <i class="fas fa-undo mr-1"></i>Clear All
                                 </button>
                                 <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
@@ -171,14 +171,14 @@
                         </div>
                         <div id="historicalPanel" class="hidden">
                             <div id="historicalFilterList" class="space-y-3 mb-4"></div>
-                            <button onclick="addHistoricalFilter()" class="border border-gray-600 text-gray-300 hover:border-gold hover:text-gold px-4 py-2 rounded-lg text-sm transition mb-4">
+                            <button onclick="addHistoricalFilter()" class="border border-gray-600 text-gray-300 hover:border-accent hover:text-accent px-4 py-2 rounded-lg text-sm transition mb-4">
                                 <i class="fas fa-plus mr-1"></i>Add Filter
                             </button>
                             <div class="flex items-center gap-3">
-                                <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                <button onclick="runScreener()" class="bg-accent hover:bg-accent-2 text-on-accent font-bold px-6 py-3 rounded-lg transition">
                                     <i class="fas fa-search mr-2"></i>Run Screener
                                 </button>
-                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-3 rounded-lg text-sm transition">
                                     <i class="fas fa-undo mr-1"></i>Clear All
                                 </button>
                                 <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
@@ -186,14 +186,14 @@
                         </div>
                         <div id="summariesPanel" class="hidden">
                             <div id="summariesFilterList" class="space-y-3 mb-4"></div>
-                            <button onclick="addSummariesFilter()" class="border border-gray-600 text-gray-300 hover:border-gold hover:text-gold px-4 py-2 rounded-lg text-sm transition mb-4">
+                            <button onclick="addSummariesFilter()" class="border border-gray-600 text-gray-300 hover:border-accent hover:text-accent px-4 py-2 rounded-lg text-sm transition mb-4">
                                 <i class="fas fa-plus mr-1"></i>Add Filter
                             </button>
                             <div class="flex items-center gap-3">
-                                <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                <button onclick="runScreener()" class="bg-accent hover:bg-accent-2 text-on-accent font-bold px-6 py-3 rounded-lg transition">
                                     <i class="fas fa-search mr-2"></i>Run Screener
                                 </button>
-                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-3 rounded-lg text-sm transition">
                                     <i class="fas fa-undo mr-1"></i>Clear All
                                 </button>
                                 <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
@@ -205,7 +205,7 @@
                         <div id="manualPanel" class="hidden">
                         <div class="mb-3">
                             <label class="block text-sm font-medium text-gray-300 mb-1">Stock Logic Query</label>
-                            <textarea id="manualQuery" rows="4" class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-gold" placeholder="e.g. pe_ratio &lt; 20 AND market_cap &gt; 1000000000"></textarea>
+                            <textarea id="manualQuery" rows="4" class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-accent" placeholder="e.g. pe_ratio &lt; 20 AND market_cap &gt; 1000000000"></textarea>
                         </div>
                         <p class="text-xs text-gray-500 mb-3">
                             Supported operators: <code class="text-gray-400">&gt; &gt;= &lt; &lt;= == !=</code>
@@ -214,7 +214,7 @@
                             String: <code class="text-gray-400">sector == 'Technology'</code>
                         </p>
                         <div class="flex items-center gap-3 mb-4">
-                            <button onclick="runManualQuery()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                            <button onclick="runManualQuery()" class="bg-accent hover:bg-accent-2 text-on-accent font-bold px-6 py-3 rounded-lg transition">
                                 <i class="fas fa-search mr-2"></i>Compile &amp; Run
                             </button>
                         </div>
@@ -229,10 +229,10 @@
                 </div>
 
             <div id="resultsContainer" class="hidden">
-                <div class="bg-navy2 rounded-xl border border-gray-700 p-4 mb-4">
+                <div class="bg-surface rounded-xl border border-gray-700 p-4 mb-4">
                     <div class="flex items-center justify-between">
                         <h2 class="text-white font-bold text-lg">
-                            Results <span id="resultCount2" class="text-gold text-base font-normal"></span>
+                            Results <span id="resultCount2" class="text-accent text-base font-normal"></span>
                         </h2>
                         <div class="flex gap-2">
                             <button onclick="showSaveDialog()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
@@ -241,7 +241,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-navy2 rounded-xl border border-gray-700 overflow-hidden">
+                <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
@@ -268,7 +268,7 @@
         </div>
 
         <div id="savedListsPanel" class="hidden w-80 shrink-0">
-            <div class="bg-navy2 rounded-xl border border-gray-700 p-4">
+            <div class="bg-surface rounded-xl border border-gray-700 p-4">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-white font-bold text-lg">Saved Lists</h2>
                     <button onclick="toggleSavedLists()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
@@ -279,9 +279,9 @@
     </div>
 
     <div id="saveDialog" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-6 w-full max-w-md">
+        <div class="bg-surface rounded-xl border border-gray-700 p-6 w-full max-w-md">
             <h3 class="text-white font-bold text-lg mb-4">Save Screener List</h3>
-            <input type="text" id="listNameInput" placeholder="Enter list name..." class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white text-sm focus:border-gold focus:outline-none mb-4">
+            <input type="text" id="listNameInput" placeholder="Enter list name..." class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white text-sm focus:border-accent focus:outline-none mb-4">
             <div class="flex justify-end gap-3">
                 <button onclick="closeSaveDialog()" class="border border-gray-600 text-gray-300 px-4 py-2 rounded-lg text-sm">Cancel</button>
                 <button onclick="saveList()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">Save</button>
@@ -484,25 +484,25 @@ var FILTER_FIELDS = [
         // Reset all tab styles
         [tabFundamental, tabTechnical, tabHistorical, tabSummaries, tabManual].forEach(function(btn) {
             if (btn) {
-                btn.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white';
+                btn.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-page border border-gray-600 text-gray-300 hover:text-white';
             }
         });
 
         if (tab === 'fundamental') {
             fundamentalPanel.classList.remove('hidden');
-            if (tabFundamental) tabFundamental.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+            if (tabFundamental) tabFundamental.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-accent text-on-accent';
         } else if (tab === 'technical') {
             technicalPanel.classList.remove('hidden');
-            if (tabTechnical) tabTechnical.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+            if (tabTechnical) tabTechnical.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-accent text-on-accent';
         } else if (tab === 'historical') {
             historicalPanel.classList.remove('hidden');
-            if (tabHistorical) tabHistorical.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+            if (tabHistorical) tabHistorical.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-accent text-on-accent';
         } else if (tab === 'summaries') {
             summariesPanel.classList.remove('hidden');
-            if (tabSummaries) tabSummaries.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+            if (tabSummaries) tabSummaries.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-accent text-on-accent';
         } else {
             manualPanel.classList.remove('hidden');
-            if (tabManual) tabManual.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+            if (tabManual) tabManual.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-accent text-on-accent';
         }
     };
 
@@ -543,11 +543,11 @@ var FILTER_FIELDS = [
                     var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
                     var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
                     var tr = document.createElement('tr');
-                    tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                    tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
                     tr.style.cursor = 'pointer';
                     tr.onclick = function() { location.href = '/stocks/' + s.id; };
                     tr.innerHTML =
-                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
                         '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
                         '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
                         '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
@@ -559,8 +559,8 @@ var FILTER_FIELDS = [
                         '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
                         '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
                         '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-gold text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
                             '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
                         '</div></td>';
                     tbody.appendChild(tr);
@@ -599,29 +599,29 @@ var FILTER_FIELDS = [
         var list = document.getElementById('filterList');
         var id = ++filterId;
         var div = document.createElement('div');
-        div.className = 'filter-row flex items-center gap-1.5 bg-navy rounded-lg p-3 border border-gray-700';
+        div.className = 'filter-row flex items-center gap-1.5 bg-page rounded-lg p-3 border border-gray-700';
         div.id = 'filter-' + id;
         
         // Filter fields by current tab
-        var activeTab = document.querySelector('[id^="tab-"].bg-gold');
+        var activeTab = document.querySelector('[id^="tab-"].bg-accent');
         var tabType = activeTab ? activeTab.id.replace('tab-', '') : 'fundamental';
         var tabFields = FILTER_FIELDS.filter(function(f) { 
             return f.category === tabType || (!f.category && tabType === 'fundamental');
         });
         
         div.innerHTML =
-            '<span class="text-xs text-gold font-semibold shrink-0 w-14">FUND</span>' +
-            '<select class="bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+            '<span class="text-xs text-accent font-semibold shrink-0 w-14">FUND</span>' +
+            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
                 tabFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
             '</select>' +
-            '<select class="math-op bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" class="math-value bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="op-select bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:52px">' +
+            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="N" style="width:65px;display:none">' +
+            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="text" placeholder="Value" class="flex-1 bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:100px">' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="fundamental">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);
@@ -641,22 +641,22 @@ var FILTER_FIELDS = [
         var list = document.getElementById('techFilterList');
         var id = ++filterId;
         var div = document.createElement('div');
-        div.className = 'filter-row flex items-center gap-1.5 bg-navy rounded-lg p-3 border border-gray-700';
+        div.className = 'filter-row flex items-center gap-1.5 bg-page rounded-lg p-3 border border-gray-700';
         div.id = 'filter-' + id;
         div.innerHTML =
             '<span class="text-xs text-blue-400 font-semibold shrink-0 w-14">TECH</span>' +
-            '<select class="indicator-select bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" onchange="updatePeriod(this)" style="min-width:170px">' +
+            '<select class="indicator-select bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" onchange="updatePeriod(this)" style="min-width:170px">' +
                 buildIndicatorOptions() +
             '</select>' +
-            '<input type="number" class="period-input bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" placeholder="P" style="width:58px" value="14">' +
-            '<select class="math-op bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+            '<input type="number" class="period-input bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="P" style="width:58px" value="14">' +
+            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" class="math-value bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:52px">' +
+            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="N" style="width:65px;display:none">' +
+            '<select class="bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" placeholder="Value" class="flex-1 bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:100px">' +
+            '<input type="number" step="any" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="technical">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);
@@ -667,24 +667,24 @@ var FILTER_FIELDS = [
         var list = document.getElementById('historicalFilterList');
         var id = ++filterId;
         var div = document.createElement('div');
-        div.className = 'filter-row flex items-center gap-1.5 bg-navy rounded-lg p-3 border border-gray-700';
+        div.className = 'filter-row flex items-center gap-1.5 bg-page rounded-lg p-3 border border-gray-700';
         div.id = 'filter-' + id;
         
         var historicalFields = FILTER_FIELDS.filter(function(f) { return f.category === 'historical'; });
         
         div.innerHTML =
             '<span class="text-xs text-purple-400 font-semibold shrink-0 w-14">HIST</span>' +
-            '<select class="bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
                 historicalFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
             '</select>' +
-            '<select class="math-op bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" class="math-value bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="op-select bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:52px">' +
+            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="N" style="width:65px;display:none">' +
+            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="text" placeholder="Value" class="flex-1 bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:100px">' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="historical">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);
@@ -694,24 +694,24 @@ var FILTER_FIELDS = [
         var list = document.getElementById('summariesFilterList');
         var id = ++filterId;
         var div = document.createElement('div');
-        div.className = 'filter-row flex items-center gap-1.5 bg-navy rounded-lg p-3 border border-gray-700';
+        div.className = 'filter-row flex items-center gap-1.5 bg-page rounded-lg p-3 border border-gray-700';
         div.id = 'filter-' + id;
         
         var summariesFields = FILTER_FIELDS.filter(function(f) { return f.category === 'summaries'; });
         
         div.innerHTML =
             '<span class="text-xs text-orange-400 font-semibold shrink-0 w-14">SUMM</span>' +
-            '<select class="bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
                 summariesFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
             '</select>' +
-            '<select class="math-op bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" class="math-value bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="op-select bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:52px">' +
+            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="N" style="width:65px;display:none">' +
+            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="text" placeholder="Value" class="flex-1 bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:100px">' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="summaries">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);
@@ -841,11 +841,11 @@ var FILTER_FIELDS = [
                         var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
                         var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
                         var tr = document.createElement('tr');
-                        tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                        tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
                         tr.style.cursor = 'pointer';
                         tr.onclick = function() { location.href = '/stocks/' + s.id; };
                         tr.innerHTML =
-                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
                             '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
                             '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
                             '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
@@ -857,8 +857,8 @@ var FILTER_FIELDS = [
                         '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
                         '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
                         '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-gold text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
                             '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
                         '</div></td>';
                     tbody.appendChild(tr);
@@ -936,7 +936,7 @@ var FILTER_FIELDS = [
                             '<p class="text-gray-500 text-xs">' + l.stock_count + ' stocks \u00B7 ' + new Date(l.created_at).toLocaleDateString() + '</p>' +
                         '</div>' +
                         '<div class="flex gap-1 ml-2">' +
-                            '<button onclick="loadList(' + l.id + ')" class="text-gold hover:text-gold2 text-xs px-2 py-1 rounded border border-gold/30 hover:border-gold transition" title="Load"><i class="fas fa-upload"></i></button>' +
+                            '<button onclick="loadList(' + l.id + ')" class="text-accent hover:text-accent-2 text-xs px-2 py-1 rounded border border-accent/30 hover:border-accent transition" title="Load"><i class="fas fa-upload"></i></button>' +
                             '<button onclick="deleteList(' + l.id + ')" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded border border-red-400/30 hover:border-red-400 transition" title="Delete"><i class="fas fa-trash"></i></button>' +
                         '</div>' +
                     '</div>';
@@ -962,11 +962,11 @@ var FILTER_FIELDS = [
                         var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
                         var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
                         var tr = document.createElement('tr');
-                        tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                        tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
                         tr.style.cursor = 'pointer';
                         tr.onclick = function() { location.href = '/stocks/' + s.id; };
                         tr.innerHTML =
-                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
                             '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
                             '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
                             '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
@@ -978,8 +978,8 @@ var FILTER_FIELDS = [
                              '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
                              '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
                              '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                                '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-gold text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                                '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                                '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                                '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
                                 '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
                              '</div></td>';
                         tbody.appendChild(tr);
@@ -1050,11 +1050,11 @@ var FILTER_FIELDS = [
                     var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
                     var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
                     var tr = document.createElement('tr');
-                    tr.className = 'border-b border-gray-700/50 hover:bg-navy/50';
+                    tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
                     tr.style.cursor = 'pointer';
                     tr.onclick = function() { location.href = '/stocks/' + s.id; };
                     tr.innerHTML =
-                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold">' + escHtml(s.symbol) + '</a></td>' +
+                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
                         '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
                         '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
                         '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
@@ -1066,8 +1066,8 @@ var FILTER_FIELDS = [
                         '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
                         '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
                         '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-gold text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-gold text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
                             '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
                         '</div></td>';
                     tbody.appendChild(tr);
@@ -1131,11 +1131,11 @@ var FILTER_FIELDS = [
                     icon.classList.remove('far');
                     icon.classList.add('fas');
                     btn.classList.remove('text-gray-400');
-                    btn.classList.add('text-gold');
+                    btn.classList.add('text-accent');
                 } else {
                     icon.classList.remove('fas');
                     icon.classList.add('far');
-                    btn.classList.remove('text-gold');
+                    btn.classList.remove('text-accent');
                     btn.classList.add('text-gray-400');
                 }
             }

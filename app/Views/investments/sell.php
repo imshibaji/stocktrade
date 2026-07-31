@@ -1,5 +1,5 @@
 <section class="max-w-2xl mx-auto py-8">
-    <div class="bg-navy2 rounded-xl p-8 border border-gray-700">
+    <div class="bg-surface rounded-xl p-8 border border-gray-700">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
                 <h1 class="text-2xl font-bold text-white">Sell Investment</h1>
@@ -7,12 +7,12 @@
                     <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>
                 </span>
             </div>
-            <a href="/investments" class="text-gray-400 hover:text-gold text-sm">
+            <a href="/investments" class="text-gray-400 hover:text-accent text-sm">
                 <i class="fas fa-arrow-left mr-1"></i>Back
             </a>
         </div>
 
-        <div class="bg-navy rounded-xl p-6 mb-6 border border-gray-700">
+        <div class="bg-page rounded-xl p-6 mb-6 border border-gray-700">
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h3 class="text-white font-bold text-lg"><?= esc($investment['symbol']) ?></h3>
@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        <div class="bg-navy rounded-xl p-6 mb-6 border border-gray-700">
+        <div class="bg-page rounded-xl p-6 mb-6 border border-gray-700">
                             <h3 class="text-white font-semibold mb-4">Current Status</h3>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -68,18 +68,18 @@
                     <label class="block text-gray-300 mb-2 text-sm">Sell Price (per share)</label>
                     <input type="number" name="sell_price" id="sellPriceInput" required min="0.01" step="0.01"
                         value="<?= $investment['current_price'] ?>"
-                        class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none text-lg">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none text-lg">
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">Quantity to Sell</label>
                     <input type="number" name="quantity" id="sellQtyInput" required min="1" max="<?= (int) $investment['shares'] ?>" step="1"
                         value="<?= (int) $investment['shares'] ?>"
-                        class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none text-lg">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none text-lg">
                     <p class="text-gray-500 text-xs mt-1">Max <?= (int) $investment['shares'] ?> shares. Enter a lower number to sell partially.</p>
                 </div>
             </div>
             <div class="flex space-x-4">
-                <a href="/investments" class="flex-1 text-center border border-gray-600 text-gray-300 hover:border-gold py-3 rounded-lg transition">Cancel</a>
+                <a href="/investments" class="flex-1 text-center border border-gray-600 text-gray-300 hover:border-accent py-3 rounded-lg transition">Cancel</a>
                 <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
                     <i class="fas fa-check mr-2"></i>Confirm Sale
                 </button>

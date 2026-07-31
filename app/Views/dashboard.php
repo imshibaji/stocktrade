@@ -10,17 +10,17 @@
             <p class="text-gray-400 mt-1">Welcome back, <?= esc(current_user()['name']) ?></p>
         </div>
         <div class="flex space-x-3 mt-4 md:mt-0">
-            <a href="/stocks" class="bg-gold hover:bg-gold2 text-navy font-semibold px-6 py-2 rounded-lg text-sm transition">
+            <a href="/stocks" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-6 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-search mr-2"></i>Browse Stocks
             </a>
-            <a href="/investments" class="border border-gold text-gold hover:bg-gold/10 px-6 py-2 rounded-lg text-sm transition">
+            <a href="/investments" class="border border-accent text-accent hover:bg-accent/10 px-6 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-plus mr-2"></i>New Investment
             </a>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div class="bg-navy2 rounded-xl p-6 border border-gray-700">
+        <div class="bg-surface rounded-xl p-6 border border-gray-700">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-400 text-sm mb-1">Active Investments</p>
@@ -32,7 +32,7 @@
             </div>
             <a href="/investments" class="text-green-400 text-sm hover:text-green-300 mt-2 inline-block">Manage investments <i class="fas fa-arrow-right ml-1"></i></a>
         </div>
-        <div class="bg-navy2 rounded-xl p-6 border border-gray-700">
+        <div class="bg-surface rounded-xl p-6 border border-gray-700">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-400 text-sm mb-1">Total Invested</p>
@@ -44,7 +44,7 @@
             </div>
             <a href="/portfolio" class="text-purple-400 text-sm hover:text-purple-300 mt-2 inline-block">View portfolio <i class="fas fa-arrow-right ml-1"></i></a>
         </div>
-        <div class="bg-navy2 rounded-xl p-6 border border-gray-700">
+        <div class="bg-surface rounded-xl p-6 border border-gray-700">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-400 text-sm mb-1">Net P/L</p>
@@ -61,10 +61,10 @@
     </div>
 
     <?php if (!empty($investmentDetails)): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 overflow-hidden mb-8">
+    <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden mb-8">
         <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
             <h2 class="text-white font-bold text-lg">Active Investments</h2>
-            <a href="/investments" class="text-gold text-sm hover:text-gold2 transition">View All</a>
+            <a href="/investments" class="text-accent text-sm hover:text-accent-2 transition">View All</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -88,7 +88,7 @@
                         $currency = $inv['currency'] ?? 'INR';
                         $baseCurrency = $inv['base_currency'] ?? 'INR';
                     ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
+                    <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
@@ -118,41 +118,41 @@
     <?php endif; ?>
 
     <?php if (!empty($investmentDetails)): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-8" id="dashSummary">
+    <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-8" id="dashSummary">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-white font-bold text-lg">Portfolio Summary</h2>
             <span class="text-gray-400 text-xs">Base Currency: <?= esc($portfolio['base_currency'] ?? 'INR') ?></span>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            <div class="text-center p-4 bg-navy rounded-lg">
+            <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Invested</p>
                 <p id="dashSumInvested" class="text-white font-bold"><?= format_price_dual($portfolio['total_invested'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
-            <div class="text-center p-4 bg-navy rounded-lg">
+            <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Current Value</p>
                 <p id="dashSumValue" class="text-white font-bold"><?= format_price_dual($portfolio['total_current_value'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
-            <div class="text-center p-4 bg-navy rounded-lg">
+            <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Gross P/L</p>
                 <p id="dashSumGross" class="font-bold <?= $portfolio['total_gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                     <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($portfolio['total_gross_profit'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?>
                 </p>
             </div>
-            <div class="text-center p-4 bg-navy rounded-lg">
+            <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Fees</p>
                 <p id="dashSumFees" class="text-orange-400 font-bold"><?= format_price_dual($portfolio['total_fees'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
-            <div class="text-center p-4 bg-navy rounded-lg">
+            <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Tax</p>
                 <p id="dashSumTax" class="text-yellow-400 font-bold"><?= format_price_dual($portfolio['total_tax'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
-            <div class="text-center p-4 bg-navy rounded-lg">
+            <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Net P/L</p>
                 <p id="dashSumNet" class="font-bold <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                     <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($portfolio['total_net_profit'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?>
                 </p>
             </div>
-            <div class="text-center p-4 bg-navy rounded-lg">
+            <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Return</p>
                 <p id="dashSumReturn" class="font-bold <?= $portfolio['total_invested'] > 0 && $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                     <?= $portfolio['total_invested'] > 0 ? round(($portfolio['total_net_profit'] / $portfolio['total_invested']) * 100, 2) : 0 ?>%
@@ -163,12 +163,12 @@
     <?php endif; ?>
 
     <?php if (!empty($watchlistStocks)): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-8">
+    <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-8">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-white font-bold text-lg">
                 <i class="fas fa-star text-yellow-400 mr-2"></i>My Watchlist
             </h2>
-            <a href="/watchlist" class="text-gold text-sm hover:text-gold2 transition">Manage</a>
+            <a href="/watchlist" class="text-accent text-sm hover:text-accent-2 transition">Manage</a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <?php foreach ($watchlistStocks as $ws): ?>
@@ -178,13 +178,13 @@
                 $pred = $watchlistPredictions[$sid] ?? null;
                 $cur = stock_currency($ws['exchange'] ?? null);
             ?>
-            <div class="wl-card p-4 bg-navy rounded-lg border border-transparent hover:border-gold transition cursor-pointer" onclick="location.href='/stocks/<?= $sid ?>'" data-wlid="<?= $ws['id'] ?>">
+            <div class="wl-card p-4 bg-page rounded-lg border border-transparent hover:border-accent transition cursor-pointer" onclick="location.href='/stocks/<?= $sid ?>'" data-wlid="<?= $ws['id'] ?>">
                 <div class="flex justify-between items-start mb-2">
                     <a href="/stocks/<?= $sid ?>" onclick="event.stopPropagation()" class="min-w-0 flex-1">
                         <p class="text-white font-semibold truncate"><?= esc($ws['symbol']) ?></p>
                         <p class="text-gray-500 text-xs truncate"><?= esc($ws['name']) ?></p>
                     </a>
-                    <span class="text-xs px-2 py-0.5 rounded bg-navy2 border border-gray-600 text-gray-300 shrink-0 ml-2"><?= esc($ws['exchange'] ?? 'NSE') ?></span>
+                    <span class="text-xs px-2 py-0.5 rounded bg-surface border border-gray-600 text-gray-300 shrink-0 ml-2"><?= esc($ws['exchange'] ?? 'NSE') ?></span>
                 </div>
                 <?php if ($pred && $pred['low'] > 0 && $pred['high'] > 0): ?>
                 <div class="text-xs flex items-center gap-2 mb-2">

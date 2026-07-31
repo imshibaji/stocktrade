@@ -5,7 +5,7 @@
         <div>
             <div class="flex items-center space-x-3">
                 <h1 class="text-3xl font-bold text-white"><?= esc($stock['symbol']) ?></h1>
-                <span class="text-xs px-3 py-1 rounded bg-navy border border-gray-600 text-gray-300"><?= esc($stock['sector']) ?></span>
+                <span class="text-xs px-3 py-1 rounded bg-page border border-gray-600 text-gray-300"><?= esc($stock['sector']) ?></span>
                 <span id="marketBadge" class="text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400">
                     <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>Checking...
                 </span>
@@ -19,12 +19,12 @@
                     <i class="fas fa-star mr-1"></i>Remove from Watchlist
                 </a>
                 <?php else: ?>
-                <a href="/watchlist/add/<?= $stock['id'] ?>" class="border border-gold text-gold hover:bg-gold/10 px-4 py-2 rounded-lg text-sm transition">
+                <a href="/watchlist/add/<?= $stock['id'] ?>" class="border border-accent text-accent hover:bg-accent/10 px-4 py-2 rounded-lg text-sm transition">
                     <i class="far fa-star mr-1"></i>Add to Watchlist
                 </a>
                 <?php endif; ?>
             <?php endif; ?>
-            <a href="/stocks/<?= $stock['id'] ?>/predictions" class="bg-gold hover:bg-gold2 text-navy font-semibold px-4 py-2 rounded-lg text-sm transition">
+            <a href="/stocks/<?= $stock['id'] ?>/predictions" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-chart-line mr-1"></i> Predictions
             </a>
             <?php if (is_logged_in()): ?>
@@ -78,7 +78,7 @@
             </div>
         </div>
 
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+        <div class="bg-surface rounded-xl border border-gray-700 p-6">
             <h3 class="text-white font-semibold mb-4">Key Metrics</h3>
             <div class="space-y-3">
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
@@ -180,10 +180,10 @@
     </section>
 
     <?php if (!empty($stock['predictions'])): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-8">
+    <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-8">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-white font-bold text-lg">30-Day Price Predictions</h2>
-            <a href="/stocks/<?= $stock['id'] ?>/predictions" class="text-gold text-sm hover:text-gold2 transition">View Details</a>
+            <a href="/stocks/<?= $stock['id'] ?>/predictions" class="text-accent text-sm hover:text-accent-2 transition">View Details</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -203,7 +203,7 @@
                         $predChange = (float) $p['predicted_price'] - (float) $stock['current_price'];
                         $predChangePct = (float) $stock['current_price'] > 0 ? ($predChange / (float) $stock['current_price']) * 100 : 0;
                     ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50">
+                    <tr class="border-b border-gray-700/50 hover:bg-page/50">
                         <td class="px-4 py-3 text-gray-300"><?= date('M d, Y', strtotime($p['predicted_date'])) ?></td>
                         <td class="px-4 py-3 text-right text-white"><?= format_price($p['predicted_price'], $cur) ?></td>
                         <td class="px-4 py-3 text-right">
@@ -227,7 +227,7 @@
     <?php endif; ?>
 
     <?php if (is_logged_in()): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+    <div class="bg-surface rounded-xl border border-gray-700 p-6">
         <h2 class="text-white font-bold text-lg mb-4">Quick Investment Calculator</h2>
         <form action="/investments/create" method="post" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <?= csrf_field() ?>
@@ -235,21 +235,21 @@
             <div>
                 <label class="block text-gray-300 mb-2 text-sm">Current Price</label>
                 <input type="text" value="<?= format_price($stock['current_price'], $cur) ?>" disabled
-                    class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
             </div>
             <div>
                 <label class="block text-gray-300 mb-2 text-sm">Investment Amount (Rs)</label>
                 <input type="number" name="amount" required min="1" step="0.01"
-                    class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none"
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
                     placeholder="e.g. 10000">
             </div>
             <div>
                 <label class="block text-gray-300 mb-2 text-sm">Buy Date</label>
                 <input type="date" name="buy_date" value="<?= date('Y-m-d') ?>"
-                    class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-gold focus:outline-none">
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
             </div>
             <div>
-                <button type="submit" class="w-full bg-gold hover:bg-gold2 text-navy font-bold py-3 rounded-lg transition">
+                <button type="submit" class="w-full bg-accent hover:bg-accent-2 text-on-accent font-bold py-3 rounded-lg transition">
                     <i class="fas fa-plus mr-1"></i> Add Investment
                 </button>
             </div>
@@ -535,7 +535,7 @@
         if (chart.hover >= 0 && chart.hover < n) {
             var hx = L.price.x + (chart.hover + 0.5) * step;
             var myy = Math.min(L.price.y + L.price.h, Math.max(L.price.y, chart.mouseY));
-            ctx.strokeStyle = col('--gold-text', 0.6);
+            ctx.strokeStyle = col('--accent', 0.6);
             ctx.setLineDash([3, 3]);
             ctx.beginPath(); ctx.moveTo(hx, L.price.y); ctx.lineTo(hx, L.vol.y - 1); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(L.price.x, myy); ctx.lineTo(L.price.x + L.price.w, myy); ctx.stroke();
@@ -546,10 +546,10 @@
             ctx.textAlign = 'left';
             var tw = ctx.measureText(plabel).width;
             var chipY = myy - 9;
-            ctx.fillStyle = col('--gold-text');
+            ctx.fillStyle = col('--accent');
             roundRectPath(ctx, L.price.x + L.price.w + 4, chipY, tw + 10, 17, 4);
             ctx.fill();
-            ctx.fillStyle = col('--gold-active-ink');
+            ctx.fillStyle = col('--on-accent');
             ctx.fillText(plabel, L.price.x + L.price.w + 9, chipY + 8.5);
         }
     }
@@ -792,7 +792,7 @@
         }
         var html = list.map(function (r) {
             var d = parseDateStr(r.date);
-            return '<div class="sd-ledger-row"><span class="sd-ledger-date sd-num">' + tapeDateLabel(d) + '</span><span class="sd-ledger-amt sd-amt-gold sd-num">' + fmtPrice(r.dividend) + '</span></div>';
+            return '<div class="sd-ledger-row"><span class="sd-ledger-date sd-num">' + tapeDateLabel(d) + '</span><span class="sd-ledger-amt sd-amt-accent sd-num">' + fmtPrice(r.dividend) + '</span></div>';
         }).join('');
         el('sdDivRows').innerHTML = '<div class="sd-fade">' + html + '</div>';
     }

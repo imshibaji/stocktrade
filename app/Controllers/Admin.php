@@ -206,7 +206,7 @@ class Admin extends BaseController
         if (is_array($keys) && is_array($values)) {
             foreach ($keys as $i => $key) {
                 if ($key) {
-                    $settingModel->where('key', $key)->update(['value' => $values[$i] ?? '']);
+                    $settingModel->set('value', $values[$i] ?? '')->where('key', $key)->update();
                 }
             }
         }

@@ -9,22 +9,22 @@
             </div>
             <p class="text-gray-400 mt-1">Complete record of all your trades</p>
         </div>
-        <a href="/investments" class="border border-gold text-gold hover:bg-gold/10 px-4 py-2 rounded-lg text-sm transition">
+        <a href="/investments" class="border border-accent text-accent hover:bg-accent/10 px-4 py-2 rounded-lg text-sm transition">
             <i class="fas fa-plus mr-2"></i>New Investment
         </a>
     </div>
 
     <?php if (empty($investments)): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-12 text-center">
+    <div class="bg-surface rounded-xl border border-gray-700 p-12 text-center">
         <i class="fas fa-history text-6xl text-gray-600 mb-4"></i>
         <h3 class="text-white text-xl font-semibold mb-2">No investment history</h3>
         <p class="text-gray-400 mb-6">Start investing to build your trading history.</p>
-        <a href="/stocks" class="bg-gold hover:bg-gold2 text-navy font-semibold px-8 py-3 rounded-lg transition inline-block">
+        <a href="/stocks" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-8 py-3 rounded-lg transition inline-block">
             Browse Stocks
         </a>
     </div>
     <?php else: ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 overflow-hidden">
+    <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -52,9 +52,9 @@
                             $actualPlPct = (float) $inv['buy_price'] > 0 ? (((float) $inv['sell_price'] - (float) $inv['buy_price']) / (float) $inv['buy_price']) * 100 : 0;
                         }
                         ?>
-                    <tr class="border-b border-gray-700/50 hover:bg-navy/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
+                    <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
-                            <a href="/stocks/<?= $inv['stock_id'] ?>" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-gold"><?= esc($inv['symbol']) ?></a>
+                            <a href="/stocks/<?= $inv['stock_id'] ?>" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent"><?= esc($inv['symbol']) ?></a>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
                         <td class="px-6 py-4 text-gray-300"><?= date('M d, Y', strtotime($inv['buy_date'])) ?></td>

@@ -1,5 +1,5 @@
 <section class="max-w-md mx-auto py-12">
-    <div class="bg-navy2 rounded-xl p-8 border border-gray-700">
+    <div class="bg-surface rounded-xl p-8 border border-gray-700">
         <h1 class="text-3xl font-bold text-white text-center mb-2">Welcome Back</h1>
         <p class="text-gray-400 text-center mb-8">Login to your StockTrade Tips account</p>
 
@@ -21,7 +21,7 @@
                 <div class="relative">
                     <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
                     <input type="email" name="email" value="<?= old('email') ?>" required
-                        class="w-full bg-navy border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white focus:border-gold focus:outline-none"
+                        class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white focus:border-accent focus:outline-none"
                         placeholder="your@email.com">
                 </div>
             </div>
@@ -30,16 +30,16 @@
                 <div class="relative">
                     <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
                     <input type="password" name="password" required
-                        class="w-full bg-navy border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white focus:border-gold focus:outline-none"
+                        class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white focus:border-accent focus:outline-none"
                         placeholder="Your password">
                 </div>
             </div>
-            <button type="submit" class="w-full bg-gold hover:bg-gold2 text-navy font-bold py-3 rounded-lg transition mb-4">
+            <button type="submit" class="w-full bg-accent hover:bg-accent-2 text-on-accent font-bold py-3 rounded-lg transition mb-4">
                 Login
             </button>
             <p class="text-center text-gray-400 text-sm">
                 Don't have an account?
-                <a href="/register" class="text-gold hover:text-gold2 transition">Register here</a>
+                <a href="/register" class="text-accent hover:text-accent-2 transition">Register here</a>
             </p>
         </form>
     </div>

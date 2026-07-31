@@ -11,18 +11,18 @@
         </div>
         <div class="flex space-x-3 mt-4 md:mt-0">
 
-            <a href="/stocks" class="bg-gold hover:bg-gold2 text-navy font-semibold px-6 py-2 rounded-lg text-sm transition">
+            <a href="/stocks" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-6 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-plus mr-2"></i>Add Stocks
             </a>
         </div>
     </div>
 
     <?php if (empty($stocks)): ?>
-    <div class="bg-navy2 rounded-xl border border-gray-700 p-12 text-center">
+    <div class="bg-surface rounded-xl border border-gray-700 p-12 text-center">
         <i class="far fa-star text-6xl text-gray-600 mb-4"></i>
         <h3 class="text-white text-xl font-semibold mb-2">Your watchlist is empty</h3>
         <p class="text-gray-400 mb-6">Start adding stocks to monitor their performance and get predictions.</p>
-        <a href="/stocks" class="bg-gold hover:bg-gold2 text-navy font-semibold px-8 py-3 rounded-lg transition inline-block">
+        <a href="/stocks" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-8 py-3 rounded-lg transition inline-block">
             Browse Stocks
         </a>
     </div>
@@ -44,10 +44,10 @@ function renderWatchlistCard($stock, $predictions)
     $watchlistId = (int) $stock['id'];
     ob_start();
 ?>
-<div class="wl-card bg-navy2 rounded-xl border border-gray-700 hover:border-gold transition cursor-pointer" onclick="location.href='/stocks/<?= $sid ?>'" data-sid="<?= $sid ?>" data-wlid="<?= $watchlistId ?>">
+<div class="wl-card bg-surface rounded-xl border border-gray-700 hover:border-accent transition cursor-pointer" onclick="location.href='/stocks/<?= $sid ?>'" data-sid="<?= $sid ?>" data-wlid="<?= $watchlistId ?>">
     <div class="p-6">
         <div class="flex justify-between items-start mb-3">
-            <a href="/stocks/<?= $sid ?>" onclick="event.stopPropagation()" class="hover:text-gold">
+            <a href="/stocks/<?= $sid ?>" onclick="event.stopPropagation()" class="hover:text-accent">
                 <h3 class="text-white font-bold text-lg"><?= esc($stock['symbol']) ?></h3>
                 <p class="text-gray-400 text-sm"><?= esc($stock['name']) ?></p>
             </a>
@@ -103,10 +103,10 @@ function renderWatchlistCard($stock, $predictions)
         </div>
     </div>
     <div class="border-t border-gray-700 flex">
-        <a href="/stocks/<?= $sid ?>" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
+        <a href="/stocks/<?= $sid ?>" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-accent hover:bg-page text-sm transition border-r border-gray-700">
             <i class="fas fa-chart-line mr-1"></i>View
         </a>
-        <a href="/stocks/<?= $sid ?>/predictions" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-gold hover:bg-navy text-sm transition border-r border-gray-700">
+        <a href="/stocks/<?= $sid ?>/predictions" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-accent hover:bg-page text-sm transition border-r border-gray-700">
             <i class="fas fa-chart-simple mr-1"></i>Predict
         </a>
         <button data-sid="<?= $sid ?>" data-symbol="<?= str_replace(['"', "'"], ['', '`'], $stock['symbol']) ?>" onclick="event.stopPropagation(); removeWatchlist(this.dataset.sid, this.dataset.symbol)" class="flex-1 text-center py-3 text-red-400 hover:text-red-300 hover:bg-red-900/10 text-sm transition">

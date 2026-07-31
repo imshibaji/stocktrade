@@ -12,30 +12,30 @@
         </div>
 
         <!-- Navigation -->
-        <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-8">
+        <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-8">
             <h2 class="text-xl font-semibold text-white mb-4">&#x1F4CB; Quick Navigation</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="#getting-started" class="block p-3 bg-navy border border-gray-600 rounded-lg hover:border-gold/30 transition-colors">
-                    <div class="text-gold font-semibold mb-1">&#x1F680; Getting Started</div>
+                <a href="#getting-started" class="block p-3 bg-page border border-gray-600 rounded-lg hover:border-accent/30 transition-colors">
+                    <div class="text-accent font-semibold mb-1">&#x1F680; Getting Started</div>
                     <div class="text-gray-400 text-sm">Basic query syntax and examples</div>
                 </a>
-                <a href="#fundamental-fields" class="block p-3 bg-navy border border-gray-600 rounded-lg hover:border-gold/30 transition-colors">
+                <a href="#fundamental-fields" class="block p-3 bg-page border border-gray-600 rounded-lg hover:border-accent/30 transition-colors">
                     <div class="text-blue-400 font-semibold mb-1">&#x1F4B0; Fundamental Fields</div>
                     <div class="text-gray-400 text-sm">Financial metrics and ratios</div>
                 </a>
-                <a href="#technical-analysis" class="block p-3 bg-navy border border-gray-600 rounded-lg hover:border-gold/30 transition-colors">
+                <a href="#technical-analysis" class="block p-3 bg-page border border-gray-600 rounded-lg hover:border-accent/30 transition-colors">
                     <div class="text-green-400 font-semibold mb-1">&#x1F4C8; Technical Analysis</div>
                     <div class="text-gray-400 text-sm">Moving averages, indicators, momentum</div>
                 </a>
-                <a href="#advanced-queries" class="block p-3 bg-navy border border-gray-600 rounded-lg hover:border-gold/30 transition-colors">
+                <a href="#advanced-queries" class="block p-3 bg-page border border-gray-600 rounded-lg hover:border-accent/30 transition-colors">
                     <div class="text-purple-400 font-semibold mb-1">&#x1F9E0; Advanced Queries</div>
                     <div class="text-gray-400 text-sm">Complex nested logic and expressions</div>
                 </a>
-                <a href="#query-builder" class="block p-3 bg-navy border border-gray-600 rounded-lg hover:border-gold/30 transition-colors">
+                <a href="#query-builder" class="block p-3 bg-page border border-gray-600 rounded-lg hover:border-accent/30 transition-colors">
                     <div class="text-cyan-400 font-semibold mb-1">&#x1F6E0;&#xFE0F; Interactive Builder</div>
                     <div class="text-gray-400 text-sm">Drag-and-drop query construction</div>
                 </a>
-                <a href="#quick-reference" class="block p-3 bg-navy border border-gray-600 rounded-lg hover:border-gold/30 transition-colors">
+                <a href="#quick-reference" class="block p-3 bg-page border border-gray-600 rounded-lg hover:border-accent/30 transition-colors">
                     <div class="text-yellow-400 font-semibold mb-1">&#x26A1; Quick Reference</div>
                     <div class="text-gray-400 text-sm">Common queries and shortcuts</div>
                 </a>
@@ -45,10 +45,10 @@
         <!-- Getting Started Section -->
         <section id="getting-started" class="mb-12">
             <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-700 pb-2">
-                <span class="text-gold">&#x1F680;</span> Getting Started with Screener Queries
+                <span class="text-accent">&#x1F680;</span> Getting Started with Screener Queries
             </h2>
             
-            <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-6">
+            <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-6">
                 <h3 class="text-xl font-semibold text-white mb-4">What Are Screener Queries?</h3>
                 <p class="text-gray-300 mb-4">
                     Stock screener queries are powerful search expressions that filter stocks based on your investment criteria. 
@@ -69,8 +69,8 @@
             </div>
 
             <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-navy border border-gray-600 rounded-lg p-5">
-                    <h4 class="text-gold font-semibold mb-3">📝 Basic Syntax</h4>
+                <div class="bg-page border border-gray-600 rounded-lg p-5">
+                    <h4 class="text-accent font-semibold mb-3">📝 Basic Syntax</h4>
                     <div class="bg-gray-900 rounded p-3 font-mono text-sm">
                         <div class="text-gray-400 mb-2">Field Operator Value</div>
                         <div class="text-white">market_cap > 1000000000000</div>
@@ -79,7 +79,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-navy border border-gray-600 rounded-lg p-5">
+                <div class="bg-page border border-gray-600 rounded-lg p-5">
                     <h4 class="text-blue-400 font-semibold mb-3">🔗 Logical Connectors</h4>
                     <div class="bg-gray-900 rounded p-3 font-mono text-sm">
                         <div class="text-gray-400 mb-2">AND / OR Logic</div>
@@ -98,12 +98,12 @@
             
             <div class="grid lg:grid-cols-2 gap-6">
                 <!-- Pricing & Valuation -->
-                <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+                <div class="bg-surface rounded-xl border border-gray-700 p-6">
                     <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">
                         <span class="text-green-400">&#x1F48E;</span> Pricing & Valuation
                     </h3>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">Current Price</div>
                                 <div class="text-gray-400 text-sm">market_cap, pe_ratio, dividend_yield</div>
@@ -114,7 +114,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">P/E Ratio</div>
                                 <div class="text-gray-400 text-sm">trailingPE, forwardPE</div>
@@ -125,7 +125,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">Market Cap</div>
                                 <div class="text-gray-400 text-sm">market_cap, marketCap</div>
@@ -136,7 +136,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">Dividend Yield</div>
                                 <div class="text-gray-400 text-sm">dividend_yield, trailingAnnualDividendYield</div>
@@ -147,7 +147,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">Price to Book</div>
                                 <div class="text-gray-400 text-sm">priceToBook, bookValue</div>
@@ -161,12 +161,12 @@
                 </div>
                 
                 <!-- Profitability & Returns -->
-                <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+                <div class="bg-surface rounded-xl border border-gray-700 p-6">
                     <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">
                         <span class="text-yellow-400">&#x1F4C8;</span> Profitability & Returns
                     </h3>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">EPS (TTM)</div>
                                 <div class="text-gray-400 text-sm">epsTrailingTwelveMonths</div>
@@ -177,7 +177,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">Revenue Growth (3Y)</div>
                                 <div class="text-gray-400 text-sm">revenue_growth_3y</div>
@@ -188,7 +188,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">Profit Margin</div>
                                 <div class="text-gray-400 text-sm">profit_margin</div>
@@ -199,7 +199,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">Beta</div>
                                 <div class="text-gray-400 text-sm">beta</div>
@@ -210,7 +210,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex justify-between items-center p-3 bg-navy rounded-lg border border-gray-600">
+                        <div class="flex justify-between items-center p-3 bg-page rounded-lg border border-gray-600">
                             <div>
                                 <div class="text-white font-medium">Average Earnings (10Y)</div>
                                 <div class="text-gray-400 text-sm">average_earnings_10y</div>
@@ -231,45 +231,45 @@
                 <span class="text-purple-400">&#x1F4C9;</span> Technical Analysis Fields
             </h2>
             
-            <div class="bg-navy2 rounded-xl border border-gray-700 p-6 mb-6">
+            <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-6">
                 <h3 class="text-xl font-semibold text-white mb-4">Moving Averages & Momentum</h3>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">50-Day SMA %</div>
                         <div class="text-gray-400 text-sm mb-2">sma_pct(50) - Price vs 50-day SMA</div>
                         <div class="text-green-400 font-mono text-sm">sma_pct(50) > 100</div>
                         <div class="text-gray-500 text-xs mt-1">50-period simple moving average</div>
                     </div>
                     
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">200-Day SMA %</div>
                         <div class="text-gray-400 text-sm mb-2">sma_pct(200) - Price vs 200-day SMA</div>
                         <div class="text-green-400 font-mono text-sm">sma_pct(200) > 100</div>
                         <div class="text-gray-500 text-xs mt-1">Long-term trend indicator</div>
                     </div>
                     
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">EMA(20) %</div>
                         <div class="text-gray-400 text-sm mb-2">ema_pct(20) - Price vs 20-day EMA</div>
                         <div class="text-green-400 font-mono text-sm">ema_pct(20) > 100</div>
                         <div class="text-gray-500 text-xs mt-1">Exponential moving average</div>
                     </div>
                     
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">MACD Line</div>
                         <div class="text-gray-400 text-sm mb-2">macd(12) - MACD line value</div>
                         <div class="text-green-400 font-mono text-sm">macd(12) > 0</div>
                         <div class="text-gray-500 text-xs mt-1">Moving average convergence divergence</div>
                     </div>
                     
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">RSI(14)</div>
                         <div class="text-gray-400 text-sm mb-2">Relative Strength Index</div>
                         <div class="text-green-400 font-mono text-sm">rsi(14) < 30</div>
                         <div class="text-gray-500 text-xs mt-1">Oversold condition</div>
                     </div>
                     	ha
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">Stochastic %K</div>
                         <div class="text-gray-400 text-sm mb-2">stoch_k(14) - Stochastic oscillator</div>
                         <div class="text-green-400 font-mono text-sm">stoch_k(14) < 20</div>
@@ -279,31 +279,31 @@
                 </div>
             </div>
             
-            <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+            <div class="bg-surface rounded-xl border border-gray-700 p-6">
                 <h3 class="text-xl font-semibold text-white mb-4">Volume & Accumulation</h3>
                 <div class="grid md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">Volume Ratio</div>
                         <div class="text-gray-400 text-sm mb-2">volume_ratio(20) - Volume relative to average</div>
                         <div class="text-green-400 font-mono text-sm">volume_ratio(20) > 1.5</div>
                         <div class="text-gray-500 text-xs mt-1">Above average volume confirmation</div>
                     </div>
                     
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">OBV</div>
                         <div class="text-gray-400 text-sm mb-2">On Balance Volume</div>
                         <div class="text-green-400 font-mono text-sm">obv > obv(20)</div>
                         <div class="text-gray-500 text-xs mt-1">Volume-based momentum indicator</div>
                     </div>
                     
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">MFI(14)</div>
                         <div class="text-gray-400 text-sm mb-2">Money Flow Index</div>
                         <div class="text-green-400 font-mono text-sm">mfi(14) < 20</div>
                         <div class="text-gray-500 text-xs mt-1">Money flow exhaustion indicator</div>
                     </div>
                     
-                    <div class="p-4 bg-navy rounded-lg border border-gray-600">
+                    <div class="p-4 bg-page rounded-lg border border-gray-600">
                         <div class="text-white font-medium mb-2">CMF(20)</div>
                         <div class="text-gray-400 text-sm mb-2">Chaikin Money Flow</div>
                         <div class="text-green-400 font-mono text-sm">cmf(20) > 0.05</div>
@@ -321,7 +321,7 @@
             
             <div class="space-y-8">
                 <!-- Complex Nested Logic -->
-                <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+                <div class="bg-surface rounded-xl border border-gray-700 p-6">
                     <h3 class="text-xl font-semibold text-white mb-4">🔗 Complex Nested Logic (Parentheses)</h3>
                     
                     <div class="space-y-4">
@@ -360,7 +360,7 @@
                 </div>
                 
                 <!-- Mathematical Expressions -->
-                <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+                <div class="bg-surface rounded-xl border border-gray-700 p-6">
                     <h3 class="text-xl font-semibold text-white mb-4">&#x1F9EE; Mathematical Expressions</h3>
                     
                     <div class="space-y-4">
@@ -394,7 +394,7 @@
                 </div>
                 
                 <!-- Real-world Examples -->
-                <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+                <div class="bg-surface rounded-xl border border-gray-700 p-6">
                     <h3 class="text-xl font-semibold text-white mb-4">&#x1F4BC; Real-World Query Examples</h3>
                     
                     <div class="grid md:grid-cols-2 gap-6">
@@ -468,14 +468,14 @@
                 <span class="text-cyan-400">&#x1F6E0;&#xFE0F;</span> Interactive Query Builder
             </h2>
             
-            <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+            <div class="bg-surface rounded-xl border border-gray-700 p-6">
                 <div class="grid lg:grid-cols-3 gap-6">
                     <!-- Left Panel - Field Categories -->
                     <div class="lg:col-span-1">
                         <h3 class="text-lg font-semibold text-white mb-4">&#x1F4CB; Field Categories</h3>
                         
                         <div class="space-y-3">
-                            <div class="bg-navy rounded-lg border border-gray-600 p-4">
+                            <div class="bg-page rounded-lg border border-gray-600 p-4">
                                 <h4 class="text-green-400 font-semibold mb-3">&#x1F4CA; Fundamental</h4>
                                 <div class="space-y-2">
                                     <button onclick="addField('market_cap')" class="w-full text-left p-2 rounded bg-gray-800 hover:bg-gray-700 transition-colors text-gray-300 text-sm">
@@ -496,7 +496,7 @@
                                 </div>
                             </div>
                             
-                            <div class="bg-navy rounded-lg border border-gray-600 p-4">
+                            <div class="bg-page rounded-lg border border-gray-600 p-4">
                                 <h4 class="text-blue-400 font-semibold mb-3">&#x1F4C9; Technical Analysis</h4>
                                 <div class="space-y-2">
                                     <button onclick="addField('sma_pct(50)')" class="w-full text-left p-2 rounded bg-gray-800 hover:bg-gray-700 transition-colors text-gray-300 text-sm">
@@ -514,7 +514,7 @@
                                 </div>
                             </div>
                             
-                            <div class="bg-navy rounded-lg border border-gray-600 p-4">
+                            <div class="bg-page rounded-lg border border-gray-600 p-4">
                                 <h4 class="text-purple-400 font-semibold mb-3">&#x1F3E2; Company Profile</h4>
                                 <div class="space-y-2">
                                     <button onclick="addField('industry')" class="w-full text-left p-2 rounded bg-gray-800 hover:bg-gray-700 transition-colors text-gray-300 text-sm">
@@ -547,14 +547,14 @@
                                 <button onclick="addParentheses()" class="px-3 py-2 bg-gray-600 hover:bg-gray-500 rounded text-white text-sm transition-colors">)</button>
                             </div>
                             
-                            <div class="bg-navy border border-gray-600 rounded-lg p-4 min-h-32 mb-4">
+                            <div class="bg-page border border-gray-600 rounded-lg p-4 min-h-32 mb-4">
                                 <div id="query-builder-canvas" class="flex flex-wrap gap-2 items-center">
                                     <div class="text-gray-500 text-sm">Drop fields here to build your query...</div>
                                 </div>
                             </div>
                             
                             <div class="flex justify-between items-center">
-                                <button onclick="generateQuery()" class="px-4 py-2 bg-gold hover:bg-gold2 text-navy font-semibold rounded-lg transition-colors">
+                                <button onclick="generateQuery()" class="px-4 py-2 bg-accent hover:bg-accent-2 text-on-accent font-semibold rounded-lg transition-colors">
                                     Generate Query
                                 </button>
                                 <button onclick="clearBuilder()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition-colors">
@@ -581,7 +581,7 @@
             </h2>
             
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-navy2 rounded-lg border border-gray-700 p-4">
+                <div class="bg-surface rounded-lg border border-gray-700 p-4">
                     <div class="text-green-400 font-semibold mb-2">🔥 Most Used</div>
                     <div class="space-y-2 text-sm">
                         <div class="text-gray-300 font-mono">market_cap > 1T</div>
@@ -591,7 +591,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-navy2 rounded-lg border border-gray-700 p-4">
+                <div class="bg-surface rounded-lg border border-gray-700 p-4">
                     <div class="text-blue-400 font-semibold mb-2">&#x1F4CA; Technical</div>
                     <div class="space-y-2 text-sm">
                         <div class="text-gray-300 font-mono">rsi(14) < 30</div>
@@ -601,7 +601,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-navy2 rounded-lg border border-gray-700 p-4">
+                <div class="bg-surface rounded-lg border border-gray-700 p-4">
                     <div class="text-purple-400 font-semibold mb-2">&#x1F4C8; Growth</div>
                     <div class="space-y-2 text-sm">
                         <div class="text-gray-300 font-mono">sales_growth_3y > 0.25</div>
@@ -611,7 +611,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-navy2 rounded-lg border border-gray-700 p-4">
+                <div class="bg-surface rounded-lg border border-gray-700 p-4">
                     <div class="text-orange-400 font-semibold mb-2">&#x1F3E2; Sector</div>
                     <div class="space-y-2 text-sm">
                         <div class="text-gray-300 font-mono">industry == 'Technology'</div>
@@ -629,7 +629,7 @@
                 <h2 class="text-3xl font-bold text-white mb-4">&#x1F680; Ready to Build Your Screener Queries?</h2>
                 <p class="text-gray-300 mb-6">Use the interactive query builder above to create complex stock screening expressions, or refer to the documentation for syntax examples.</p>
                 <div class="flex flex-wrap justify-center gap-4">
-                    <button onclick="scrollToSection('query-builder')" class="px-6 py-3 bg-gold hover:bg-gold2 text-navy font-semibold rounded-lg transition-colors">
+                    <button onclick="scrollToSection('query-builder')" class="px-6 py-3 bg-accent hover:bg-accent-2 text-on-accent font-semibold rounded-lg transition-colors">
                         Start Building Queries
                     </button>
                     <button onclick="scrollToSection('getting-started')" class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">

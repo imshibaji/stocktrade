@@ -1,17 +1,17 @@
 <section class="min-h-screen">
     <div class="flex">
         <!-- Admin Sidebar -->
-        <div class="w-64 bg-navy2 border-r border-gray-700 min-h-screen">
+        <div class="w-64 bg-surface border-r border-gray-700 min-h-screen">
             <div class="p-4 border-b border-gray-700">
                 <h2 class="text-white font-bold text-lg">Admin Panel</h2>
             </div>
             <nav class="p-2">
-                <a href="/admin" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Dashboard</a>
-                <a href="/admin/users" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Users</a>
-                <a href="/admin/stocks" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Stocks</a>
-                <a href="/admin/screeners" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Screeners</a>
-                <a href="/admin/pages" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition">Pages</a>
-                <a href="/admin/settings" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-navy rounded-lg transition text-white bg-navy">Website Settings</a>
+                <a href="/admin" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Dashboard</a>
+                <a href="/admin/users" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Users</a>
+                <a href="/admin/stocks" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Stocks</a>
+                <a href="/admin/screeners" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Screeners</a>
+                <a href="/admin/pages" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition">Pages</a>
+                <a href="/admin/settings" class="flex items-center gap-2 px-4 py-3 text-gray-300 hover:text-white hover:bg-page rounded-lg transition text-white bg-page">Website Settings</a>
             </nav>
         </div>
 
@@ -34,21 +34,21 @@
                 <?= csrf_field() ?>
                 <div class="space-y-6">
                     <?php foreach ($settings as $group => $groupSettings): ?>
-                        <div class="bg-navy2 rounded-xl border border-gray-700 p-6">
+                        <div class="bg-surface rounded-xl border border-gray-700 p-6">
                             <h2 class="text-xl font-bold text-white mb-4"><?= ucfirst(str_replace('_', ' ', $group)) ?> Settings</h2>
                             <div class="space-y-4">
                                 <?php foreach ($groupSettings as $setting): ?>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300 mb-1"><?= esc($setting['label']) ?></label>
                                         <?php if ($setting['type'] === 'boolean'): ?>
-                                            <select name="values[]" class="w-full px-3 py-2 bg-navy border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gold">
+                                            <select name="values[]" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent">
                                                 <option value="1" <?= $setting['value'] == '1' ? 'selected' : '' ?>>Enabled</option>
                                                 <option value="0" <?= $setting['value'] == '0' ? 'selected' : '' ?>>Disabled</option>
                                             </select>
                                         <?php elseif ($setting['type'] === 'textarea'): ?>
-                                            <textarea name="values[]" rows="3" class="w-full px-3 py-2 bg-navy border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gold"><?= esc($setting['value']) ?></textarea>
+                                            <textarea name="values[]" rows="3" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent"><?= esc($setting['value']) ?></textarea>
                                         <?php else: ?>
-                                            <input type="text" name="values[]" value="<?= esc($setting['value']) ?>" class="w-full px-3 py-2 bg-navy border border-gray-600 rounded-lg text-white focus:outline-none focus:border-gold">
+                                            <input type="text" name="values[]" value="<?= esc($setting['value']) ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent">
                                         <?php endif; ?>
                                         <input type="hidden" name="keys[]" value="<?= esc($setting['key']) ?>">
                                     </div>
@@ -59,7 +59,7 @@
                 </div>
 
                 <div class="mt-6">
-                    <button type="submit" class="px-6 py-2 bg-gold text-navy font-medium rounded-lg hover:bg-gold2 transition">Save Settings</button>
+                    <button type="submit" class="px-6 py-2 bg-accent text-on-accent font-medium rounded-lg hover:bg-accent-2 transition">Save Settings</button>
                 </div>
             </form>
         </div>

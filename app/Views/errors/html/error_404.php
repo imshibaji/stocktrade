@@ -11,20 +11,21 @@
             theme: {
                 extend: {
                     colors: {
-                        navy: '#0B1220',
-                        navy2: '#111827',
-                        gold: '#D4A853',
-                        gold2: '#E8C56D',
+                        page: '#141413',
+                        surface: '#1c1c1b',
+                        accent: '#D97757',
+                        'accent-2': '#E29376',
+                        'on-accent': '#141413',
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-navy text-gray-100 min-h-screen flex items-center justify-center">
+<body class="bg-page text-gray-100 min-h-screen flex items-center justify-center">
     <div class="text-center px-4">
         <div class="mb-8">
-            <i class="fas fa-search text-gold text-8xl opacity-80"></i>
+            <i class="fas fa-search text-accent text-8xl opacity-80"></i>
         </div>
         <h1 class="text-6xl font-bold text-white mb-4">404</h1>
         <h2 class="text-2xl text-gray-300 mb-6">Page Not Found</h2>
@@ -33,10 +34,10 @@
             It might have been a bad link or the stock you're looking for was delisted.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/dashboard" class="bg-gold hover:bg-gold2 text-navy font-semibold px-6 py-3 rounded-lg transition">
+            <a href="/dashboard" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-6 py-3 rounded-lg transition">
                 <i class="fas fa-tachometer-alt mr-2"></i>Go to Dashboard
             </a>
-            <a href="/stocks" class="border border-gold text-gold hover:bg-gold/10 font-semibold px-6 py-3 rounded-lg transition">
+            <a href="/stocks" class="border border-accent text-accent hover:bg-accent/10 font-semibold px-6 py-3 rounded-lg transition">
                 <i class="fas fa-search mr-2"></i>Browse Stocks
             </a>
             <a href="/" class="text-gray-400 hover:text-white text-sm">
