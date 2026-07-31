@@ -55,9 +55,8 @@
             <div class="flex flex-col gap-3 px-5 pt-2">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-baseline gap-3">
-                        <p id="livePrice" class="text-3xl font-bold text-white sd-num"><?= format_price($stock['current_price'], $cur) ?></p>
-                        <p id="liveChange" class="<?= $priceChange['change'] >= 0 ? 'text-green-400' : 'text-red-400' ?> sd-num">
-                            <?= $priceChange['change'] >= 0 ? '+' : '' ?><?= format_price($priceChange['change'], $cur) ?>
+                        <p id="livePrice" class="text-3xl font-bold text-white sd-num cursor-pointer price-value" data-currency="<?= esc($cur) ?>" data-price="<?= $stock['current_price'] ?>"><?= format_price($stock['current_price'], $cur) ?></p>
+                        <p id="liveChange" class="<?= $priceChange['change'] >= 0 ? 'text-green-400' : 'text-red-400' ?> sd-num cursor-pointer price-value" data-currency="<?= esc($cur) ?>" data-price="<?= $priceChange['change'] ?>"><?= $priceChange['change'] >= 0 ? '+' : '' ?><?= format_price($priceChange['change'], $cur) ?>
                             (<span id="livePct"><?= $priceChange['change'] >= 0 ? '+' : '' ?><?= $priceChange['percent'] ?></span>%)
                         </p>
                     </div>
@@ -91,15 +90,15 @@
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Open</span>
-                    <span class="text-white text-sm" id="mktOpen"><?= isset($stock['open_price']) ? format_price($stock['open_price'], $cur) : 'N/A' ?></span>
+                    <span class="text-white text-sm cursor-pointer price-value" id="mktOpen" data-currency="<?= esc($cur) ?>" data-price="<?= $stock['open_price'] ?? 0 ?>"><?= isset($stock['open_price']) ? format_price($stock['open_price'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Day High</span>
-                    <span class="text-green-400 text-sm" id="mktHigh"><?= isset($stock['day_high']) ? format_price($stock['day_high'], $cur) : 'N/A' ?></span>
+                    <span class="text-green-400 text-sm cursor-pointer price-value" id="mktHigh" data-currency="<?= esc($cur) ?>" data-price="<?= $stock['day_high'] ?? 0 ?>"><?= isset($stock['day_high']) ? format_price($stock['day_high'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Day Low</span>
-                    <span class="text-red-400 text-sm" id="mktLow"><?= isset($stock['day_low']) ? format_price($stock['day_low'], $cur) : 'N/A' ?></span>
+                    <span class="text-red-400 text-sm cursor-pointer price-value" id="mktLow" data-currency="<?= esc($cur) ?>" data-price="<?= $stock['day_low'] ?? 0 ?>"><?= isset($stock['day_low']) ? format_price($stock['day_low'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Volume</span>
@@ -111,11 +110,11 @@
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">52-Week High</span>
-                    <span class="text-green-400 text-sm"><?= ($stock['week_52_high'] ?? 0) ? format_price($stock['week_52_high'], $cur) : 'N/A' ?></span>
+                    <span class="text-green-400 text-sm cursor-pointer price-value" data-currency="<?= esc($cur) ?>" data-price="<?= $stock['week_52_high'] ?? 0 ?>"><?= ($stock['week_52_high'] ?? 0) ? format_price($stock['week_52_high'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">52-Week Low</span>
-                    <span class="text-red-400 text-sm"><?= ($stock['week_52_low'] ?? 0) ? format_price($stock['week_52_low'], $cur) : 'N/A' ?></span>
+                    <span class="text-red-400 text-sm cursor-pointer price-value" data-currency="<?= esc($cur) ?>" data-price="<?= $stock['week_52_low'] ?? 0 ?>"><?= ($stock['week_52_low'] ?? 0) ? format_price($stock['week_52_low'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Dividend Yield</span>
@@ -123,7 +122,7 @@
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-700/50">
                     <span class="text-gray-400 text-sm">Bid / Ask</span>
-                    <span class="text-white text-sm" id="mktBidAsk"><?= (($stock['bid'] ?? 0) > 0 && ($stock['ask'] ?? 0) > 0) ? format_price($stock['bid'], $cur) . ' / ' . format_price($stock['ask'], $cur) : 'N/A' ?></span>
+                    <span class="text-white text-sm cursor-pointer price-value" id="mktBidAsk" data-currency="<?= esc($cur) ?>" data-price="<?= ($stock['bid'] ?? 0) > 0 && ($stock['ask'] ?? 0) > 0 ? min($stock['bid'], $stock['ask']) : 0 ?>"><?= (($stock['bid'] ?? 0) > 0 && ($stock['ask'] ?? 0) > 0) ? format_price($stock['bid'], $cur) . ' / ' . format_price($stock['ask'], $cur) : 'N/A' ?></span>
                 </div>
                 <div class="flex justify-between py-2">
                     <span class="text-gray-400 text-sm">Beta</span>
@@ -205,7 +204,7 @@
                     ?>
                     <tr class="border-b border-gray-700/50 hover:bg-page/50">
                         <td class="px-4 py-3 text-gray-300"><?= date('M d, Y', strtotime($p['predicted_date'])) ?></td>
-                        <td class="px-4 py-3 text-right text-white"><?= format_price($p['predicted_price'], $cur) ?></td>
+                        <td class="px-4 py-3 text-right text-white price-value" data-currency="<?= esc($cur) ?>" data-price="<?= $p['predicted_price'] ?>"><?= format_price($p['predicted_price'], $cur) ?></td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex items-center justify-end space-x-1">
                                 <div class="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -976,6 +975,79 @@
         });
     }
     retryHandlers.options = loadOptions;
+
+    /* ================= CURRENCY CONVERSION TOOLTIPS ================= */
+
+    var BASE_CURRENCY = '<?= esc($base_currency ?? 'INR') ?>';
+
+    var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024', 'HKD': 'HK\u0024', 'KRW': '\u20A9', 'MXN': 'Mex\u0024', 'BRL': 'R\u0024', 'NZD': 'NZ\u0024', 'ZAR': 'R', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr', 'PLN': 'z\u0142', 'CZK': 'K\u010D', 'HUF': 'Ft', 'RUB': '\u20BD', 'TRY': '\u20BA', 'ILS': '\u20AA', 'THB': '\u0E3F', 'MYR': 'RM', 'IDR': 'Rp', 'PHP': '\u20B1', 'TWD': 'NT\u0024', 'VND': '\u20AB', 'AED': '\u062F.\u0625', 'SAR': '\u0631.\u0639', 'QAR': 'QR', 'KWD': 'KD', 'OMR': '\u0631.\u0639', 'BHD': '.\u062F.\u0628' };
+
+    var exchangeRatesCache = {};
+
+    function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function fetchExchangeRate(fromCurr, toCurr) {
+        if (fromCurr === toCurr) return Promise.resolve(1);
+        var cacheKey = fromCurr + '_' + toCurr;
+        if (exchangeRatesCache[cacheKey]) return Promise.resolve(exchangeRatesCache[cacheKey]);
+        return fetch('https://open.er-api.com/v6/latest/' + encodeURIComponent(fromCurr))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.result === 'success' && data.rates[toCurr]) {
+                    var rate = data.rates[toCurr];
+                    exchangeRatesCache[cacheKey] = rate;
+                    return rate;
+                }
+                return null;
+            })
+            .catch(function() { return null; });
+    }
+
+    function showConversionTooltip(el, price, fromCurr) {
+        var existing = document.getElementById('currency-convert-tooltip');
+        if (existing) existing.remove();
+
+        var toCurr = BASE_CURRENCY || 'INR';
+        var rect = el.getBoundingClientRect();
+
+        var tooltip = document.createElement('div');
+        tooltip.id = 'currency-convert-tooltip';
+        tooltip.style.cssText = 'position:fixed;z-index:9999;top:' + (rect.bottom + 8) + 'px;left:' + Math.max(8, rect.left) + 'px;background:#1e1e2e;border:1px solid #313244;border-radius:8px;padding:8px 12px;font-size:12px;color:#cdd6f4;box-shadow:0 4px 12px rgba(0,0,0,0.4);min-width:180px;';
+        tooltip.innerHTML = '<div style="font-weight:600;margin-bottom:4px;">' + formatPrice(price, fromCurr) + '</div><div style="color:#a6adc8;">Loading conversion...</div>';
+        document.body.appendChild(tooltip);
+
+        fetchExchangeRate(fromCurr, toCurr).then(function(rate) {
+            if (rate !== null) {
+                var converted = price * rate;
+                var sym = CURRENCY_SYMBOLS[toCurr] || (toCurr + ' ');
+                tooltip.innerHTML = '<div style="font-weight:600;margin-bottom:4px;">' + formatPrice(price, fromCurr) + '</div><div style="color:#a6e3a1;">' + sym + converted.toLocaleString("en-IN", {minimumFractionDigits:2,maximumFractionDigits:2}) + ' (' + toCurr + ')</div><div style="color:#6c7086;font-size:11px;margin-top:2px;">1 ' + fromCurr + ' = ' + rate.toFixed(4) + ' ' + toCurr + '</div>';
+            } else {
+                tooltip.innerHTML = '<div style="font-weight:600;margin-bottom:4px;">' + formatPrice(price, fromCurr) + '</div><div style="color:#f38ba8;">Conversion unavailable</div>';
+            }
+        });
+
+        setTimeout(function() { if (tooltip.parentNode) tooltip.remove(); }, 8000);
+        tooltip.addEventListener('click', function() { tooltip.remove(); });
+    }
+
+    function hideConversionTooltip() {
+        var existing = document.getElementById('currency-convert-tooltip');
+        if (existing) existing.remove();
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+        var priceEl = e.target.closest('.price-value');
+        if (priceEl && !e.target.closest('a')) {
+            var price = parseFloat(priceEl.dataset.price);
+            var curr = priceEl.dataset.currency;
+            if (price && curr) showConversionTooltip(priceEl, price, curr);
+        }
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+        var priceEl = e.target.closest('.price-value');
+        if (priceEl) hideConversionTooltip();
+    }, true);
 
     /* ================= GO ================= */
 

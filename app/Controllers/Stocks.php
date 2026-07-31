@@ -158,6 +158,7 @@ class Stocks extends BaseController
             'predictionData'  => $predictionData,
             'predictionDates' => $predictionDates,
             'isWatched'       => $isWatched,
+            'base_currency'   => get_user_base_currency(),
         ];
 
         return view('templates/header', $data)

@@ -34,7 +34,7 @@ class Investment extends BaseController
 
         $stockCurrencyMap = [];
         foreach ($stocks as $s) {
-            $stockCurrencyMap[$s['id']] = $s['currency'] ?? 'INR';
+            $stockCurrencyMap[$s['id']] = stock_currency($s['exchange'] ?? null);
         }
         foreach ($investments as &$inv) {
             $inv['currency'] = $stockCurrencyMap[$inv['stock_id']] ?? 'INR';
@@ -55,6 +55,7 @@ class Investment extends BaseController
             'stocks'         => $stocks,
             'taxInfo'        => tax_bracket_info($user),
             'taxRates'       => $taxRates,
+            'base_currency'  => $user['base_currency'] ?? 'INR',
         ];
 
         return view('templates/header', $data)
@@ -144,6 +145,8 @@ class Investment extends BaseController
         ];
 
         $pl = $investmentModel->calculateProfitLoss($investment, $taxRates);
+
+        $investment['currency'] = stock_currency($investment['exchange'] ?? null);
 
         $data = [
             'title'      => 'Sell Investment - StockTrade Tips',
@@ -330,7 +333,7 @@ class Investment extends BaseController
 
         $stockCurrencyMap = [];
         foreach ($stocks as $s) {
-            $stockCurrencyMap[$s['id']] = $s['currency'] ?? 'INR';
+            $stockCurrencyMap[$s['id']] = stock_currency($s['exchange'] ?? null);
         }
         $portfolio['base_currency'] = $user['base_currency'] ?? 'INR';
 

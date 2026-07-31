@@ -56,18 +56,17 @@
                         <td class="px-6 py-4">
                             <a href="/stocks/<?= $inv['stock_id'] ?>" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent"><?= esc($inv['symbol']) ?></a>
                             <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle ml-1"><?= esc(exchange_display($inv['exchange'] ?? null, $inv['exchange_display'] ?? null)) ?></span>
-                            <span class="text-xs text-gray-500 align-middle ml-1"><?= currency_symbol(stock_currency($inv['exchange'] ?? null)) ?> <?= stock_currency($inv['exchange'] ?? null) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
                         <td class="px-6 py-4 text-gray-300"><?= date('M d, Y', strtotime($inv['buy_date'])) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price($inv['buy_price']) ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price($inv['buy_price'], $inv['currency']) ?></td>
                         <td class="px-6 py-4 text-right text-gray-300"><?= (int) $inv['shares'] ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price($inv['total_invested']) ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price($inv['total_invested'], $inv['currency']) ?></td>
                         <td class="px-6 py-4 text-right text-gray-300 hist-price">
                             <?php if ($isActive): ?>
-                            <span class="hist-live"><?= format_price($inv['current_price']) ?></span>
+                            <span class="hist-live"><?= format_price($inv['current_price'], $inv['currency']) ?></span>
                             <?php else: ?>
-                            <?= format_price($inv['sell_price']) ?>
+                            <?= format_price($inv['sell_price'], $inv['currency']) ?>
                             <?php endif; ?>
                         </td>
                         <td class="px-6 py-4 text-gray-300">
@@ -79,7 +78,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right hist-pl font-semibold <?= $actualPl >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                            <span class="hist-pl-val"><?= $actualPl >= 0 ? '+' : '' ?><?= format_price($actualPl) ?></span>
+                            <span class="hist-pl-val"><?= $actualPl >= 0 ? '+' : '' ?><?= format_price($actualPl, $inv['currency']) ?></span>
                             <div class="text-xs hist-pl-pct <?= $actualPlPct >= 0 ? 'text-green-500' : 'text-red-500' ?>">
                                 <?= $actualPlPct >= 0 ? '+' : '' ?><?= round($actualPlPct, 2) ?>%
                             </div>

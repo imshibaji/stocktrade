@@ -36,8 +36,9 @@ class Dashboard extends BaseController
             $investmentDetails = [];
             foreach ($activeInvestments as $inv) {
                 $pl = $investmentModel->calculateProfitLoss($inv, $taxRates);
-                $stockCurrency = $inv['currency'] ?? 'INR';
+                $stockCurrency = stock_currency($inv['exchange'] ?? null);
                 $pl['stock_id'] = $inv['stock_id'];
+                $pl['id'] = $inv['id'];
                 $pl['symbol'] = $inv['symbol'];
                 $pl['name'] = $inv['name'];
                 $pl['shares'] = $inv['shares'];

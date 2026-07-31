@@ -15,7 +15,7 @@
         <div class="bg-page rounded-xl p-6 mb-6 border border-gray-700">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h3 class="text-white font-bold text-lg"><?= esc($investment['symbol']) ?> <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle"><?= esc(exchange_display($investment['exchange'] ?? null, $investment['exchange_display'] ?? null)) ?></span> <span class="text-xs text-gray-500 align-middle ml-1"><?= currency_symbol(stock_currency($investment['exchange'] ?? null)) ?> <?= stock_currency($investment['exchange'] ?? null) ?></span></h3>
+                    <h3 class="text-white font-bold text-lg"><?= esc($investment['symbol']) ?> <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle"><?= esc(exchange_display($investment['exchange'] ?? null, $investment['exchange_display'] ?? null)) ?></span></h3>
                     <p class="text-gray-400 text-sm"><?= esc($investment['name']) ?></p>
                 </div>
                 <span class="px-3 py-1 rounded bg-green-900/30 text-green-400 text-xs">Active</span>
@@ -23,7 +23,7 @@
             <div class="grid grid-cols-3 gap-4 text-center">
                 <div>
                     <p class="text-gray-400 text-xs mb-1">Buy Price</p>
-                    <p class="text-white font-semibold"><?= format_price($investment['buy_price']) ?></p>
+                    <p class="text-white font-semibold"><?= format_price($investment['buy_price'], $investment['currency']) ?></p>
                 </div>
                 <div>
                     <p class="text-gray-400 text-xs mb-1">Held Shares</p>
@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <p class="text-gray-400 text-xs mb-1">Invested</p>
-                    <p class="text-white font-semibold"><?= format_price($investment['total_invested']) ?></p>
+                    <p class="text-white font-semibold"><?= format_price($investment['total_invested'], $investment['currency']) ?></p>
                 </div>
             </div>
         </div>
@@ -41,22 +41,22 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-gray-400 text-xs mb-1">Current Price</p>
-                    <p id="sellLivePrice" class="text-white font-semibold"><?= format_price($investment['current_price']) ?></p>
+                    <p id="sellLivePrice" class="text-white font-semibold"><?= format_price($investment['current_price'], $investment['currency']) ?></p>
                 </div>
                 <div>
                     <p class="text-gray-400 text-xs mb-1">Current Value</p>
-                    <p id="sellLiveValue" class="text-white font-semibold"><?= format_price($pl['current_value']) ?></p>
+                    <p id="sellLiveValue" class="text-white font-semibold"><?= format_price($pl['current_value'], $investment['currency']) ?></p>
                 </div>
                 <div>
                     <p class="text-gray-400 text-xs mb-1">Gross P/L</p>
                     <p id="sellLivePL" class="font-semibold <?= $pl['gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                        <?= $pl['gross_profit'] >= 0 ? '+' : '' ?><?= format_price($pl['gross_profit']) ?>
+                        <?= $pl['gross_profit'] >= 0 ? '+' : '' ?><?= format_price($pl['gross_profit'], $investment['currency']) ?>
                         (<span id="sellLivePct"><?= $pl['gross_profit_pct'] >= 0 ? '+' : '' ?><?= $pl['gross_profit_pct'] ?></span>%)
                     </p>
                 </div>
                 <div>
                     <p class="text-gray-400 text-xs mb-1">Est. Tax</p>
-                    <p id="sellLiveTax" class="text-yellow-400 font-semibold"><?= format_price($pl['total_tax']) ?></p>
+                    <p id="sellLiveTax" class="text-yellow-400 font-semibold"><?= format_price($pl['total_tax'], $investment['currency']) ?></p>
                 </div>
             </div>
         </div>

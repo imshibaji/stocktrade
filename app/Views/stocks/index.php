@@ -162,7 +162,7 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
                     </div>
                     <div class="flex justify-between items-end mt-4">
                         <div>
-                            <p class="price-value text-2xl font-bold text-white"><?= format_price($stock['current_price'], $cur) ?></p>
+                            <p class="price-value text-2xl font-bold text-white cursor-pointer" data-currency="<?= esc($cur) ?>" data-price="<?= $stock['current_price'] ?>"><?= format_price($stock['current_price'], $cur) ?></p>
                             <p class="text-gray-500 text-xs mt-1 prev-close">
                                 Prev Close: <?= format_price($stock['previous_close'], $cur) ?>
                             </p>
@@ -242,7 +242,7 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
                 var yahooIsPos = s.change_percent >= 0;
                 var yahooChangeClass = yahooIsPos ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400';
                 var yahooChangePct = (s.change_percent >= 0 ? '+' + s.change_percent : s.change_percent) + '%';
-                yahooPriceHtml = '<p class="price-value text-2xl font-bold text-white">' + formatPrice(s.price, sc) + '</p>';
+                yahooPriceHtml = '<p class="price-value text-2xl font-bold text-white cursor-pointer" data-currency="' + sc + '" data-price="' + (s.price || 0) + '">' + formatPrice(s.price, sc) + '</p>';
                 yahooChangeHtml = '<span class="change-badge px-3 py-1 rounded text-sm font-semibold ' + yahooChangeClass + '">' + yahooChangePct + '</span>';
             }
             return '<div class="stock-card bg-surface rounded-xl border border-gray-700 hover:border-accent transition relative group yahoo-result" data-sym="' + (s.symbol || '') + '" data-exch="' + (s.exchange || 'NSE') + '">' +
@@ -289,7 +289,7 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
             '</div>' +
             '<div class="flex justify-between items-end mt-4">' +
             '<div>' +
-            '<p class="price-value text-2xl font-bold text-white">' + priceHtml + '</p>' +
+            '<p class="price-value text-2xl font-bold text-white cursor-pointer" data-currency="' + sc + '" data-price="' + (s.price || 0) + '">' + priceHtml + '</p>' +
             '<p class="text-gray-500 text-xs mt-1 prev-close">' + prevCloseHtml + '</p>' +
             '</div>' +
             '<div class="text-right">' +
@@ -625,5 +625,76 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
                 btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> Bulk Import';
             });
     };
+    var CURRENCY_SYMBOLS = { 'INR': '\u20B9', 'USD': '\u0024', 'EUR': '\u20AC', 'GBP': '\u00A3', 'JPY': '\u00A5', 'AUD': 'A\u0024', 'CAD': 'C\u0024', 'CHF': 'CHF ', 'CNY': '\u00A5', 'SGD': 'S\u0024', 'HKD': 'HK\u0024', 'KRW': '\u20A9', 'MXN': 'Mex\u0024', 'BRL': 'R\u0024', 'NZD': 'NZ\u0024', 'ZAR': 'R', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr', 'PLN': 'z\u0142', 'CZK': 'K\u010D', 'HUF': 'Ft', 'RUB': '\u20BD', 'TRY': '\u20BA', 'ILS': '\u20AA', 'THB': '\u0E3F', 'MYR': 'RM', 'IDR': 'Rp', 'PHP': '\u20B1', 'TWD': 'NT\u0024', 'VND': '\u20AB', 'AED': '\u062F.\u0625', 'SAR': '\u0631.\u0639', 'QAR': 'QR', 'KWD': 'KD', 'OMR': '\u0631.\u0639', 'BHD': '.\u062F.\u0628' };
+    function stockCurrency(exch) {
+        var m = { 'NSE': 'INR', 'BSE': 'INR', 'NSI': 'INR',
+                  'LSE': 'GBP', 'TSE': 'JPY', 'HKEX': 'HKD',
+                  'KRX': 'KRW', 'TSX': 'CAD', 'ASX': 'AUD',
+                  'SWX': 'CHF', 'FRA': 'EUR', 'ETR': 'EUR',
+                  'Euronext': 'EUR', 'MEX': 'MXN', 'BVMF': 'BRL',
+                  'NMS': 'USD', 'NYQ': 'USD', 'NGM': 'USD' };
+        return m[exch] || 'USD';
+    }
+    function formatPrice(v, c) { c = c || 'INR'; var sym = CURRENCY_SYMBOLS[c] || (c + ' '); return sym + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    var exchangeRatesCache = {};
+
+    function fetchExchangeRate(fromCurr, toCurr) {
+        if (fromCurr === toCurr) return Promise.resolve(1);
+        var cacheKey = fromCurr + '_' + toCurr;
+        if (exchangeRatesCache[cacheKey]) return Promise.resolve(exchangeRatesCache[cacheKey]);
+        return fetch('https://open.er-api.com/v6/latest/' + encodeURIComponent(fromCurr))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.result === 'success' && data.rates[toCurr]) {
+                    var rate = data.rates[toCurr];
+                    exchangeRatesCache[cacheKey] = rate;
+                    return rate;
+                }
+                return null;
+            })
+            .catch(function() { return null; });
+    }
+
+    function showConversionTooltip(el, price, fromCurr) {
+        var existing = document.getElementById('currency-convert-tooltip');
+        if (existing) existing.remove();
+
+        var toCurr = 'INR';
+        var rect = el.getBoundingClientRect();
+
+        var tooltip = document.createElement('div');
+        tooltip.id = 'currency-convert-tooltip';
+        tooltip.style.cssText = 'position:fixed;z-index:9999;top:' + (rect.bottom + 8) + 'px;left:' + Math.max(8, rect.left) + 'px;background:#1e1e2e;border:1px solid #313244;border-radius:8px;padding:8px 12px;font-size:12px;color:#cdd6f4;box-shadow:0 4px 12px rgba(0,0,0,0.4);min-width:180px;';
+        tooltip.innerHTML = '<div style="font-weight:600;margin-bottom:4px;">' + formatPrice(price, fromCurr) + '</div><div style="color:#a6adc8;">Loading conversion...</div>';
+        document.body.appendChild(tooltip);
+
+        fetchExchangeRate(fromCurr, toCurr).then(function(rate) {
+            if (rate !== null) {
+                var converted = price * rate;
+                var sym = CURRENCY_SYMBOLS[toCurr] || (toCurr + ' ');
+                tooltip.innerHTML = '<div style="font-weight:600;margin-bottom:4px;">' + formatPrice(price, fromCurr) + '</div><div style="color:#a6e3a1;">' + sym + converted.toLocaleString("en-IN", {minimumFractionDigits:2,maximumFractionDigits:2}) + ' (' + toCurr + ')</div><div style="color:#6c7086;font-size:11px;margin-top:2px;">1 ' + fromCurr + ' = ' + rate.toFixed(4) + ' ' + toCurr + '</div>';
+            } else {
+                tooltip.innerHTML = '<div style="font-weight:600;margin-bottom:4px;">' + formatPrice(price, fromCurr) + '</div><div style="color:#f38ba8;">Conversion unavailable</div>';
+            }
+        });
+
+        setTimeout(function() { if (tooltip.parentNode) tooltip.remove(); }, 8000);
+        tooltip.addEventListener('click', function() { tooltip.remove(); });
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+        var priceEl = e.target.closest('.price-value');
+        if (priceEl && !e.target.closest('a')) {
+            var price = parseFloat(priceEl.dataset.price);
+            var curr = priceEl.dataset.currency;
+            if (price && curr) showConversionTooltip(priceEl, price, curr);
+        }
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+        var priceEl = e.target.closest('.price-value');
+        if (priceEl) hideConversionTooltip();
+    }, true);
 })();
 </script>

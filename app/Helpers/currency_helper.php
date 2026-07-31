@@ -1,16 +1,14 @@
 <?php
 
-use CodeIgniter\Cache\Cache;
+$currencyCacheInstance = null;
 
-$instance = null;
-
-function get_currency_cache(): Cache
+function get_currency_cache()
 {
-    global $instance;
-    if ($instance === null) {
-        $instance = new Cache();
+    global $currencyCacheInstance;
+    if ($currencyCacheInstance === null) {
+        $currencyCacheInstance = cache();
     }
-    return $instance;
+    return $currencyCacheInstance;
 }
 
 function fetch_exchange_rate(string $from, string $to): ?float
