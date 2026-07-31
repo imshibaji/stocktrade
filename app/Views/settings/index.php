@@ -36,6 +36,25 @@
 
     <div class="bg-navy2 rounded-xl border border-gray-700 p-8 mb-6">
         <h2 class="text-white font-bold text-lg mb-6 flex items-center">
+            <i class="fas fa-palette text-gold mr-2"></i>Appearance
+        </h2>
+        <label class="block text-gray-300 mb-3 text-sm">Theme</label>
+        <div class="theme-segmented mb-2" data-theme-segment-wrap>
+            <button type="button" data-theme-segment="day" onclick="setTheme('day')">
+                <i class="fa-regular fa-sun icon-off"></i><i class="fa-solid fa-sun icon-on"></i> Day
+            </button>
+            <button type="button" data-theme-segment="system" onclick="setTheme('system')">
+                <i class="fa-regular fa-circle icon-off"></i><i class="fa-solid fa-circle-half-stroke icon-on"></i> Auto
+            </button>
+            <button type="button" data-theme-segment="night" onclick="setTheme('night')">
+                <i class="fa-regular fa-moon icon-off"></i><i class="fa-solid fa-moon icon-on"></i> Night
+            </button>
+        </div>
+        <p class="text-gray-500 text-xs">Changes apply instantly and are saved to this browser.</p>
+    </div>
+
+    <div class="bg-navy2 rounded-xl border border-gray-700 p-8 mb-6">
+        <h2 class="text-white font-bold text-lg mb-6 flex items-center">
             <i class="fas fa-calculator text-gold mr-2"></i>Tax Settings
         </h2>
 

@@ -151,9 +151,22 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
 </section>
 
 <script>
-var ctx = document.getElementById('predictionChart').getContext('2d');
+function chartCssRgb(name) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || '0, 0, 0';
+}
+function chartCssColor(name, alpha) {
+    var v = chartCssRgb(name);
+    return alpha !== undefined ? 'rgb(' + v + ' / ' + alpha + ')' : 'rgb(' + v + ')';
+}
+function renderPredictionChart() {
+    var canvas = document.getElementById('predictionChart');
+    if (!canvas || !window.Chart) return;
+    var existing = Chart.getChart(canvas);
+    if (existing) existing.destroy();
+    var ctx = canvas.getContext('2d');
 
-new Chart(ctx, {
+    new Chart(ctx, {
     type: 'line',
     data: {
         labels: <?= json_encode(array_merge(
@@ -163,7 +176,7 @@ new Chart(ctx, {
         datasets: [{
             label: 'Historical',
             data: <?= json_encode($priceData) ?>,
-            borderColor: '#60a5fa',
+            borderColor: chartCssColor('--blue'),
             backgroundColor: 'transparent',
             tension: 0.3,
             pointRadius: 0,
@@ -171,7 +184,7 @@ new Chart(ctx, {
         }, {
             label: 'Predicted',
             data: <?= json_encode(array_merge([$lastPrice], $predictionPrices)) ?>,
-            borderColor: '#d4a853',
+            borderColor: chartCssColor('--gold-text'),
             borderDash: [5, 5],
             backgroundColor: 'transparent',
             tension: 0.3,
@@ -186,8 +199,8 @@ new Chart(ctx, {
                 }
                 echo json_encode(array_merge([$lastPrice], $upperBound));
             ?>,
-            borderColor: 'rgba(212, 168, 83, 0.2)',
-            backgroundColor: 'rgba(212, 168, 83, 0.05)',
+            borderColor: chartCssColor('--gold-text', 0.2),
+            backgroundColor: chartCssColor('--gold-text', 0.05),
             fill: 2,
             tension: 0.3,
             pointRadius: 0,
@@ -201,8 +214,8 @@ new Chart(ctx, {
                 }
                 echo json_encode(array_merge([$lastPrice], $lowerBound));
             ?>,
-            borderColor: 'rgba(212, 168, 83, 0.2)',
-            backgroundColor: 'rgba(212, 168, 83, 0.05)',
+            borderColor: chartCssColor('--gold-text', 0.2),
+            backgroundColor: chartCssColor('--gold-text', 0.05),
             tension: 0.3,
             pointRadius: 0,
             borderWidth: 0.5,
@@ -223,16 +236,19 @@ new Chart(ctx, {
                         if (index % 15 === 0) return labels[index];
                         return '';
                     },
-                    color: '#888',
+                    color: chartCssColor('--ink-5'),
                     maxTicksLimit: 10,
                 },
-                grid: { color: 'rgba(75, 85, 99, 0.3)' }
+                grid: { color: chartCssColor('--ink-6', 0.3) }
             },
             y: {
-                ticks: { color: '#888', callback: function(v) { return '\u20B9' + v; } },
-                grid: { color: 'rgba(75, 85, 99, 0.3)' }
+                ticks: { color: chartCssColor('--ink-5'), callback: function(v) { return '\u20B9' + v; } },
+                grid: { color: chartCssColor('--ink-6', 0.3) }
             }
         }
     }
-});
+    });
+}
+renderPredictionChart();
+document.documentElement.addEventListener('themechange', renderPredictionChart);
 </script>

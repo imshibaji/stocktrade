@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'StockTrade Tips') ?></title>
+    <meta name="theme-color" id="metaThemeColor" content="#0a1929">
+    <script>
+    (function() {
+        try {
+            var saved = localStorage.getItem('stt_theme');
+            var mode = (saved === 'day' || saved === 'night' || saved === 'system') ? saved : 'night';
+            var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var eff = mode === 'system' ? (dark ? 'night' : 'day') : mode;
+            document.documentElement.setAttribute('data-theme', eff);
+            document.documentElement.setAttribute('data-theme-mode', mode);
+        } catch (e) {
+            document.documentElement.setAttribute('data-theme', 'night');
+            document.documentElement.setAttribute('data-theme-mode', 'night');
+        }
+    })();
+    </script>
     <link rel="stylesheet" href="/css/tailwind.css">
     <?php if (!empty($showChartJs)): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -42,6 +58,17 @@
                     <a href="/dashboard" class="hidden md:flex px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-navy transition items-center">
                         <i class="fas fa-tachometer-alt mr-1.5"></i>Dashboard
                     </a>
+                    <div class="hidden md:block theme-switch" data-theme-switch-wrap>
+                        <button type="button" data-theme-switch="day" onclick="setTheme('day')" title="Light theme" aria-label="Switch to light theme">
+                            <i class="fa-regular fa-sun icon-off"></i><i class="fa-solid fa-sun icon-on"></i>
+                        </button>
+                        <button type="button" data-theme-switch="system" onclick="setTheme('system')" title="Match system" aria-label="Switch to system theme">
+                            <i class="fa-regular fa-circle icon-off"></i><i class="fa-solid fa-circle-half-stroke icon-on"></i>
+                        </button>
+                        <button type="button" data-theme-switch="night" onclick="setTheme('night')" title="Dark theme" aria-label="Switch to dark theme">
+                            <i class="fa-regular fa-moon icon-off"></i><i class="fa-solid fa-moon icon-on"></i>
+                        </button>
+                    </div>
                     <div class="relative hidden md:block" id="userDropdown">
                         <button onclick="toggleUserNav()" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-navy transition">
                             <i class="fas fa-user-circle text-gold"></i>
@@ -100,6 +127,17 @@
                         class="w-full bg-navy border border-gray-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-gold focus:outline-none">
                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
                     <div id="mobileSearchDropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-navy2 border border-gray-600 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto"></div>
+                </div>
+                <div class="theme-segmented mb-3" data-theme-segment-wrap>
+                    <button type="button" data-theme-segment="day" onclick="setTheme('day')">
+                        <i class="fa-regular fa-sun icon-off"></i><i class="fa-solid fa-sun icon-on"></i> Day
+                    </button>
+                    <button type="button" data-theme-segment="system" onclick="setTheme('system')">
+                        <i class="fa-regular fa-circle icon-off"></i><i class="fa-solid fa-circle-half-stroke icon-on"></i> Auto
+                    </button>
+                    <button type="button" data-theme-segment="night" onclick="setTheme('night')">
+                        <i class="fa-regular fa-moon icon-off"></i><i class="fa-solid fa-moon icon-on"></i> Night
+                    </button>
                 </div>
                 <hr class="border-gray-700 my-2">
                 <div class="space-y-1">
@@ -228,6 +266,17 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <div class="hidden md:block theme-switch" data-theme-switch-wrap>
+                        <button type="button" data-theme-switch="day" onclick="setTheme('day')" title="Light theme" aria-label="Switch to light theme">
+                            <i class="fa-regular fa-sun icon-off"></i><i class="fa-solid fa-sun icon-on"></i>
+                        </button>
+                        <button type="button" data-theme-switch="system" onclick="setTheme('system')" title="Match system" aria-label="Switch to system theme">
+                            <i class="fa-regular fa-circle icon-off"></i><i class="fa-solid fa-circle-half-stroke icon-on"></i>
+                        </button>
+                        <button type="button" data-theme-switch="night" onclick="setTheme('night')" title="Dark theme" aria-label="Switch to dark theme">
+                            <i class="fa-regular fa-moon icon-off"></i><i class="fa-solid fa-moon icon-on"></i>
+                        </button>
+                    </div>
                     <a href="/login" class="px-4 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-navy transition">Login</a>
                     <a href="/register" class="bg-gold hover:bg-gold2 text-navy font-semibold px-4 py-2 rounded-lg text-sm transition">Get Started</a>
                     <button class="md:hidden text-gray-300" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
@@ -357,6 +406,78 @@
             searchDropdown.classList.remove('hidden');
         }
     });
+})();
+</script>
+
+<script>
+(function() {
+    var KEY = 'stt_theme';
+
+    function savedMode() {
+        try {
+            var s = localStorage.getItem(KEY);
+            if (s === 'day' || s === 'night' || s === 'system') return s;
+        } catch (e) {}
+        return 'night';
+    }
+
+    function prefersDark() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    function effective(mode) {
+        if (mode === 'system') return prefersDark() ? 'night' : 'day';
+        return mode;
+    }
+
+    window.sttTheme = {
+        set: function(mode) {
+            try { localStorage.setItem(KEY, mode); } catch (e) {}
+            sync();
+        }
+    };
+
+    function sync() {
+        var mode = savedMode();
+        var eff = effective(mode);
+        var root = document.documentElement;
+        root.setAttribute('data-theme', eff);
+        root.setAttribute('data-theme-mode', mode);
+        var meta = document.getElementById('metaThemeColor');
+        if (meta) meta.setAttribute('content', eff === 'day' ? '#f2f6fa' : '#0a1929');
+
+        document.querySelectorAll('[data-theme-switch]').forEach(function(btn) {
+            var on = btn.getAttribute('data-theme-switch') === mode;
+            btn.classList.toggle('active', on);
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        document.querySelectorAll('[data-theme-segment]').forEach(function(seg) {
+            seg.classList.toggle('active', seg.getAttribute('data-theme-segment') === mode);
+        });
+
+        if (typeof CustomEvent !== 'undefined') {
+            document.documentElement.dispatchEvent(new CustomEvent('themechange', { detail: { mode: mode, theme: eff } }));
+        }
+    }
+
+    window.setTheme = function(mode) {
+        window.sttTheme.set(mode);
+    };
+
+    var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    function onSystemChange() {
+        if (savedMode() === 'system') sync();
+    }
+    if (mq) {
+        if (mq.addEventListener) mq.addEventListener('change', onSystemChange);
+        else if (mq.addListener) mq.addListener(onSystemChange);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', sync);
+    } else {
+        sync();
+    }
 })();
 </script>
 

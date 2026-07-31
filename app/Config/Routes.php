@@ -71,6 +71,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->post('/watchlist/bucket/(:num)/delete', 'Watchlist::deleteBucket/$1');
     $routes->post('/watchlist/move-to-bucket', 'Watchlist::moveToBucket');
     $routes->get('/screener', 'Screener::index');
+    $routes->get('/screener/docs', 'Screener::docs');
     $routes->get('/api-playground', 'ApiDocs::index');
     $routes->get('/api/screener/run', 'Screener::run');
     $routes->post('/api/screener/run-manual', 'Screener::runManualQuery');

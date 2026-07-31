@@ -1998,3 +1998,389 @@ video {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/*
+================ THEME SYSTEM (Day / Night / System) ================
+Night values below reproduce the original design exactly.
+Day is the same navy + gold identity relit for a bright desk.
+The <html data-theme> attribute is set before first paint in the
+header template to avoid a flash of the wrong theme.
+=====================================================================
+*/
+:root,
+html[data-theme="night"] {
+  --bg-page: 10 25 41;
+  --bg-surface: 15 39 68;
+  --bg-hover: 10 25 41;
+  --bg-hover-soft: 10 25 41 / 0.5;
+  --bg-page-30: 10 25 41 / 0.3;
+  --bg-page-50: 10 25 41 / 0.5;
+  --ink: 243 244 246;
+  --ink-2: 229 231 235;
+  --ink-3: 209 213 219;
+  --ink-4: 156 163 175;
+  --ink-5: 107 114 128;
+  --ink-6: 75 85 99;
+  --border: 55 65 81;
+  --border-strong: 75 85 99;
+  --gold-text: 212 168 83;
+  --gold-text-2: 240 192 96;
+  --gold-active: 212 168 83;
+  --gold-active-ink: 10 25 41;
+  --pos: 74 222 128;
+  --pos-soft: 134 239 172;
+  --neg: 248 113 113;
+  --neg-soft: 252 165 165;
+  --blue: 96 165 250;
+  --blue-soft: 147 197 253;
+  --purple: 192 132 252;
+  --indigo: 129 140 248;
+  --teal: 45 212 191;
+  --orange: 251 146 60;
+  --yellow: 250 204 21;
+  --flash-ok-bg: 20 83 45 / 0.5;
+  --flash-err-bg: 127 29 29 / 0.5;
+  --flash-info-bg: 30 58 138 / 0.5;
+}
+
+html[data-theme="day"] {
+  --bg-page: 242 246 250;
+  --bg-surface: 255 255 255;
+  --bg-hover: 226 234 243;
+  --bg-hover-soft: 20 37 61 / 0.06;
+  --bg-page-30: 20 37 61 / 0.04;
+  --bg-page-50: 20 37 61 / 0.06;
+  --ink: 20 37 61;
+  --ink-2: 41 58 82;
+  --ink-3: 56 74 99;
+  --ink-4: 84 102 128;
+  --ink-5: 122 138 158;
+  --ink-6: 140 154 172;
+  --border: 221 228 236;
+  --border-strong: 199 208 220;
+  --gold-text: 163 120 32;
+  --gold-text-2: 140 102 25;
+  --gold-active: 163 120 32;
+  --gold-active-ink: 255 255 255;
+  --pos: 22 130 67;
+  --pos-soft: 21 128 61;
+  --neg: 199 48 48;
+  --neg-soft: 190 30 30;
+  --blue: 37 99 235;
+  --blue-soft: 29 78 150;
+  --purple: 124 58 194;
+  --indigo: 79 70 190;
+  --teal: 15 118 110;
+  --orange: 194 90 20;
+  --yellow: 180 130 0;
+  --flash-ok-bg: 220 252 231 / 0.7;
+  --flash-err-bg: 254 226 226 / 0.7;
+  --flash-info-bg: 219 234 254 / 0.7;
+}
+
+html {
+  color-scheme: dark;
+}
+
+html[data-theme="day"] {
+  color-scheme: light;
+}
+
+/* --- surfaces --- */
+.bg-navy {
+  --tw-bg-opacity: 1;
+  background-color: rgb(var(--bg-page) / var(--tw-bg-opacity, 1));
+}
+
+.bg-navy2 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(var(--bg-surface) / var(--tw-bg-opacity, 1));
+}
+
+.bg-navy\/30 {
+  background-color: rgb(var(--bg-page-30));
+}
+
+.bg-navy\/50 {
+  background-color: rgb(var(--bg-page-50));
+}
+
+.hover\:bg-navy:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(var(--bg-hover) / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-navy\/50:hover {
+  background-color: rgb(var(--bg-hover-soft));
+}
+
+/* --- borders --- */
+.border-gray-700 {
+  --tw-border-opacity: 1;
+  border-color: rgb(var(--border) / var(--tw-border-opacity, 1));
+}
+
+.border-gray-700\/50 {
+  border-color: rgb(var(--border) / 0.5);
+}
+
+.border-gray-600 {
+  --tw-border-opacity: 1;
+  border-color: rgb(var(--border-strong) / var(--tw-border-opacity, 1));
+}
+
+/* --- neutral ink --- */
+.text-gray-100 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--ink) / var(--tw-text-opacity, 1));
+}
+
+.text-gray-200 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--ink-2) / var(--tw-text-opacity, 1));
+}
+
+.text-gray-300 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--ink-3) / var(--tw-text-opacity, 1));
+}
+
+.text-gray-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--ink-4) / var(--tw-text-opacity, 1));
+}
+
+.text-gray-500 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--ink-5) / var(--tw-text-opacity, 1));
+}
+
+.text-gray-600 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--ink-6) / var(--tw-text-opacity, 1));
+}
+
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(var(--ink) / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-white:hover {
+  --tw-text-opacity: 1;
+  color: rgb(var(--ink) / var(--tw-text-opacity, 1));
+}
+
+/* --- brand gold --- */
+.text-gold {
+  --tw-text-opacity: 1;
+  color: rgb(var(--gold-text) / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-gold:hover {
+  --tw-text-opacity: 1;
+  color: rgb(var(--gold-text) / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-gold2:hover {
+  --tw-text-opacity: 1;
+  color: rgb(var(--gold-text-2) / var(--tw-text-opacity, 1));
+}
+
+/* --- signal colors (pos/neg) --- */
+.text-green-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--pos) / var(--tw-text-opacity, 1));
+}
+
+.text-green-300 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--pos-soft) / var(--tw-text-opacity, 1));
+}
+
+.text-red-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--neg) / var(--tw-text-opacity, 1));
+}
+
+.text-red-300 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--neg-soft) / var(--tw-text-opacity, 1));
+}
+
+/* --- category accents --- */
+.text-blue-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--blue) / var(--tw-text-opacity, 1));
+}
+
+.text-blue-300 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--blue-soft) / var(--tw-text-opacity, 1));
+}
+
+.text-purple-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--purple) / var(--tw-text-opacity, 1));
+}
+
+.text-indigo-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--indigo) / var(--tw-text-opacity, 1));
+}
+
+.text-teal-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--teal) / var(--tw-text-opacity, 1));
+}
+
+.text-orange-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--orange) / var(--tw-text-opacity, 1));
+}
+
+.text-yellow-400 {
+  --tw-text-opacity: 1;
+  color: rgb(var(--yellow) / var(--tw-text-opacity, 1));
+}
+
+/* --- flash messages --- */
+.bg-green-900\/50 {
+  background-color: rgb(var(--flash-ok-bg));
+}
+
+.bg-red-900\/50 {
+  background-color: rgb(var(--flash-err-bg));
+}
+
+.bg-blue-900\/50 {
+  background-color: rgb(var(--flash-info-bg));
+}
+
+.placeholder-gray-500::-moz-placeholder {
+  --tw-placeholder-opacity: 1;
+  color: rgb(var(--ink-5) / var(--tw-placeholder-opacity, 1));
+}
+
+.placeholder-gray-500::placeholder {
+  --tw-placeholder-opacity: 1;
+  color: rgb(var(--ink-5) / var(--tw-placeholder-opacity, 1));
+}
+
+/* White text stays white on solid, colored fills (badges, buttons, dialogs). */
+html[data-theme="day"] .bg-green-600.text-white,
+html[data-theme="day"] .bg-green-700.text-white,
+html[data-theme="day"] .bg-red-600.text-white,
+html[data-theme="day"] .bg-red-700.text-white,
+html[data-theme="day"] .bg-blue-600.text-white,
+html[data-theme="day"] .bg-blue-700.text-white,
+html[data-theme="day"] .bg-gray-600.text-white,
+html[data-theme="day"] .bg-gray-700.text-white,
+html[data-theme="day"] .bg-gold.text-white,
+html[data-theme="day"] .bg-gray-900\/50.text-white,
+html[data-theme="day"] .bg-black\/60.text-white {
+  color: rgb(255 255 255);
+}
+
+/* Query builder expression chain is tuned for the dark surface. */
+html[data-theme="day"] .expression-chain {
+  background: rgba(20, 37, 61, 0.04);
+  border: 1px solid rgba(20, 37, 61, 0.12);
+}
+
+/* Theme switch */
+.theme-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9999px;
+  background: rgb(var(--bg-page));
+  border: 1px solid rgb(var(--border));
+}
+
+.theme-switch button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: rgb(var(--ink-5));
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.theme-switch button:hover {
+  color: rgb(var(--ink));
+}
+
+.theme-switch button.active {
+  background: rgb(var(--gold-active));
+  color: rgb(var(--gold-active-ink));
+}
+
+.theme-switch button.active:hover {
+  color: rgb(var(--gold-active-ink));
+}
+
+.theme-segmented {
+  display: flex;
+  gap: 4px;
+}
+
+.theme-segmented button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgb(var(--ink-4));
+  border: 1px solid rgb(var(--border));
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-segmented button.active {
+  background: rgb(var(--gold-active));
+  color: rgb(var(--gold-active-ink));
+  border-color: transparent;
+}
+
+.theme-switch button .icon-on,
+.theme-segmented button .icon-on {
+  display: none;
+}
+
+html[data-theme-mode="day"] [data-theme-switch="day"] .icon-on,
+html[data-theme-mode="night"] [data-theme-switch="night"] .icon-on,
+html[data-theme-mode="system"] [data-theme-switch="system"] .icon-on,
+html[data-theme-mode="day"] [data-theme-segment="day"] .icon-on,
+html[data-theme-mode="night"] [data-theme-segment="night"] .icon-on,
+html[data-theme-mode="system"] [data-theme-segment="system"] .icon-on {
+  display: inline-block;
+}
+
+html[data-theme-mode="day"] [data-theme-switch="day"] .icon-off,
+html[data-theme-mode="night"] [data-theme-switch="night"] .icon-off,
+html[data-theme-mode="system"] [data-theme-switch="system"] .icon-off,
+html[data-theme-mode="day"] [data-theme-segment="day"] .icon-off,
+html[data-theme-mode="night"] [data-theme-segment="night"] .icon-off,
+html[data-theme-mode="system"] [data-theme-segment="system"] .icon-off {
+  display: none;
+}
+
+.theme-switch button:focus-visible,
+.theme-segmented button:focus-visible {
+  outline: 2px solid #d4a853;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body,
+  nav,
+  footer {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+}

@@ -216,38 +216,54 @@
 </section>
 
 <script>
-var ctx = document.getElementById('priceChart').getContext('2d');
-var gradient = ctx.createLinearGradient(0, 0, 0, 256);
-gradient.addColorStop(0, 'rgba(212, 168, 83, 0.15)');
-gradient.addColorStop(1, 'rgba(212, 168, 83, 0)');
+function chartCssRgb(name) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || '0, 0, 0';
+}
+function chartCssColor(name, alpha) {
+    var v = chartCssRgb(name);
+    return alpha !== undefined ? 'rgb(' + v + ' / ' + alpha + ')' : 'rgb(' + v + ')';
+}
+function renderPriceChart() {
+    var canvas = document.getElementById('priceChart');
+    if (!canvas || !window.Chart) return;
+    var existing = Chart.getChart(canvas);
+    if (existing) existing.destroy();
+    var ctx = canvas.getContext('2d');
+    var gradient = ctx.createLinearGradient(0, 0, 0, 256);
+    gradient.addColorStop(0, chartCssColor('--gold-text', 0.15));
+    gradient.addColorStop(1, chartCssColor('--gold-text', 0));
 
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: <?= json_encode(range(1, count($priceData))) ?>,
-        datasets: [{
-            label: 'Price History (90 Days)',
-            data: <?= json_encode($priceData) ?>,
-            borderColor: '#d4a853',
-            backgroundColor: gradient,
-            fill: true,
-            tension: 0.3,
-            pointRadius: 0,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: { display: false },
-            y: {
-                ticks: { color: '#888', callback: function(v) { return '\u20B9' + v; } },
-                grid: { color: 'rgba(75, 85, 99, 0.3)' }
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <?= json_encode(range(1, count($priceData))) ?>,
+            datasets: [{
+                label: 'Price History (90 Days)',
+                data: <?= json_encode($priceData) ?>,
+                borderColor: chartCssColor('--gold-text'),
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 0,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { display: false },
+                y: {
+                    ticks: { color: chartCssColor('--ink-5'), callback: function(v) { return '\u20B9' + v; } },
+                    grid: { color: chartCssColor('--ink-6', 0.3) }
+                }
             }
         }
-    }
-});
+    });
+}
+renderPriceChart();
+document.documentElement.addEventListener('themechange', renderPriceChart);
 </script>
 <script>
 function refreshStock() {

@@ -26,6 +26,11 @@ class Screener extends BaseController
             . view('templates/footer');
     }
 
+    public function docs(): string
+    {
+        return view('templates/header'). view('screener/docs') . view('templates/footer');
+    }
+
     public function run()
     {
         $stockModel = new StockModel();
@@ -36,6 +41,14 @@ class Screener extends BaseController
         $filters     = $filters ? json_decode($filters, true) : [];
         $techFilters = $this->request->getGet('tech_filters');
         $techFilters = $techFilters ? json_decode($techFilters, true) : [];
+
+        foreach (['historical_filters', 'summaries_filters'] as $extraParam) {
+            $extra = $this->request->getGet($extraParam);
+            $extra = $extra ? json_decode($extra, true) : [];
+            if (!empty($extra)) {
+                $filters = array_merge($filters, $extra);
+            }
+        }
 
         $results = [];
         foreach ($stocks as $s) {
@@ -70,15 +83,64 @@ class Screener extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => $compiled['error']]);
         }
 
-        $stockModel = new StockModel();
-        $stocks = $stockModel->findAll();
+         $stockModel = new StockModel();
+         $stocks = $stockModel->findAll();
 
-        $results = [];
-        foreach ($stocks as $s) {
-            if ($this->matchesFilters($s, $compiled['filters'], $match)) {
-                $results[] = $s;
-            }
-        }
+         $techFilters = [];
+         $fundFilters = [];
+         $needsDerivedFields = false;
+         $derivedFieldNames = [
+             'fiftyDayAverage', 'fifty_day_average',
+             'twoHundredDayAverage', 'two_hundred_day_average',
+             'fiftyDayAverageChange', 'fifty_day_average_change',
+             'fiftyDayAverageChangePercent', 'fifty_day_average_change_pct',
+             'twoHundredDayAverageChange', 'two_hundred_day_average_change',
+             'twoHundredDayAverageChangePercent', 'two_hundred_day_average_change_pct',
+         ];
+         foreach ($compiled['filters'] as $f) {
+             if (!empty($f['is_technical'])) {
+                 $techFilters[] = $f;
+             } else {
+                 $fieldName = $f['field'] ?? '';
+                 if (in_array($fieldName, $derivedFieldNames)) {
+                     $needsDerivedFields = true;
+                 }
+                 $fundFilters[] = $f;
+             }
+         }
+
+         if (!empty($techFilters) || $needsDerivedFields) {
+             $priceModel = new StockPriceModel();
+             $allStockIds = array_column($stocks, 'id');
+             $allPrices = $priceModel->whereIn('stock_id', $allStockIds)
+                 ->orderBy('stock_id', 'ASC')
+                 ->orderBy('price_date', 'ASC')
+                 ->findAll();
+             $pricesByStock = [];
+             foreach ($allPrices as $p) {
+                 $sid = (int) $p['stock_id'];
+                 $pricesByStock[$sid][] = $p;
+             }
+             foreach ($stocks as &$s) {
+                 $sid = (int) $s['id'];
+                 $ohlcv = $pricesByStock[$sid] ?? [];
+                 $s = $this->augmentStockWithDerivedFields($s, $ohlcv);
+             }
+             unset($s);
+         }
+
+         $fundResults = [];
+         foreach ($stocks as $s) {
+             if ($this->matchesFilters($s, $fundFilters, $match)) {
+                 $fundResults[] = $s;
+             }
+         }
+
+         if (!empty($techFilters)) {
+             $results = $this->applyTechnicalFilters($fundResults, $techFilters, $match);
+         } else {
+             $results = $fundResults;
+         }
 
         $response = [
             'success'  => true,
@@ -151,7 +213,7 @@ class Screener extends BaseController
                     $suffix = trim(substr($clause, $opPos + $opLen));
                     if ($prefix !== '' && $suffix !== '') {
                         if ($opLen > $bestOpLen) {
-                            $validPrefix = preg_match('~^[\w.]+$~', $prefix);
+                            $validPrefix = preg_match('~^[\w.]+(\(\d+\))?$~', $prefix);
                             if ($validPrefix) {
                                 $bestOp = $op;
                                 $bestOpLen = $opLen;
@@ -167,23 +229,47 @@ class Screener extends BaseController
                 return ['valid' => false, 'error' => 'Cannot parse condition: "' . $clause . '". Use format: field operator value', 'filters' => []];
             }
 
-            $field = trim(substr($clause, 0, $bestOpPos));
-            $value = trim(substr($clause, $bestOpPos + $bestOpLen));
+             $field = trim(substr($clause, 0, $bestOpPos));
+             $value = trim(substr($clause, $bestOpPos + $bestOpLen));
 
-            if ($field === '' || $value === '') {
-                return ['valid' => false, 'error' => 'Missing field or value in: "' . $clause . '"', 'filters' => []];
-            }
+             if ($field === '' || $value === '') {
+                 return ['valid' => false, 'error' => 'Missing field or value in: "' . $clause . '"', 'filters' => []];
+             }
 
-            $parsed = $this->parseConditionSide($value, $validMathOps);
+             $isTech = preg_match('~^([a-z_]+)\((\d+)\)$~i', $field, $m);
+             $filterExtra = [];
+             if ($isTech) {
+                 $filterExtra = ['is_technical' => true, 'indicator' => strtolower($m[1]), 'period' => (int) $m[2]];
+             } else {
+                 $techIndicatorNames = [
+                     'sma_pct', 'ema_pct', 'vwap_ratio', 'macd', 'macd_signal', 'macd_histogram',
+                     'atr', 'natr', 'bb_pct', 'bb_width', 'kc_pct', 'dc_pct',
+                     'rsi', 'stoch_k', 'stoch_d', 'cci', 'roc', 'williams_r', 'rvi', 'coppock',
+                     'supertrend', 'supertrend_dir', 'psar',
+                     'obv', 'cmf', 'vpt', 'mfi', 'volume_ratio', 'force_index', 'eom',
+                     'pivot', 'fib_61.8',
+                     'linreg_slope', 'linreg_rsq', 'zscore', 'efficiency_ratio', 'chop', 'hurst', 'dpo', 'ulcer_index',
+                     'kama', 'volume_delta',
+                     'ttm_squeeze', 'ttm_momentum', 'sortino_ratio', 'cvar', 'historical_var', 'martin_ratio', 'downside_dev',
+                     'aroon_up', 'aroon_down', 'aroon_osc', 'tsi', 'vi_plus', 'vi_minus', 'cmo', 'mass_index', 'connors_rsi', 'rmi',
+                     'klinger_osc', 'rainbow_sma1',
+                     'vp_poc', 'vp_vah', 'vp_val',
+                 ];
+                 if (in_array(strtolower($field), $techIndicatorNames)) {
+                     $filterExtra = ['is_technical' => true, 'indicator' => strtolower($field), 'period' => 0];
+                 }
+             }
+
+             $parsed = $this->parseConditionSide($value, $validMathOps);
             if ($parsed === null) {
                 return ['valid' => false, 'error' => 'Cannot parse value: "' . $value . '"', 'filters' => []];
             }
 
-            $filters[] = array_merge([
-                'field' => $field,
-                'op' => $bestOp,
-                'logic' => $currentLogic,
-            ], $parsed);
+             $filters[] = array_merge([
+                 'field' => $field,
+                 'op' => $bestOp,
+                 'logic' => $currentLogic,
+             ] + $filterExtra, $parsed);
 
             $currentLogic = 'AND';
         }
@@ -364,7 +450,11 @@ class Screener extends BaseController
         if (!empty($f['value_is_field'])) {
             return $this->getFieldStringValue($stock, $f['value'] ?? '');
         }
-        return $f['value'] ?? null;
+        $raw = $f['value'] ?? null;
+        if ($raw !== null && preg_match('/^([\'"])(.*)\\1$/', $raw, $m)) {
+            return $m[2];
+        }
+        return $raw;
     }
 
     private function matchesFilters(array $stock, array $filters, string $mode = 'all'): bool
@@ -383,7 +473,7 @@ class Screener extends BaseController
             if ($isString) {
                 $stockVal = $this->getFieldStringValue($stock, $field);
                 if ($stockVal === null) { $results[] = false; continue; }
-                $compareVal = $this->resolveFilterValue($f, $stock);
+                $compareVal = $this->resolveFilterStringValue($f, $stock);
                 if ($compareVal === null) { $results[] = false; continue; }
                 $compareStr = is_array($compareVal) ? ($compareVal['value'] ?? '') : (string) $compareVal;
                 switch ($op) {
@@ -463,39 +553,62 @@ class Screener extends BaseController
         $map = [
             'price'                          => $stock['current_price'] ?? null,
             'current_price'                  => $stock['current_price'] ?? null,
-            'regularMarketPrice'             => $stock['current_price'] ?? null,
-            'regularMarketPreviousClose'      => $stock['previous_close'] ?? null,
+            'regularMarketPrice'             => $stock['regularMarketPrice'] ?? null,
+            'regularMarketPreviousClose'      => $stock['regularMarketPreviousClose'] ?? null,
             'previous_close'                 => $stock['previous_close'] ?? null,
-            'regularMarketOpen'              => $stock['current_price'] ?? null,
-            'regularMarketDayHigh'           => $stock['current_price'] ?? null,
-            'regularMarketDayLow'            => $stock['current_price'] ?? null,
-            'regularMarketChange'            => null,
-            'regularMarketChangePercent'     => null,
+            'regularMarketOpen'              => $stock['regularMarketOpen'] ?? null,
+            'regularMarketDayHigh'           => $stock['regularMarketDayHigh'] ?? null,
+            'regularMarketDayLow'            => $stock['regularMarketDayLow'] ?? null,
+            'regularMarketChange'            => $stock['regularMarketChange'] ?? null,
+            'regularMarketChangePercent'     => $stock['regularMarketChangePercent'] ?? null,
             'market_cap'                     => $stock['market_cap'] ?? null,
             'pe_ratio'                       => $stock['pe_ratio'] ?? null,
-            'trailingPE'                     => $stock['pe_ratio'] ?? null,
-            'forwardPE'                      => null,
-            'epsTrailingTwelveMonths'        => null,
-            'epsForward'                     => null,
+            'trailingPE'                     => $stock['trailingPE'] ?? null,
+            'forwardPE'                      => $stock['forwardPE'] ?? null,
+            'epsTrailingTwelveMonths'        => $stock['epsTrailingTwelveMonths'] ?? null,
+            'epsForward'                     => $stock['epsForward'] ?? null,
             'dividend_yield'                 => $stock['dividend_yield'] ?? null,
-            'trailingAnnualDividendYield'    => $stock['dividend_yield'] ?? null,
-            'trailingAnnualDividendRate'     => null,
+            'trailingAnnualDividendYield'    => $stock['trailingAnnualDividendYield'] ?? null,
+            'trailingAnnualDividendRate'     => $stock['trailingAnnualDividendRate'] ?? null,
             'beta'                           => $stock['beta'] ?? null,
             'avg_volume'                     => $stock['avg_volume'] ?? null,
-            'averageDailyVolume10Day'        => $stock['avg_volume'] ?? null,
-            'averageDailyVolume3Month'       => $stock['avg_volume'] ?? null,
-            'regularMarketVolume'            => $stock['avg_volume'] ?? null,
+            'averageDailyVolume10Day'        => $stock['averageDailyVolume10Day'] ?? null,
+            'averageDailyVolume3Month'       => $stock['averageDailyVolume3Month'] ?? null,
+            'regularMarketVolume'            => $stock['regularMarketVolume'] ?? null,
             'week_52_high'                   => $stock['week_52_high'] ?? null,
-            'fiftyTwoWeekHigh'               => $stock['week_52_high'] ?? null,
+            'fiftyTwoWeekHigh'               => $stock['fiftyTwoWeekHigh'] ?? null,
             'week_52_low'                    => $stock['week_52_low'] ?? null,
-            'fiftyTwoWeekLow'                => $stock['week_52_low'] ?? null,
-            'fiftyDayAverage'                => null,
-            'twoHundredDayAverage'           => null,
-            'bookValue'                      => null,
-            'priceToBook'                    => null,
-            'priceHint'                      => null,
-            'sharesOutstanding'              => null,
+            'fiftyTwoWeekLow'                => $stock['fiftyTwoWeekLow'] ?? null,
+            'fiftyDayAverage'                => $stock['fiftyDayAverage'] ?? null,
+            'twoHundredDayAverage'           => $stock['twoHundredDayAverage'] ?? null,
+            'bookValue'                      => $stock['bookValue'] ?? null,
+            'priceToBook'                    => $stock['priceToBook'] ?? null,
+            'priceHint'                      => $stock['priceHint'] ?? null,
+            'sharesOutstanding'              => $stock['sharesOutstanding'] ?? null,
             'marketCap'                      => $stock['market_cap'] ?? null,
+            'fifty_day_average'              => $stock['fifty_day_average'] ?? null,
+            'fiftyDayAverage'               => $stock['fifty_day_average'] ?? null,
+            'two_hundred_day_average'        => $stock['two_hundred_day_average'] ?? null,
+            'twoHundredDayAverage'           => $stock['two_hundred_day_average'] ?? null,
+            'fifty_day_average_change'      => $stock['fifty_day_average_change'] ?? null,
+            'fiftyDayAverageChange'         => $stock['fiftyDayAverageChange'] ?? null,
+            'fifty_day_average_change_pct'  => $stock['fifty_day_average_change_pct'] ?? null,
+            'fiftyDayAverageChangePercent'  => $stock['fiftyDayAverageChangePercent'] ?? null,
+            'two_hundred_day_average_change' => $stock['two_hundred_day_average_change'] ?? null,
+            'twoHundredDayAverageChange'         => $stock['twoHundredDayAverageChange'] ?? null,
+            'two_hundred_day_average_change_pct'  => $stock['two_hundred_day_average_change_pct'] ?? null,
+            'twoHundredDayAverageChangePercent'  => $stock['twoHundredDayAverageChangePercent'] ?? null,
+            'regularMarketChange'            => $stock['regularMarketChange'] ?? null,
+            'regularMarketChangePercent'     => $stock['regularMarketChangePercent'] ?? null,
+            'marketState'                    => $stock['marketState'] ?? null,
+            'tradeable'                      => $stock['tradeable'] ?? null,
+            'shares_outstanding'             => $stock['shares_outstanding'] ?? null,
+            'sharesOutstanding'              => $stock['sharesOutstanding'] ?? null,
+            'enterprise_value'               => $stock['enterprise_value'] ?? null,
+            'enterpriseValue'                => $stock['enterpriseValue'] ?? null,
+            'forward_pe'                     => $stock['forward_pe'] ?? null,
+            'forwardPE'                      => $stock['forwardPE'] ?? null,
+            'peg_ratio'                      => $stock['peg_ratio'] ?? null,
         ];
         $v = $map[$field] ?? null;
         return $v !== null ? (float) $v : null;
@@ -508,21 +621,21 @@ class Screener extends BaseController
             'sector'                  => $stock['sector'] ?? null,
             'symbol'                  => $stock['symbol'] ?? null,
             'exchange'                => $stock['exchange'] ?? null,
-            'currency'                => $stock['exchange'] ?? null,
-            'financialCurrency'       => 'INR',
-            'fullExchangeName'        => 'NSE',
-            'exchangeTimezoneName'    => 'Asia/Kolkata',
-            'exchangeTimezoneShortName' => 'IST',
-            'quoteSourceName'         => 'Delayed Quote',
-            'quoteType'               => 'EQUITY',
-            'market'                  => 'in_market',
+            'currency'                => $stock['currency'] ?? null,
+            'financialCurrency'       => $stock['financialCurrency'] ?? 'INR',
+            'fullExchangeName'        => $stock['fullExchangeName'] ?? 'NSE',
+            'exchangeTimezoneName'    => $stock['exchangeTimezoneName'] ?? 'Asia/Kolkata',
+            'exchangeTimezoneShortName' => $stock['exchangeTimezoneShortName'] ?? 'IST',
+            'quoteSourceName'         => $stock['quoteSourceName'] ?? 'Delayed Quote',
+            'quoteType'               => $stock['quoteType'] ?? 'EQUITY',
+            'market'                  => $stock['market'] ?? 'in_market',
             'longName'                => $stock['name'] ?? null,
             'shortName'               => $stock['name'] ?? null,
-            'marketState'             => null,
-            'language'                => 'en-US',
-            'messageBoardId'          => null,
-            'sourceInterval'          => null,
-            'tradeable'               => null,
+            'marketState'             => $stock['marketState'] ?? null,
+            'language'                => $stock['language'] ?? 'en-US',
+            'messageBoardId'          => $stock['messageBoardId'] ?? null,
+            'sourceInterval'          => $stock['sourceInterval'] ?? null,
+            'tradeable'               => $stock['tradeable'] ?? null,
         ];
         return $map[$field] ?? null;
     }
@@ -786,5 +899,39 @@ class Screener extends BaseController
             }
         }
         return $returns;
+    }
+
+    private function computeSMA(array $prices, int $period): ?float
+    {
+        if (count($prices) < $period) return null;
+        $slice = array_slice($prices, -$period);
+        return array_sum($slice) / $period;
+    }
+
+    private function augmentStockWithDerivedFields(array $stock, array $ohlcv): array
+    {
+        if (empty($ohlcv)) return $stock;
+        $closes = array_map(function ($p) { return (float) ($p['close'] ?? 0); }, $ohlcv);
+        if (empty($closes)) return $stock;
+
+        $sma50 = $this->computeSMA($closes, 50);
+        $sma200 = $this->computeSMA($closes, 200);
+        $currentPrice = (float) ($stock['current_price'] ?? 0);
+
+        if ($sma50 !== null) {
+            $stock['fifty_day_average'] = round($sma50, 2);
+            if ($sma50 > 0) {
+                $stock['fifty_day_average_change'] = round($currentPrice - $sma50, 2);
+                $stock['fifty_day_average_change_pct'] = round((($currentPrice - $sma50) / $sma50) * 100, 2);
+            }
+        }
+        if ($sma200 !== null) {
+            $stock['two_hundred_day_average'] = round($sma200, 2);
+            if ($sma200 > 0) {
+                $stock['two_hundred_day_average_change'] = round($currentPrice - $sma200, 2);
+                $stock['two_hundred_day_average_change_pct'] = round((($currentPrice - $sma200) / $sma200) * 100, 2);
+            }
+        }
+        return $stock;
     }
 }

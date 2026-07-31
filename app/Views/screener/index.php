@@ -8,6 +8,9 @@
             <button onclick="toggleGuide()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-book mr-2"></i>Guide
             </button>
+            <a href="/screener/docs" class="border border-blue-400 text-blue-400 hover:bg-blue-400/10 px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-file-alt mr-2"></i>Documentation
+            </a>
             <button onclick="toggleSavedLists()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-2 rounded-lg text-sm transition">
                 <i class="fas fa-save mr-2"></i>Saved Lists
                 <span id="savedCount" class="ml-1 text-gold text-xs"><?= count($savedLists) ?></span>
@@ -55,10 +58,10 @@
                      <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">fiftyTwoWeekHigh</td><td class="py-1.5 text-gray-500">52-week high (Yahoo)</td></tr>
                      <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">fiftyTwoWeekLow</td><td class="py-1.5 text-gray-500">52-week low (Yahoo)</td></tr>
                      <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">sharesOutstanding</td><td class="py-1.5 text-gray-500">Shares outstanding</td></tr>
-                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">exchange</td><td class="py-1.5 text-gray-500" style="color:#818cf8">String: Exchange (NSE, BSE)</td></tr>
-                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">currency</td><td class="py-1.5 text-gray-500" style="color:#818cf8">String: Currency code</td></tr>
-                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">sector</td><td class="py-1.5 text-gray-500" style="color:#818cf8">String: Sector name</td></tr>
-                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">name</td><td class="py-1.5 text-gray-500" style="color:#818cf8">String: Company name</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">exchange</td><td class="py-1.5 text-gray-500" style="color:rgb(var(--indigo))">String: Exchange (NSE, BSE)</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">currency</td><td class="py-1.5 text-gray-500" style="color:rgb(var(--indigo))">String: Currency code</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">sector</td><td class="py-1.5 text-gray-500" style="color:rgb(var(--indigo))">String: Sector name</td></tr>
+                     <tr class="border-b border-gray-700"><td class="py-1.5 font-mono">name</td><td class="py-1.5 text-gray-500" style="color:rgb(var(--indigo))">String: Company name</td></tr>
                 </table>
                 <h3 class="text-gold font-semibold mt-4 mb-2">Math Operators</h3>
                 <p class="text-gray-400 text-xs">Transform a field value before comparing:</p>
@@ -101,6 +104,12 @@
                         <p class="text-green-400 text-xs mb-1">Math Transform</p>
                         <code class="text-gray-300 text-xs">price &times; 2 &gt; 5000</code>
                     </div>
+                    <div class="bg-navy rounded-lg p-3 border border-gray-700">
+                        <p class="text-green-400 text-xs mb-1">String Comparison</p>
+                        <code class="text-gray-300 text-xs">exchange == 'NSE'</code><br>
+                        <code class="text-gray-300 text-xs">currency != 'USD'</code><br>
+                        <code class="text-gray-300 text-xs">sector == 'Technology'</code>
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,22 +129,80 @@
                         </div>
                     </div>
                     <div class="flex gap-3 mb-4">
-                        <button onclick="switchScreenerTab('filters')" id="tab-filters" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy">Filters</button>
+                        <button onclick="switchScreenerTab('fundamental')" id="tab-fundamental" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy">Fundamental</button>
+                        <button onclick="switchScreenerTab('technical')" id="tab-technical" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Technical Analysis</button>
+                        <button onclick="switchScreenerTab('historical')" id="tab-historical" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Historical Data</button>
+                        <button onclick="switchScreenerTab('summaries')" id="tab-summaries" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Summaries</button>
                         <button onclick="switchScreenerTab('manual')" id="tab-manual" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white">Manual Query</button>
                     </div>
-                    <div id="filtersPanel">
-                        <div id="filterList" class="space-y-3 mb-4"></div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
-                                <i class="fas fa-search mr-2"></i>Run Screener
+<div id="filtersPanel">
+                        <div id="fundamentalPanel">
+                            <div id="filterList" class="space-y-3 mb-4"></div>
+                            <button onclick="addFundamentalFilter()" class="border border-gray-600 text-gray-300 hover:border-gold hover:text-gold px-4 py-2 rounded-lg text-sm transition mb-4">
+                                <i class="fas fa-plus mr-1"></i>Add Filter
                             </button>
-                            <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
-                                <i class="fas fa-undo mr-1"></i>Clear All
-                            </button>
-                            <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
+                            <div class="flex items-center gap-3">
+                                <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                    <i class="fas fa-search mr-2"></i>Run Screener
+                                </button>
+                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                    <i class="fas fa-undo mr-1"></i>Clear All
+                                </button>
+                                <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                Numeric: <code class="text-gray-400">> >= < <= == !=</code> &nbsp; Strings: <code class="text-gray-400">== !=</code> &nbsp; Math: <code class="text-gray-400">price * 2 > 5000</code> &nbsp; String: <code class="text-gray-400">exchange == 'NSE'</code>
+                            </p>
                         </div>
-                    </div>
-                    <div id="manualPanel" class="hidden">
+                        <div id="technicalPanel" class="hidden">
+                            <div id="techFilterList" class="space-y-3 mb-4"></div>
+                            <button onclick="addTechnicalFilter()" class="border border-gray-600 text-gray-300 hover:border-gold hover:text-gold px-4 py-2 rounded-lg text-sm transition mb-4">
+                                <i class="fas fa-plus mr-1"></i>Add Filter
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                    <i class="fas fa-search mr-2"></i>Run Screener
+                                </button>
+                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                    <i class="fas fa-undo mr-1"></i>Clear All
+                                </button>
+                                <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
+                            </div>
+                        </div>
+                        <div id="historicalPanel" class="hidden">
+                            <div id="historicalFilterList" class="space-y-3 mb-4"></div>
+                            <button onclick="addHistoricalFilter()" class="border border-gray-600 text-gray-300 hover:border-gold hover:text-gold px-4 py-2 rounded-lg text-sm transition mb-4">
+                                <i class="fas fa-plus mr-1"></i>Add Filter
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                    <i class="fas fa-search mr-2"></i>Run Screener
+                                </button>
+                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                    <i class="fas fa-undo mr-1"></i>Clear All
+                                </button>
+                                <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
+                            </div>
+                        </div>
+                        <div id="summariesPanel" class="hidden">
+                            <div id="summariesFilterList" class="space-y-3 mb-4"></div>
+                            <button onclick="addSummariesFilter()" class="border border-gray-600 text-gray-300 hover:border-gold hover:text-gold px-4 py-2 rounded-lg text-sm transition mb-4">
+                                <i class="fas fa-plus mr-1"></i>Add Filter
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <button onclick="runScreener()" class="bg-gold hover:bg-gold2 text-navy font-bold px-6 py-3 rounded-lg transition">
+                                    <i class="fas fa-search mr-2"></i>Run Screener
+                                </button>
+                                <button onclick="clearAll()" class="border border-gray-600 text-gray-300 hover:border-gold px-4 py-3 rounded-lg text-sm transition">
+                                    <i class="fas fa-undo mr-1"></i>Clear All
+                                </button>
+                                <span id="resultCount" class="text-gray-400 text-sm ml-auto"></span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">
+                            Tech Indicators: <code class="text-gray-400">rsi &lt; 30</code> <code class="text-gray-400">sma_pct(20) &gt; 100</code> <code class="text-gray-400">macd &gt; 0</code> <code class="text-gray-400">rsi&lt;30 AND macd&gt;0</code>
+                        </p>
+                        <div id="manualPanel" class="hidden">
                         <div class="mb-3">
                             <label class="block text-sm font-medium text-gray-300 mb-1">Stock Logic Query</label>
                             <textarea id="manualQuery" rows="4" class="w-full bg-navy border border-gray-600 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-gold" placeholder="e.g. pe_ratio &lt; 20 AND market_cap &gt; 1000000000"></textarea>
@@ -158,6 +225,7 @@
                             </button>
                         </div>
                     </div>
+                </div>
                 </div>
 
             <div id="resultsContainer" class="hidden">
@@ -223,72 +291,72 @@
 
 <script>
 (function() {
-     var FILTER_FIELDS = [
-         // Price / Valuation
-         { value: 'price', label: 'Current Price' },
-         { value: 'previous_close', label: 'Previous Close' },
-         { value: 'regularMarketDayHigh', label: 'Regular Market Day High' },
-         { value: 'regularMarketDayLow', label: 'Regular Market Day Low' },
-         { value: 'regularMarketOpen', label: 'Regular Market Open' },
-         { value: 'regularMarketChange', label: 'Regular Market Change' },
-         { value: 'regularMarketChangePercent', label: 'Regular Market Change %' },
-         { value: 'regularMarketVolume', label: 'Regular Market Volume' },
-         { value: 'regularMarketPreviousClose', label: 'Regular Market Prev Close' },
-         { value: 'weekly_change', label: 'Weekly Change %' },
-         { value: 'monthly_change', label: 'Monthly Change %' },
-         { value: 'market_cap', label: 'Market Cap' },
-         { value: 'pe_ratio', label: 'P/E Ratio' },
-         { value: 'forwardPE', label: 'Forward P/E' },
-         { value: 'trailingPE', label: 'Trailing P/E' },
-         { value: 'priceToBook', label: 'Price to Book' },
-         { value: 'bookValue', label: 'Book Value' },
-         { value: 'epsTrailingTwelveMonths', label: 'EPS (TTM)' },
-         { value: 'epsForward', label: 'EPS Forward' },
-         { value: 'dividend_yield', label: 'Dividend Yield' },
-         { value: 'trailingAnnualDividendRate', label: 'Trailing Annual Dividend Rate' },
-         { value: 'trailingAnnualDividendYield', label: 'Trailing Annual Dividend Yield' },
-         { value: 'priceHint', label: 'Price Hint' },
-         // Volume
-         { value: 'avg_volume', label: 'Avg Volume' },
-         { value: 'averageDailyVolume10Day', label: 'Avg Daily Volume (10D)' },
-         { value: 'averageDailyVolume3Month', label: 'Avg Daily Volume (3M)' },
-         // 52-Week / Averages
-         { value: 'week_52_high', label: '52-Week High' },
-         { value: 'week_52_low', label: '52-Week Low' },
-         { value: 'fiftyDayAverage', label: '50-Day Average' },
-         { value: 'twoHundredDayAverage', label: '200-Day Average' },
-         { value: 'fiftyTwoWeekHigh', label: '52-Week High (Yahoo)' },
-         { value: 'fiftyTwoWeekLow', label: '52-Week Low (Yahoo)' },
-         { value: 'fiftyDayAverageChange', label: '50-Day Avg Change' },
-         { value: 'fiftyDayAverageChangePercent', label: '50-Day Avg Change %' },
-         { value: 'twoHundredDayAverageChange', label: '200-Day Avg Change' },
-         { value: 'twoHundredDayAverageChangePercent', label: '200-Day Avg Change %' },
-         // Shares
-         { value: 'sharesOutstanding', label: 'Shares Outstanding' },
-         // Currency / Exchange
-         { value: 'currency', label: 'Currency', isString: true },
-         { value: 'financialCurrency', label: 'Financial Currency', isString: true },
-         { value: 'exchange', label: 'Exchange', isString: true },
-         { value: 'fullExchangeName', label: 'Full Exchange Name', isString: true },
-         { value: 'exchangeTimezoneName', label: 'Exchange Timezone', isString: true },
-         { value: 'exchangeTimezoneShortName', label: 'Exchange TZ Short', isString: true },
-         { value: 'exchangeDataDelayedBy', label: 'Exchange Data Delayed By (min)' },
-         // Quote metadata
-         { value: 'quoteType', label: 'Quote Type', isString: true },
-         { value: 'quoteSourceName', label: 'Quote Source', isString: true },
-         { value: 'marketState', label: 'Market State', isString: true },
-         { value: 'market', label: 'Market', isString: true },
-         { value: 'longName', label: 'Long Name', isString: true },
-         { value: 'shortName', label: 'Short Name', isString: true },
-         { value: 'symbol', label: 'Symbol', isString: true },
-         { value: 'language', label: 'Language', isString: true },
-         { value: 'messageBoardId', label: 'Message Board ID', isString: true },
-         { value: 'sourceInterval', label: 'Source Interval', isString: true },
-         { value: 'tradeable', label: 'Tradeable (0/1)' },
-     ];
+var FILTER_FIELDS = [
+        // Price / Valuation (Fundamental)
+        { value: 'price', label: 'Current Price', category: 'fundamental' },
+        { value: 'previous_close', label: 'Previous Close', category: 'fundamental' },
+        { value: 'regularMarketDayHigh', label: 'Regular Market Day High', category: 'fundamental' },
+        { value: 'regularMarketDayLow', label: 'Regular Market Day Low', category: 'fundamental' },
+        { value: 'regularMarketOpen', label: 'Regular Market Open', category: 'fundamental' },
+        { value: 'regularMarketChange', label: 'Regular Market Change', category: 'fundamental' },
+        { value: 'regularMarketChangePercent', label: 'Regular Market Change %', category: 'fundamental' },
+        { value: 'regularMarketVolume', label: 'Regular Market Volume', category: 'fundamental' },
+        { value: 'regularMarketPreviousClose', label: 'Regular Market Prev Close', category: 'fundamental' },
+        { value: 'weekly_change', label: 'Weekly Change %', category: 'fundamental' },
+        { value: 'monthly_change', label: 'Monthly Change %', category: 'fundamental' },
+        { value: 'market_cap', label: 'Market Cap', category: 'fundamental' },
+        { value: 'pe_ratio', label: 'P/E Ratio', category: 'fundamental' },
+        { value: 'forwardPE', label: 'Forward P/E', category: 'fundamental' },
+        { value: 'trailingPE', label: 'Trailing P/E', category: 'fundamental' },
+        { value: 'priceToBook', label: 'Price to Book', category: 'fundamental' },
+        { value: 'bookValue', label: 'Book Value', category: 'fundamental' },
+        { value: 'epsTrailingTwelveMonths', label: 'EPS (TTM)', category: 'fundamental' },
+        { value: 'epsForward', label: 'EPS Forward', category: 'fundamental' },
+        { value: 'dividend_yield', label: 'Dividend Yield', category: 'fundamental' },
+        { value: 'trailingAnnualDividendRate', label: 'Trailing Annual Dividend Rate', category: 'fundamental' },
+        { value: 'trailingAnnualDividendYield', label: 'Trailing Annual Dividend Yield', category: 'fundamental' },
+        { value: 'priceHint', label: 'Price Hint', category: 'fundamental' },
+        // Volume
+        { value: 'avg_volume', label: 'Avg Volume', category: 'fundamental' },
+        { value: 'averageDailyVolume10Day', label: 'Avg Daily Volume (10D)', category: 'fundamental' },
+        { value: 'averageDailyVolume3Month', label: 'Avg Daily Volume (3M)', category: 'fundamental' },
+        // 52-Week / Averages
+        { value: 'week_52_high', label: '52-Week High', category: 'fundamental' },
+        { value: 'week_52_low', label: '52-Week Low', category: 'fundamental' },
+        { value: 'fiftyDayAverage', label: '50-Day Average', category: 'historical' },
+        { value: 'twoHundredDayAverage', label: '200-Day Average', category: 'historical' },
+        { value: 'fiftyTwoWeekHigh', label: '52-Week High (Yahoo)', category: 'fundamental' },
+        { value: 'fiftyTwoWeekLow', label: '52-Week Low (Yahoo)', category: 'fundamental' },
+        { value: 'fiftyDayAverageChange', label: '50-Day Avg Change', category: 'historical' },
+        { value: 'fiftyDayAverageChangePercent', label: '50-Day Avg Change %', category: 'historical' },
+        { value: 'twoHundredDayAverageChange', label: '200-Day Avg Change', category: 'historical' },
+        { value: 'twoHundredDayAverageChangePercent', label: '200-Day Avg Change %', category: 'historical' },
+        // Shares
+        { value: 'sharesOutstanding', label: 'Shares Outstanding', category: 'fundamental' },
+        // Currency / Exchange
+        { value: 'currency', label: 'Currency', isString: true, category: 'summaries' },
+        { value: 'financialCurrency', label: 'Financial Currency', isString: true, category: 'summaries' },
+        { value: 'exchange', label: 'Exchange', isString: true, category: 'summaries' },
+        { value: 'fullExchangeName', label: 'Full Exchange Name', isString: true, category: 'summaries' },
+        { value: 'exchangeTimezoneName', label: 'Exchange Timezone', isString: true, category: 'summaries' },
+        { value: 'exchangeTimezoneShortName', label: 'Exchange TZ Short', isString: true, category: 'summaries' },
+        { value: 'exchangeDataDelayedBy', label: 'Exchange Data Delayed By (min)', category: 'summaries' },
+        // Quote metadata
+        { value: 'quoteType', label: 'Quote Type', isString: true, category: 'summaries' },
+        { value: 'quoteSourceName', label: 'Quote Source', isString: true, category: 'summaries' },
+        { value: 'marketState', label: 'Market State', isString: true, category: 'summaries' },
+        { value: 'market', label: 'Market', isString: true, category: 'summaries' },
+        { value: 'longName', label: 'Long Name', isString: true, category: 'summaries' },
+        { value: 'shortName', label: 'Short Name', isString: true, category: 'summaries' },
+        { value: 'symbol', label: 'Symbol', isString: true, category: 'summaries' },
+        { value: 'language', label: 'Language', isString: true, category: 'summaries' },
+        { value: 'messageBoardId', label: 'Message Board ID', isString: true, category: 'summaries' },
+        { value: 'sourceInterval', label: 'Source Interval', isString: true, category: 'summaries' },
+        { value: 'tradeable', label: 'Tradeable (0/1)', category: 'summaries' },
+    ];
 
     var TECH_GROUPS = [
-        { label: 'Overlay & Trend', options: [
+        { label: 'Overlay & Trend', category: 'technical', options: [
             { value: 'sma_pct', label: 'SMA % (Price/SMA*100)', period: 50 },
             { value: 'ema_pct', label: 'EMA % (Price/EMA*100)', period: 50 },
             { value: 'vwap_ratio', label: 'VWAP Ratio', period: 0 },
@@ -296,7 +364,7 @@
             { value: 'macd_signal', label: 'MACD Signal', period: 12 },
             { value: 'macd_histogram', label: 'MACD Histogram', period: 12 },
         ]},
-        { label: 'Volatility & Channels', options: [
+        { label: 'Volatility & Channels', category: 'technical', options: [
             { value: 'atr', label: 'ATR', period: 14 },
             { value: 'natr', label: 'NATR (%)', period: 14 },
             { value: 'bb_pct', label: 'BB %B (0-100)', period: 20 },
@@ -304,7 +372,7 @@
             { value: 'kc_pct', label: 'Keltner %B', period: 20 },
             { value: 'dc_pct', label: 'Donchian %B', period: 20 },
         ]},
-        { label: 'Momentum & Oscillators', options: [
+        { label: 'Momentum & Oscillators', category: 'technical', options: [
             { value: 'rsi', label: 'RSI', period: 14 },
             { value: 'stoch_k', label: 'Stochastic %K', period: 14 },
             { value: 'stoch_d', label: 'Stochastic %D', period: 14 },
@@ -314,12 +382,12 @@
             { value: 'rvi', label: 'RVI', period: 14 },
             { value: 'coppock', label: 'Coppock Curve', period: 10 },
         ]},
-        { label: 'Trend Strength', options: [
+        { label: 'Trend Strength', category: 'technical', options: [
             { value: 'supertrend', label: 'Supertrend Value', period: 10 },
             { value: 'supertrend_dir', label: 'Supertrend Direction', period: 10 },
             { value: 'psar', label: 'Parabolic SAR', period: 0 },
         ]},
-        { label: 'Volume & Accumulation', options: [
+        { label: 'Volume & Accumulation', category: 'technical', options: [
             { value: 'obv', label: 'OBV', period: 0 },
             { value: 'cmf', label: 'CMF', period: 20 },
             { value: 'vpt', label: 'VPT', period: 0 },
@@ -328,11 +396,11 @@
             { value: 'force_index', label: 'Force Index', period: 13 },
             { value: 'eom', label: 'Ease of Movement', period: 14 },
         ]},
-        { label: 'S/R & Pivots', options: [
+        { label: 'S/R & Pivots', category: 'technical', options: [
             { value: 'pivot', label: 'Pivot Point', period: 0 },
             { value: 'fib_61.8', label: 'Fib 61.8% Ratio', period: 0 },
         ]},
-        { label: 'Quantitative / Regime', options: [
+        { label: 'Quantitative / Regime', category: 'technical', options: [
             { value: 'linreg_slope', label: 'Lin Reg Slope', period: 20 },
             { value: 'linreg_rsq', label: 'Lin Reg R\u00B2', period: 20 },
             { value: 'zscore', label: 'Z-Score', period: 20 },
@@ -342,11 +410,11 @@
             { value: 'dpo', label: 'DPO', period: 20 },
             { value: 'ulcer_index', label: 'Ulcer Index', period: 14 },
         ]},
-        { label: 'Adaptive / Micro', options: [
+        { label: 'Adaptive / Micro', category: 'technical', options: [
             { value: 'kama', label: 'KAMA', period: 10 },
             { value: 'volume_delta', label: 'Volume Delta', period: 0 },
         ]},
-        { label: 'Tail Risk & Squeeze', options: [
+        { label: 'Tail Risk & Squeeze', category: 'technical', options: [
             { value: 'ttm_squeeze', label: 'TTM Squeeze (0/1)', period: 20 },
             { value: 'ttm_momentum', label: 'TTM Momentum', period: 20 },
             { value: 'sortino_ratio', label: 'Sortino Ratio', period: 0 },
@@ -355,7 +423,7 @@
             { value: 'martin_ratio', label: 'Martin Ratio', period: 0 },
             { value: 'downside_dev', label: 'Downside Dev', period: 0 },
         ]},
-        { label: 'Specialized Oscillators', options: [
+        { label: 'Specialized Oscillators', category: 'technical', options: [
             { value: 'aroon_up', label: 'Aroon Up', period: 25 },
             { value: 'aroon_down', label: 'Aroon Down', period: 25 },
             { value: 'aroon_osc', label: 'Aroon Oscillator', period: 25 },
@@ -367,11 +435,11 @@
             { value: 'connors_rsi', label: 'Connors RSI', period: 3 },
             { value: 'rmi', label: 'RMI', period: 14 },
         ]},
-        { label: 'Volatility Scaling', options: [
+        { label: 'Volatility Scaling', category: 'technical', options: [
             { value: 'klinger_osc', label: 'Klinger Osc', period: 34 },
             { value: 'rainbow_sma1', label: 'Rainbow SMA %', period: 2 },
         ]},
-        { label: 'Volume Profile', options: [
+        { label: 'Volume Profile', category: 'technical', options: [
             { value: 'vp_poc', label: 'VP POC', period: 30 },
             { value: 'vp_vah', label: 'VP VAH', period: 30 },
             { value: 'vp_val', label: 'VP VAL', period: 30 },
@@ -394,20 +462,46 @@
     function escHtml(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
     window.switchScreenerTab = function(tab) {
-        var filtersPanel = document.getElementById('filtersPanel');
+        var fundamentalPanel = document.getElementById('fundamentalPanel');
+        var technicalPanel = document.getElementById('technicalPanel');
+        var historicalPanel = document.getElementById('historicalPanel');
+        var summariesPanel = document.getElementById('summariesPanel');
         var manualPanel = document.getElementById('manualPanel');
-        var tabFilters = document.getElementById('tab-filters');
+        var tabFundamental = document.getElementById('tab-fundamental');
+        var tabTechnical = document.getElementById('tab-technical');
+        var tabHistorical = document.getElementById('tab-historical');
+        var tabSummaries = document.getElementById('tab-summaries');
         var tabManual = document.getElementById('tab-manual');
-        if (tab === 'filters') {
-            filtersPanel.classList.remove('hidden');
-            manualPanel.classList.add('hidden');
-            tabFilters.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
-            tabManual.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white';
+
+        // Hide all panels
+        fundamentalPanel.classList.add('hidden');
+        technicalPanel.classList.add('hidden');
+        historicalPanel.classList.add('hidden');
+        summariesPanel.classList.add('hidden');
+        manualPanel.classList.add('hidden');
+
+        // Reset all tab styles
+        [tabFundamental, tabTechnical, tabHistorical, tabSummaries, tabManual].forEach(function(btn) {
+            if (btn) {
+                btn.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white';
+            }
+        });
+
+        if (tab === 'fundamental') {
+            fundamentalPanel.classList.remove('hidden');
+            if (tabFundamental) tabFundamental.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+        } else if (tab === 'technical') {
+            technicalPanel.classList.remove('hidden');
+            if (tabTechnical) tabTechnical.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+        } else if (tab === 'historical') {
+            historicalPanel.classList.remove('hidden');
+            if (tabHistorical) tabHistorical.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
+        } else if (tab === 'summaries') {
+            summariesPanel.classList.remove('hidden');
+            if (tabSummaries) tabSummaries.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
         } else {
-            filtersPanel.classList.add('hidden');
             manualPanel.classList.remove('hidden');
-            tabManual.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
-            tabFilters.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-navy border border-gray-600 text-gray-300 hover:text-white';
+            if (tabManual) tabManual.className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-gold text-navy';
         }
     };
 
@@ -465,7 +559,6 @@
                 });
             }
             document.getElementById('resultsContainer').classList.remove('hidden');
-            document.getElementById('resultCount').textContent = total + ' stocks found (query)';
             document.getElementById('resultCount2').textContent = '(' + total + ')';
             var sb = document.getElementById('manualSaveBtn');
             if (sb) sb.classList.remove('hidden');
@@ -500,26 +593,44 @@
         var div = document.createElement('div');
         div.className = 'filter-row flex items-center gap-1.5 bg-navy rounded-lg p-3 border border-gray-700';
         div.id = 'filter-' + id;
+        
+        // Filter fields by current tab
+        var activeTab = document.querySelector('[id^="tab-"].bg-gold');
+        var tabType = activeTab ? activeTab.id.replace('tab-', '') : 'fundamental';
+        var tabFields = FILTER_FIELDS.filter(function(f) { 
+            return f.category === tabType || (!f.category && tabType === 'fundamental');
+        });
+        
         div.innerHTML =
             '<span class="text-xs text-gold font-semibold shrink-0 w-14">FUND</span>' +
-            '<select class="bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:120px">' +
-                FILTER_FIELDS.map(function(f) { return '<option value="' + f.value + '">' + f.label + '</option>'; }).join('') +
+            '<select class="bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+                tabFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
             '</select>' +
             '<select class="math-op bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
             '<input type="number" step="any" class="math-value bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:52px">' +
+            '<select class="op-select bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" placeholder="Value" class="flex-1 bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:100px">' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="fundamental">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);
     };
 
+    window.updateFilterOperators = function(select) {
+        var row = select.closest('.filter-row');
+        if (!row) return;
+        var opSelect = row.querySelector('.op-select');
+        if (!opSelect) return;
+        var isString = select.selectedOptions[0] && select.selectedOptions[0].getAttribute('data-is-string') === '1';
+        var ops = isString ? ['==', '!='] : ['>', '>=', '<', '<=', '==', '!='];
+        opSelect.innerHTML = ops.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('');
+    };
+
     window.addTechnicalFilter = function() {
-        var list = document.getElementById('filterList');
+        var list = document.getElementById('techFilterList');
         var id = ++filterId;
         var div = document.createElement('div');
         div.className = 'filter-row flex items-center gap-1.5 bg-navy rounded-lg p-3 border border-gray-700';
@@ -544,6 +655,60 @@
         updatePeriod(div.querySelector('.indicator-select'));
     };
 
+    window.addHistoricalFilter = function() {
+        var list = document.getElementById('historicalFilterList');
+        var id = ++filterId;
+        var div = document.createElement('div');
+        div.className = 'filter-row flex items-center gap-1.5 bg-navy rounded-lg p-3 border border-gray-700';
+        div.id = 'filter-' + id;
+        
+        var historicalFields = FILTER_FIELDS.filter(function(f) { return f.category === 'historical'; });
+        
+        div.innerHTML =
+            '<span class="text-xs text-purple-400 font-semibold shrink-0 w-14">HIST</span>' +
+            '<select class="bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+                historicalFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
+            '</select>' +
+            '<select class="math-op bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+                MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
+            '</select>' +
+            '<input type="number" step="any" class="math-value bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" placeholder="N" style="width:65px;display:none">' +
+            '<select class="op-select bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:52px">' +
+                OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
+            '</select>' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:100px">' +
+            '<input type="hidden" class="filter-type" value="historical">' +
+            '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
+        list.appendChild(div);
+    };
+
+    window.addSummariesFilter = function() {
+        var list = document.getElementById('summariesFilterList');
+        var id = ++filterId;
+        var div = document.createElement('div');
+        div.className = 'filter-row flex items-center gap-1.5 bg-navy rounded-lg p-3 border border-gray-700';
+        div.id = 'filter-' + id;
+        
+        var summariesFields = FILTER_FIELDS.filter(function(f) { return f.category === 'summaries'; });
+        
+        div.innerHTML =
+            '<span class="text-xs text-orange-400 font-semibold shrink-0 w-14">SUMM</span>' +
+            '<select class="bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+                summariesFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
+            '</select>' +
+            '<select class="math-op bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+                MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
+            '</select>' +
+            '<input type="number" step="any" class="math-value bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" placeholder="N" style="width:65px;display:none">' +
+            '<select class="op-select bg-navy border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-gold focus:outline-none" style="width:52px">' +
+                OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
+            '</select>' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-gold focus:outline-none" style="min-width:100px">' +
+            '<input type="hidden" class="filter-type" value="summaries">' +
+            '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
+        list.appendChild(div);
+    };
+
     window.updatePeriod = function(sel) {
         var opt = sel.options[sel.selectedIndex];
         var p = opt.getAttribute('data-period');
@@ -553,16 +718,20 @@
 
     window.clearAll = function() {
         document.getElementById('filterList').innerHTML = '';
+        document.getElementById('techFilterList').innerHTML = '';
+        document.getElementById('historicalFilterList').innerHTML = '';
+        document.getElementById('summariesFilterList').innerHTML = '';
         var rc = document.getElementById('resultsContainer');
         if (rc) rc.classList.add('hidden');
-        document.getElementById('resultCount').textContent = '';
+        document.querySelectorAll('#resultCount').forEach(function(span) { span.textContent = ''; });
+        document.getElementById('resultCount2').textContent = '';
         var mrc = document.getElementById('manualResultCount');
         if (mrc) mrc.textContent = '';
         lastResults = [];
     };
 
     function collectFilters() {
-        var filters = [], techFilters = [];
+        var filters = [], techFilters = [], historicalFilters = [], summariesFilters = [];
         document.querySelectorAll('.filter-row').forEach(function(r) {
             var type = (r.querySelector('.filter-type') || {}).value || 'fundamental';
             var inputs = r.querySelectorAll('input:not([type=hidden]):not(.math-value)');
@@ -589,38 +758,59 @@
                         value: val
                     });
                 }
-             } else {
-                 var fieldSelect = selects[0], opSelect = selects[selects.length - 1], valueInput = inputs[inputs.length - 1];
-                 if (fieldSelect && opSelect && valueInput) {
-                     var val = valueInput.value.trim();
-                     if (val !== '') {
-                         var fieldInfo = FILTER_FIELDS.find(function(f) { return f.value === fieldSelect.value; });
-                         if (fieldInfo && fieldInfo.isString && !val.startsWith("'") && !val.endsWith("'")) {
-                             val = "'" + val + "'";
-                         }
-                         filters.push({
-                             field: fieldSelect.value,
-                             math_op: mathOp,
-                             math_value: mathOp !== '=' ? mathValue : '',
-                             op: opSelect.value,
-                             value: val
-                         });
-                     }
-                 }
-             }
+                return;
+            }
+
+            var fieldSelect = selects[0], opSelect = selects[selects.length - 1], valueInput = inputs[inputs.length - 1];
+            if (fieldSelect && opSelect && valueInput) {
+                var val = valueInput.value.trim();
+                if (val !== '') {
+                    var fieldInfo = FILTER_FIELDS.find(function(f) { return f.value === fieldSelect.value; });
+                    if (fieldInfo && fieldInfo.isString && !val.startsWith("'") && !val.endsWith("'")) {
+                        val = "'" + val + "'";
+                    }
+                    var item = {
+                        field: fieldSelect.value,
+                        math_op: mathOp,
+                        math_value: mathOp !== '=' ? mathValue : '',
+                        op: opSelect.value,
+                        is_string: fieldInfo ? !!fieldInfo.isString : false,
+                        value: val
+                    };
+                    if (type === 'historical') historicalFilters.push(item);
+                    else if (type === 'summaries') summariesFilters.push(item);
+                    else filters.push(item);
+                }
+            }
         });
-        return { filters: filters, techFilters: techFilters };
+        return { filters: filters, techFilters: techFilters, historicalFilters: historicalFilters, summariesFilters: summariesFilters };
+    }
+
+    function setResultCount(text) {
+        var panels = ['fundamentalPanel', 'technicalPanel', 'historicalPanel', 'summariesPanel'];
+        for (var i = 0; i < panels.length; i++) {
+            var panel = document.getElementById(panels[i]);
+            if (panel && !panel.classList.contains('hidden')) {
+                var span = panel.querySelector('#resultCount');
+                if (span) span.textContent = text;
+                return;
+            }
+        }
+        var fallback = document.getElementById('resultCount');
+        if (fallback) fallback.textContent = text;
     }
 
     window.runScreener = function() {
         var cf = collectFilters();
-        if (cf.filters.length === 0 && cf.techFilters.length === 0) { alert('Add at least one filter condition.'); return; }
+        if (cf.filters.length === 0 && cf.techFilters.length === 0 && cf.historicalFilters.length === 0 && cf.summariesFilters.length === 0) { alert('Add at least one filter condition.'); return; }
 
         var matchMode = document.getElementById('matchMode').value;
         var params = new URLSearchParams();
         params.set('match_mode', matchMode);
         if (cf.filters.length > 0) params.set('filters', JSON.stringify(cf.filters));
         if (cf.techFilters.length > 0) params.set('tech_filters', JSON.stringify(cf.techFilters));
+        if (cf.historicalFilters.length > 0) params.set('historical_filters', JSON.stringify(cf.historicalFilters));
+        if (cf.summariesFilters.length > 0) params.set('summaries_filters', JSON.stringify(cf.summariesFilters));
 
         var url = '/api/screener/run?' + params.toString();
         var btn = document.querySelector('button[onclick="runScreener()"]');
@@ -632,7 +822,7 @@
                 if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-search mr-2"></i>Run Screener'; }
                 lastResults = data.stocks || [];
                 var total = data.total ?? data.stocks?.length ?? 0;
-                document.getElementById('resultCount').textContent = total + ' stocks found';
+                setResultCount(total + ' stocks found');
                 document.getElementById('resultCount2').textContent = '(' + total + ')';
                 var tbody = document.getElementById('resultsBody');
                 tbody.innerHTML = '';
@@ -773,7 +963,6 @@
                         tbody.appendChild(tr);
                     });
                     document.getElementById('resultsContainer').classList.remove('hidden');
-                    document.getElementById('resultCount').textContent = total + ' stocks found (query)';
                     document.getElementById('resultCount2').textContent = '(' + total + ')';
                     var sb = document.getElementById('manualSaveBtn');
                     if (sb) sb.classList.remove('hidden');
@@ -782,12 +971,13 @@
                 return;
             }
             document.getElementById('filterList').innerHTML = '';
+            document.getElementById('techFilterList').innerHTML = '';
             filterId = 0;
             if (data.match_mode) document.getElementById('matchMode').value = data.match_mode;
 
             (data.criteria || []).forEach(function(c) {
                 addFundamentalFilter();
-                var rows = document.querySelectorAll('.filter-row');
+                var rows = document.querySelectorAll('#filterList .filter-row');
                 var lr = rows[rows.length - 1];
                 var sels = lr.querySelectorAll('select');
                 var inps = lr.querySelectorAll('input:not([type=hidden]):not(.math-value)');
@@ -807,7 +997,7 @@
 
             (data.technical_criteria || []).forEach(function(tc) {
                 addTechnicalFilter();
-                var rows = document.querySelectorAll('.filter-row');
+                var rows = document.querySelectorAll('#techFilterList .filter-row');
                 var lr = rows[rows.length - 1];
                 var isel = lr.querySelector('.indicator-select');
                 var pInput = lr.querySelector('.period-input');
@@ -830,7 +1020,7 @@
 
             if (data.stocks && data.stocks.length > 0) {
                 lastResults = data.stocks;
-                document.getElementById('resultCount').textContent = data.stocks.length + ' stocks found';
+                setResultCount(data.stocks.length + ' stocks found');
                 document.getElementById('resultCount2').textContent = '(' + data.stocks.length + ')';
                 var tbody = document.getElementById('resultsBody');
                 tbody.innerHTML = '';
