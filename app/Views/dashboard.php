@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-surface rounded-xl p-6 border border-gray-700">
             <div class="flex justify-between items-start">
                 <div>
@@ -36,7 +36,7 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-gray-400 text-sm mb-1">Total Invested</p>
-                    <p id="dashInvested" class="text-3xl font-bold text-white"><?= format_price_dual($portfolio['total_invested'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
+                    <p id="dashInvested" class="text-3xl font-bold text-white"><?= format_price_base($portfolio['total_invested'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
                 </div>
                 <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
                     <i class="fas fa-coins text-purple-400 text-xl"></i>
@@ -49,7 +49,7 @@
                 <div>
                     <p class="text-gray-400 text-sm mb-1">Net P/L</p>
                     <p id="dashNetPL" class="text-3xl font-bold <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                        <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($portfolio['total_net_profit'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?>
+                        <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_base($portfolio['total_net_profit'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?>
                     </p>
                 </div>
                 <div id="dashNetIcon" class="w-12 h-12 <?= $portfolio['total_net_profit'] >= 0 ? 'bg-green-900/30' : 'bg-red-900/30' ?> rounded-lg flex items-center justify-center">
@@ -57,6 +57,20 @@
                 </div>
             </div>
             <a href="/portfolio" id="dashNetLink" class="<?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?> text-sm mt-2 inline-block">After tax <i class="fas fa-arrow-right ml-1"></i></a>
+        </div>
+        <div class="bg-surface rounded-xl p-6 border border-gray-700">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-400 text-sm mb-1">Booked P/L</p>
+                    <p id="dashBookedPl" class="text-3xl font-bold <?= ($totalBookedPl ?? 0) >= 0 ? 'text-green-400' : 'text-red-400' ?>">
+                        <?= ($totalBookedPl ?? 0) >= 0 ? '+' : '' ?><?= format_price_base($totalBookedPl ?? 0, $portfolio['base_currency'] ?? 'INR') ?>
+                    </p>
+                </div>
+                <div id="dashBookedIcon" class="w-12 h-12 <?= ($totalBookedPl ?? 0) >= 0 ? 'bg-green-900/30' : 'bg-red-900/30' ?> rounded-lg flex items-center justify-center">
+                    <i class="fas fa-handshake <?= ($totalBookedPl ?? 0) >= 0 ? 'text-green-400' : 'text-red-400' ?> text-xl"></i>
+                </div>
+            </div>
+            <a href="/investments/transactions" class="<?= ($totalBookedPl ?? 0) >= 0 ? 'text-green-400' : 'text-red-400' ?> text-sm hover:opacity-80 mt-2 inline-block"><?= ($sellCount ?? 0) ?> sold <i class="fas fa-arrow-right ml-1"></i></a>
         </div>
     </div>
 
@@ -130,30 +144,30 @@
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Invested</p>
-                <p id="dashSumInvested" class="text-white font-bold"><?= format_price_dual($portfolio['total_invested'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
+                <p id="dashSumInvested" class="text-white font-bold"><?= format_price_base($portfolio['total_invested'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
             <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Current Value</p>
-                <p id="dashSumValue" class="text-white font-bold"><?= format_price_dual($portfolio['total_current_value'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
+                <p id="dashSumValue" class="text-white font-bold"><?= format_price_base($portfolio['total_current_value'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
             <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Gross P/L</p>
                 <p id="dashSumGross" class="font-bold <?= $portfolio['total_gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                    <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($portfolio['total_gross_profit'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?>
+                    <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price_base($portfolio['total_gross_profit'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?>
                 </p>
             </div>
             <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Fees</p>
-                <p id="dashSumFees" class="text-orange-400 font-bold"><?= format_price_dual($portfolio['total_fees'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
+                <p id="dashSumFees" class="text-orange-400 font-bold"><?= format_price_base($portfolio['total_fees'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
             <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Total Tax</p>
-                <p id="dashSumTax" class="text-yellow-400 font-bold"><?= format_price_dual($portfolio['total_tax'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?></p>
+                <p id="dashSumTax" class="text-yellow-400 font-bold"><?= format_price_base($portfolio['total_tax'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
             </div>
             <div class="text-center p-4 bg-page rounded-lg">
                 <p class="text-gray-400 text-xs mb-1">Net P/L</p>
                 <p id="dashSumNet" class="font-bold <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                    <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($portfolio['total_net_profit'] ?? 0, 'INR', $portfolio['base_currency'] ?? 'INR') ?>
+                    <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_base($portfolio['total_net_profit'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?>
                 </p>
             </div>
             <div class="text-center p-4 bg-page rounded-lg">

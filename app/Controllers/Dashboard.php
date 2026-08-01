@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\InvestmentModel;
 use App\Models\WatchlistModel;
 use App\Models\PredictionModel;
+use App\Models\SellTransactionModel;
 
 class Dashboard extends BaseController
 {
@@ -18,14 +19,7 @@ class Dashboard extends BaseController
             $taxRates = [
                 'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
                 'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-                'fee_rates' => [
-                    'brokerage_pct' => $user['brokerage_pct'] ?? 0,
-                    'stt_pct'       => $user['stt_pct'] ?? 0,
-                    'exchange_pct'  => $user['exchange_pct'] ?? 0,
-                    'gst_pct'       => $user['gst_pct'] ?? 0,
-                    'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
-                    'sebi_fees'     => $user['sebi_fees'] ?? 0,
-                ],
+                'fee_rates' => get_fee_rates($user),
             ];
 
             $activeInvestments = $investmentModel->getActiveInvestments($userId);
@@ -59,12 +53,15 @@ class Dashboard extends BaseController
             }
 
             $portfolio['base_currency'] = $baseCurrency;
-            $portfolio['total_invested_base'] = convert_to_base_currency($portfolio['total_invested'] ?? 0, 'INR');
-            $portfolio['total_current_value_base'] = convert_to_base_currency($portfolio['total_current_value'] ?? 0, 'INR');
-            $portfolio['total_profit_loss_base'] = convert_to_base_currency($portfolio['total_profit_loss'] ?? 0, 'INR');
-            $portfolio['total_fees_base'] = convert_to_base_currency($portfolio['total_fees'] ?? 0, 'INR');
-            $portfolio['total_tax_base'] = convert_to_base_currency($portfolio['total_tax'] ?? 0, 'INR');
-            $portfolio['net_profit_loss_base'] = convert_to_base_currency($portfolio['net_profit_loss'] ?? 0, 'INR');
+
+            $txModel = new SellTransactionModel();
+            $sellTransactions = $txModel->getUserTransactions($userId);
+            $totalBookedPl = 0;
+            foreach ($sellTransactions as $tx) {
+                $native = stock_currency($tx['exchange'] ?? null);
+                $totalBookedPl += convert_to_base_currency((float) ($tx['net_profit_loss'] ?? 0), $native);
+            }
+            $totalBookedPl = round($totalBookedPl, 2);
 
             $watchlistModel = new WatchlistModel();
             $watchlistStocks = $watchlistModel->getUserWatchlist($userId);
@@ -98,6 +95,8 @@ class Dashboard extends BaseController
                 'activeInvestments'    => $activeInvestments,
                 'investmentDetails'    => $investmentDetails,
                 'portfolio'            => $portfolio,
+                'totalBookedPl'        => $totalBookedPl,
+                'sellCount'            => count($sellTransactions),
                 'watchlistStocks'      => $watchlistStocks,
                 'watchlistPredictions' => $watchlistPredictions,
                 'taxRates'             => $taxRates,

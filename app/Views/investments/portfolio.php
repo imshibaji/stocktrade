@@ -33,30 +33,30 @@
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8" id="portfolioCards">
         <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Invested</p>
-            <p id="totalInvested" class="text-xl font-bold text-white"><?= format_price($portfolio['total_invested']) ?></p>
+            <p id="totalInvested" class="text-xl font-bold text-white"><?= format_price_base($portfolio['total_invested'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
         </div>
         <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Current Value</p>
-            <p id="totalValue" class="text-xl font-bold text-white"><?= format_price($portfolio['total_current_value']) ?></p>
+            <p id="totalValue" class="text-xl font-bold text-white"><?= format_price_base($portfolio['total_current_value'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
         </div>
         <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Gross P/L</p>
             <p id="totalGross" class="text-xl font-bold <?= $portfolio['total_gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_gross_profit']) ?>
+                <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price_base($portfolio['total_gross_profit'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?>
             </p>
         </div>
         <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Fees</p>
-            <p id="totalFeesCard" class="text-xl font-bold text-orange-400"><?= format_price($portfolio['total_fees'] ?? 0) ?></p>
+            <p id="totalFeesCard" class="text-xl font-bold text-orange-400"><?= format_price_base($portfolio['total_fees'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
         </div>
         <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Tax</p>
-            <p id="totalTax" class="text-xl font-bold text-yellow-400"><?= format_price($portfolio['total_tax']) ?></p>
+            <p id="totalTax" class="text-xl font-bold text-yellow-400"><?= format_price_base($portfolio['total_tax'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></p>
         </div>
         <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
             <p class="text-gray-400 text-xs mb-1">Net P/L</p>
             <p id="totalNet" class="text-xl font-bold <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_net_profit']) ?>
+                <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_base($portfolio['total_net_profit'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?>
             </p>
         </div>
         <div class="bg-surface rounded-xl p-5 border border-gray-700 text-center">
@@ -81,11 +81,11 @@
                         <th class="text-right px-6 py-3">Shares</th>
                         <th class="text-right px-6 py-3">Invested</th>
                         <th class="text-right px-6 py-3">Value</th>
-                        <th class="text-right px-6 py-3">Gross P/L</th>
+                        <th class="text-right px-6 py-3 whitespace-nowrap">Gross P/L</th>
                         <th class="text-right px-6 py-3">Fees</th>
                         <th class="text-right px-6 py-3">Tax Type</th>
                         <th class="text-right px-6 py-3">Tax</th>
-                        <th class="text-right px-6 py-3">Net P/L</th>
+                        <th class="text-right px-6 py-3 whitespace-nowrap">Net P/L</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,43 +94,45 @@
                     ?>
                     <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
                         <td class="px-6 py-4">
-                            <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
-                            <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle ml-1"><?= esc(exchange_display($inv['exchange'] ?? null, $inv['exchange_display'] ?? null)) ?></span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
+                                <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 whitespace-nowrap"><?= esc(exchange_display($inv['exchange'] ?? null, $inv['exchange_display'] ?? null)) ?></span>
+                            </div>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
-<td class="px-6 py-4 text-right text-gray-300"><?= format_price($inv['buy_price'], stock_currency($inv['exchange'] ?? null)) ?></td>
-                         <td class="px-6 py-4 text-right text-gray-300 pf-cp"><?= format_price($inv['current_price'], stock_currency($inv['exchange'] ?? null)) ?></td>
+<td class="px-6 py-4 text-right text-gray-300"><?= format_price_stack((float) $inv['buy_price'], stock_currency($inv['exchange'] ?? null), $portfolio['base_currency'] ?? 'INR') ?></td>
+                         <td class="px-6 py-4 text-right text-gray-300 pf-cp"><?= format_price_stack((float) $inv['current_price'], stock_currency($inv['exchange'] ?? null), $portfolio['base_currency'] ?? 'INR') ?></td>
                          <td class="px-6 py-4 text-right text-gray-300"><?= (int) $inv['shares'] ?></td>
-                         <td class="px-6 py-4 text-right text-gray-300 pf-invested"><?= format_price($item['total_invested'], stock_currency($inv['exchange'] ?? null)) ?></td>
-                         <td class="px-6 py-4 text-right text-gray-300 pf-value"><?= format_price($item['current_value'], stock_currency($inv['exchange'] ?? null)) ?></td>
+                         <td class="px-6 py-4 text-right text-gray-300 pf-invested"><?= format_price_stack((float) $item['total_invested'], stock_currency($inv['exchange'] ?? null), $portfolio['base_currency'] ?? 'INR') ?></td>
+                         <td class="px-6 py-4 text-right text-gray-300 pf-value"><?= format_price_stack((float) $item['current_value'], stock_currency($inv['exchange'] ?? null), $portfolio['base_currency'] ?? 'INR') ?></td>
                          <td class="px-6 py-4 text-right pf-gl <?= $item['gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                             <span class="pf-gross"><?= $item['gross_profit'] >= 0 ? '+' : '' ?><?= format_price($item['gross_profit'], stock_currency($inv['exchange'] ?? null)) ?></span>
+                             <span class="pf-gross"><?= $item['gross_profit'] >= 0 ? '+' : '' ?><?= format_price_stack((float) $item['gross_profit'], stock_currency($inv['exchange'] ?? null), $portfolio['base_currency'] ?? 'INR') ?></span>
                              <div class="text-xs pf-gpct"><?= $item['gross_profit_pct'] >= 0 ? '+' : '' ?><?= $item['gross_profit_pct'] ?>%</div>
                          </td>
-                         <td class="px-6 py-4 text-right text-orange-400 pf-fees"><?= format_price($item['total_fees'], stock_currency($inv['exchange'] ?? null)) ?></td>
+                         <td class="px-6 py-4 text-right text-orange-400 pf-fees"><?= format_price_stack((float) $item['total_fees'], stock_currency($inv['exchange'] ?? null), $portfolio['base_currency'] ?? 'INR') ?></td>
                          <td class="px-6 py-4 text-right pf-tax-type">
                              <span class="text-xs <?= $item['held_days'] < 365 ? 'text-yellow-400' : 'text-blue-400' ?>">
                                  <?= $item['type'] ?>
                              </span>
                          </td>
-                         <td class="px-6 py-4 text-right text-yellow-400 pf-tax"><?= format_price($item['total_tax'], stock_currency($inv['exchange'] ?? null)) ?></td>
+                         <td class="px-6 py-4 text-right text-yellow-400 pf-tax"><?= format_price_stack((float) $item['total_tax'], stock_currency($inv['exchange'] ?? null), $portfolio['base_currency'] ?? 'INR') ?></td>
                          <td class="px-6 py-4 text-right pf-net <?= $item['net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?> font-semibold">
-                             <span class="pf-net-val"><?= $item['net_profit'] >= 0 ? '+' : '' ?><?= format_price($item['net_profit'], stock_currency($inv['exchange'] ?? null)) ?></span>
+                             <span class="pf-net-val"><?= $item['net_profit'] >= 0 ? '+' : '' ?><?= format_price_stack((float) $item['net_profit'], stock_currency($inv['exchange'] ?? null), $portfolio['base_currency'] ?? 'INR') ?></span>
                          </td>
                     </tr>
                     <?php endforeach; ?>
                     <tr class="bg-page">
                         <td class="px-6 py-4 font-bold text-white" colspan="4">TOTAL</td>
-                        <td class="px-6 py-4 text-right text-white font-bold" id="totalInvFooter"><?= format_price($portfolio['total_invested'], $portfolio['base_currency'] ?? 'INR') ?></td>
-                        <td class="px-6 py-4 text-right text-white font-bold" id="totalValFooter"><?= format_price($portfolio['total_current_value'], $portfolio['base_currency'] ?? 'INR') ?></td>
-                        <td class="px-6 py-4 text-right font-bold <?= $portfolio['total_gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>" id="totalGrossFooter">
-                            <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_gross_profit'], $portfolio['base_currency'] ?? 'INR') ?>
+                        <td class="px-6 py-4 text-right text-white font-bold" id="totalInvFooter"><?= format_price_base($portfolio['total_invested'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></td>
+                        <td class="px-6 py-4 text-right text-white font-bold" id="totalValFooter"><?= format_price_base($portfolio['total_current_value'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></td>
+                        <td class="px-6 py-4 text-right font-bold whitespace-nowrap <?= $portfolio['total_gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>" id="totalGrossFooter">
+                            <?= $portfolio['total_gross_profit'] >= 0 ? '+' : '' ?><?= format_price_base($portfolio['total_gross_profit'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?>
                         </td>
-                        <td class="px-6 py-4 text-right text-orange-400 font-bold" id="totalFeesFooter"><?= format_price($portfolio['total_fees'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></td>
+                        <td class="px-6 py-4 text-right text-orange-400 font-bold" id="totalFeesFooter"><?= format_price_base($portfolio['total_fees'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></td>
                         <td class="px-6 py-4"></td>
-                        <td class="px-6 py-4 text-right text-yellow-400 font-bold" id="totalTaxFooter"><?= format_price($portfolio['total_tax'], $portfolio['base_currency'] ?? 'INR') ?></td>
-                        <td class="px-6 py-4 text-right font-bold <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>" id="totalNetFooter">
-                            <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price($portfolio['total_net_profit'], $portfolio['base_currency'] ?? 'INR') ?>
+                        <td class="px-6 py-4 text-right text-yellow-400 font-bold" id="totalTaxFooter"><?= format_price_base($portfolio['total_tax'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?></td>
+                        <td class="px-6 py-4 text-right font-bold whitespace-nowrap <?= $portfolio['total_net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>" id="totalNetFooter">
+                            <?= $portfolio['total_net_profit'] >= 0 ? '+' : '' ?><?= format_price_base($portfolio['total_net_profit'] ?? 0, $portfolio['base_currency'] ?? 'INR') ?>
                         </td>
                     </tr>
                 </tbody>

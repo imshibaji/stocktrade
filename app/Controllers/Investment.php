@@ -17,14 +17,7 @@ class Investment extends BaseController
         $taxRates = [
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-            'fee_rates' => [
-                'brokerage_pct' => $user['brokerage_pct'] ?? 0,
-                'stt_pct'       => $user['stt_pct'] ?? 0,
-                'exchange_pct'  => $user['exchange_pct'] ?? 0,
-                'gst_pct'       => $user['gst_pct'] ?? 0,
-                'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
-                'sebi_fees'     => $user['sebi_fees'] ?? 0,
-            ],
+            'fee_rates' => get_fee_rates($user),
             'base_currency' => $user['base_currency'] ?? 'INR',
         ];
 
@@ -134,14 +127,7 @@ class Investment extends BaseController
         $taxRates = [
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-            'fee_rates' => [
-                'brokerage_pct' => $user['brokerage_pct'] ?? 0,
-                'stt_pct'       => $user['stt_pct'] ?? 0,
-                'exchange_pct'  => $user['exchange_pct'] ?? 0,
-                'gst_pct'       => $user['gst_pct'] ?? 0,
-                'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
-                'sebi_fees'     => $user['sebi_fees'] ?? 0,
-            ],
+            'fee_rates' => get_fee_rates($user),
         ];
 
         $pl = $investmentModel->calculateProfitLoss($investment, $taxRates);
@@ -206,14 +192,7 @@ class Investment extends BaseController
         $profitSign = $grossProfit >= 0 ? '+' : '';
 
         $user = current_user();
-        $feeRates = [
-            'brokerage_pct' => $user['brokerage_pct'] ?? 0,
-            'stt_pct'       => $user['stt_pct'] ?? 0,
-            'exchange_pct'  => $user['exchange_pct'] ?? 0,
-            'gst_pct'       => $user['gst_pct'] ?? 0,
-            'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
-            'sebi_fees'     => $user['sebi_fees'] ?? 0,
-        ];
+        $feeRates = get_fee_rates($user);
         $sellFees = calc_transaction_fees($saleValue, $feeRates);
         $totalFees = $sellFees['total'];
 
@@ -275,17 +254,15 @@ class Investment extends BaseController
         $taxRates = [
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-            'fee_rates' => [
-                'brokerage_pct' => $user['brokerage_pct'] ?? 0,
-                'stt_pct'       => $user['stt_pct'] ?? 0,
-                'exchange_pct'  => $user['exchange_pct'] ?? 0,
-                'gst_pct'       => $user['gst_pct'] ?? 0,
-                'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
-                'sebi_fees'     => $user['sebi_fees'] ?? 0,
-            ],
+            'fee_rates' => get_fee_rates($user),
         ];
 
         $investments = $investmentModel->getUserInvestments($userId);
+
+        foreach ($investments as &$inv) {
+            $inv['currency'] = stock_currency($inv['exchange'] ?? null);
+        }
+        unset($inv);
 
         $investmentPl = [];
         foreach ($investments as $inv) {
@@ -317,14 +294,7 @@ class Investment extends BaseController
         $taxRates = [
             'stcg_rate' => (float) ($user['stcg_rate'] ?? 15) / 100,
             'ltcg_rate' => (float) ($user['ltcg_rate'] ?? 10) / 100,
-            'fee_rates' => [
-                'brokerage_pct' => $user['brokerage_pct'] ?? 0,
-                'stt_pct'       => $user['stt_pct'] ?? 0,
-                'exchange_pct'  => $user['exchange_pct'] ?? 0,
-                'gst_pct'       => $user['gst_pct'] ?? 0,
-                'stamp_duty_pct'=> $user['stamp_duty_pct'] ?? 0,
-                'sebi_fees'     => $user['sebi_fees'] ?? 0,
-            ],
+            'fee_rates' => get_fee_rates($user),
         ];
 
         $portfolio = $investmentModel->getPortfolioSummary($userId, $taxRates);
@@ -434,12 +404,13 @@ class Investment extends BaseController
         $totalTax = 0;
         $totalNet = 0;
         foreach ($transactions as $tx) {
-            $totalGross += (float) $tx['profit_loss'];
-            $totalSellValue += (float) $tx['sale_value'];
-            $totalCost += (float) $tx['cost_basis'];
-            $totalFees += (float) ($tx['total_fees'] ?? 0);
-            $totalTax += (float) ($tx['total_tax'] ?? 0);
-            $totalNet += (float) ($tx['net_profit_loss'] ?? 0);
+            $native = stock_currency($tx['exchange'] ?? null);
+            $totalGross += convert_to_base_currency((float) $tx['profit_loss'], $native);
+            $totalSellValue += convert_to_base_currency((float) $tx['sale_value'], $native);
+            $totalCost += convert_to_base_currency((float) $tx['cost_basis'], $native);
+            $totalFees += convert_to_base_currency((float) ($tx['total_fees'] ?? 0), $native);
+            $totalTax += convert_to_base_currency((float) ($tx['total_tax'] ?? 0), $native);
+            $totalNet += convert_to_base_currency((float) ($tx['net_profit_loss'] ?? 0), $native);
         }
 
         $data = [

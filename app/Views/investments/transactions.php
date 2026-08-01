@@ -22,22 +22,22 @@
         </div>
         <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Total Sale Value</p>
-            <p class="text-white font-bold text-xl"><?= format_price($totalSellValue) ?></p>
+            <p class="text-white font-bold text-xl"><?= format_price_base($totalSellValue, $baseCurrency ?? 'INR') ?></p>
         </div>
         <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Gross P/L</p>
             <p class="font-bold text-xl <?= $totalGross >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                <?= $totalGross >= 0 ? '+' : '' ?><?= format_price($totalGross) ?>
+                <?= $totalGross >= 0 ? '+' : '' ?><?= format_price_base($totalGross, $baseCurrency ?? 'INR') ?>
             </p>
         </div>
         <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Fees + Tax</p>
-            <p class="font-bold text-xl text-yellow-400"><?= format_price($totalFees + $totalTax) ?></p>
+            <p class="font-bold text-xl text-yellow-400"><?= format_price_base($totalFees + $totalTax, $baseCurrency ?? 'INR') ?></p>
         </div>
         <div class="bg-surface rounded-xl border border-gray-700 p-4 text-center">
             <p class="text-gray-400 text-xs mb-1">Net P/L</p>
             <p class="font-bold text-xl <?= $totalNet >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                <?= $totalNet >= 0 ? '+' : '' ?><?= format_price($totalNet) ?>
+                <?= $totalNet >= 0 ? '+' : '' ?><?= format_price_base($totalNet, $baseCurrency ?? 'INR') ?>
             </p>
         </div>
     </div>
@@ -75,16 +75,16 @@
                             <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle ml-1"><?= esc(exchange_display($tx['exchange'] ?? null, $tx['exchange_display'] ?? null)) ?></span>
                         </td>
                         <td class="px-6 py-4 text-right text-gray-300"><?= (int) $tx['shares'] ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price($tx['buy_price'], stock_currency($tx['exchange'] ?? null)) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price($tx['sell_price'], stock_currency($tx['exchange'] ?? null)) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price($tx['cost_basis'], stock_currency($tx['exchange'] ?? null)) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price($tx['sale_value'], stock_currency($tx['exchange'] ?? null)) ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price_stack((float) $tx['buy_price'], stock_currency($tx['exchange'] ?? null), $baseCurrency ?? 'INR') ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price_stack((float) $tx['sell_price'], stock_currency($tx['exchange'] ?? null), $baseCurrency ?? 'INR') ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price_stack((float) $tx['cost_basis'], stock_currency($tx['exchange'] ?? null), $baseCurrency ?? 'INR') ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300"><?= format_price_stack((float) $tx['sale_value'], stock_currency($tx['exchange'] ?? null), $baseCurrency ?? 'INR') ?></td>
                         <td class="px-6 py-4 text-right font-semibold <?= $gross >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                            <?= $gross >= 0 ? '+' : '' ?><?= format_price($gross, stock_currency($tx['exchange'] ?? null)) ?>
+                            <?= $gross >= 0 ? '+' : '' ?><?= format_price_stack($gross, stock_currency($tx['exchange'] ?? null), $baseCurrency ?? 'INR') ?>
                         </td>
-                        <td class="px-6 py-4 text-right text-yellow-400"><?= format_price($fees + $tax, stock_currency($tx['exchange'] ?? null)) ?></td>
+                        <td class="px-6 py-4 text-right text-yellow-400"><?= format_price_stack($fees + $tax, stock_currency($tx['exchange'] ?? null), $baseCurrency ?? 'INR') ?></td>
                         <td class="px-6 py-4 text-right font-semibold <?= $net >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                            <?= $net >= 0 ? '+' : '' ?><?= format_price($net, stock_currency($tx['exchange'] ?? null)) ?>
+                            <?= $net >= 0 ? '+' : '' ?><?= format_price_stack($net, stock_currency($tx['exchange'] ?? null), $baseCurrency ?? 'INR') ?>
                         </td>
                         <td class="px-6 py-4 text-right font-semibold <?= $ret >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                             <?= $ret >= 0 ? '+' : '' ?><?= number_format($ret, 2) ?>%

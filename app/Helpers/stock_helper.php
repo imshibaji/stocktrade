@@ -136,6 +136,27 @@ if (!function_exists('tax_bracket_info')) {
     }
 }
 
+if (!function_exists('get_fee_rates')) {
+    function get_fee_rates(?array $user = null): array
+    {
+        $user = $user ?? (current_user() ?: []);
+        $defaults = [
+            'brokerage_pct' => 0.05,
+            'stt_pct'       => 0.01,
+            'exchange_pct'  => 0.003,
+            'gst_pct'       => 18,
+            'stamp_duty_pct'=> 0.005,
+            'sebi_fees'     => 0.0001,
+        ];
+        $rates = [];
+        foreach ($defaults as $key => $default) {
+            $value = $user[$key] ?? null;
+            $rates[$key] = (is_numeric($value) && (float) $value != 0) ? (float) $value : $default;
+        }
+        return $rates;
+    }
+}
+
 if (!function_exists('calc_transaction_fees')) {
     function calc_transaction_fees(float $amount, array $rates): array
     {

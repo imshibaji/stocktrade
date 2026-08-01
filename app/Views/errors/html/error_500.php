@@ -39,7 +39,7 @@
             <a href="/dashboard" class="border border-accent text-accent hover:bg-accent/10 font-semibold px-6 py-3 rounded-lg transition">
                 <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
             </a>
-            <a href="/" class="text-gray-400 hover:text-white text-sm">
+            <a href="/" class="border border-gray-600 text-gray-400 hover:text-white font-semibold px-6 py-3 rounded-lg transition">
                 <i class="fas fa-home mr-1"></i>Back to Home
             </a>
         </div>
@@ -48,6 +48,16 @@
         <div class="mt-12 text-left max-w-2xl mx-auto p-4 bg-surface rounded-lg border border-gray-700 overflow-hidden">
             <p class="text-red-400 text-xs mb-2">Debug Information (Development Only)</p>
             <pre class="text-xs text-gray-400 overflow-x-auto"><?= esc($message ?? 'Unknown error') ?></pre>
+            <?php if (isset($exception)): ?>
+            <div class="mt-4 text-gray-500 text-xs">
+                <p><strong>Type:</strong> <?= get_class($exception) ?></p>
+                <p><strong>Message:</strong> <?= esc($exception->getMessage()) ?></p>
+                <p><strong>File:</strong> <?= esc($exception->getFile()) ?></p>
+                <p><strong>Line:</strong> <?= esc($exception->getLine()) ?></p>
+                <p><strong>Trace:</strong></p>
+                <pre class="text-xs text-gray-400 overflow-x-auto"><?= esc($exception->getTraceAsString()) ?></pre>
+            </div>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>

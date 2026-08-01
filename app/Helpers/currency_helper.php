@@ -219,3 +219,14 @@ function format_price_dual(float $price, string $nativeCurrency, string $baseCur
     $converted = format_price_base(convert_to_base_currency($price, $nativeCurrency), $baseCurrency);
     return "{$native} (~{$converted})";
 }
+
+function format_price_stack(float $price, string $nativeCurrency, string $baseCurrency = ''): string
+{
+    $baseCurrency = $baseCurrency ?: get_user_base_currency();
+    $native = format_price($price, $nativeCurrency);
+    if ($nativeCurrency === $baseCurrency) {
+        return $native;
+    }
+    $converted = format_price_base(convert_to_base_currency($price, $nativeCurrency), $baseCurrency);
+    return "{$native}<span class=\"block text-[10px] text-gray-500 mt-0.5 whitespace-nowrap\">~ {$converted}</span>";
+}

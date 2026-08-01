@@ -48,7 +48,7 @@ class InvestmentModel extends Model
         $sellFees = calc_transaction_fees($currentValue, $feeRates);
         $totalFees = $buyFees['total'] + $sellFees['total'];
 
-        $grossProfit = $currentValue - $totalInvested - $totalFees;
+        $grossProfit = $currentValue - $totalInvested;
         $grossProfitPercent = $totalInvested > 0 ? ($grossProfit / $totalInvested) * 100 : 0;
 
         $stcgTax = 0;
@@ -67,7 +67,7 @@ class InvestmentModel extends Model
         }
 
         $totalTax = $stcgTax + $ltcgTax;
-        $netProfit = $grossProfit - $totalTax;
+        $netProfit = $grossProfit - $totalFees - $totalTax;
         $stcgPct = round($stcgRate * 100, 1);
         $ltcgPct = round($ltcgRate * 100, 1);
 
@@ -98,18 +98,26 @@ class InvestmentModel extends Model
         $totalFees = 0;
         $totalTax = 0;
         $totalNetProfit = 0;
+        $baseCurrency = strtoupper($taxRates['base_currency'] ?? get_user_base_currency());
 
         foreach ($investments as $inv) {
             $pl = $this->calculateProfitLoss($inv, $taxRates);
+            $native = stock_currency($inv['exchange'] ?? null);
+            $pl['total_invested_base'] = round(convert_to_base_currency((float) $pl['total_invested'], $native), 2);
+            $pl['current_value_base'] = round(convert_to_base_currency((float) $pl['current_value'], $native), 2);
+            $pl['gross_profit_base'] = round(convert_to_base_currency((float) $pl['gross_profit'], $native), 2);
+            $pl['total_fees_base'] = round(convert_to_base_currency((float) $pl['total_fees'], $native), 2);
+            $pl['total_tax_base'] = round(convert_to_base_currency((float) $pl['total_tax'], $native), 2);
+            $pl['net_profit_base'] = round(convert_to_base_currency((float) $pl['net_profit'], $native), 2);
             $pl['stock'] = $inv;
             $results[] = $pl;
 
-            $totalInvested += $pl['total_invested'];
-            $totalCurrentValue += $pl['current_value'];
-            $totalGrossProfit += $pl['gross_profit'];
-            $totalFees += $pl['total_fees'];
-            $totalTax += $pl['total_tax'];
-            $totalNetProfit += $pl['net_profit'];
+            $totalInvested += $pl['total_invested_base'];
+            $totalCurrentValue += $pl['current_value_base'];
+            $totalGrossProfit += $pl['gross_profit_base'];
+            $totalFees += $pl['total_fees_base'];
+            $totalTax += $pl['total_tax_base'];
+            $totalNetProfit += $pl['net_profit_base'];
         }
 
         return [
@@ -120,7 +128,7 @@ class InvestmentModel extends Model
             'total_fees'         => round($totalFees, 2),
             'total_tax'          => round($totalTax, 2),
             'total_net_profit'   => round($totalNetProfit, 2),
-            'base_currency'      => $taxRates['base_currency'] ?? 'INR',
+            'base_currency'      => $baseCurrency,
         ];
     }
 }

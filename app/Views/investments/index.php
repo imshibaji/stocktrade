@@ -109,13 +109,13 @@
                             <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle ml-1"><?= esc(exchange_display($inv['exchange'] ?? null, $inv['exchange_display'] ?? null)) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
-                        <td class="px-6 py-4 text-right text-gray-300 inv-buy-price cursor-pointer" data-currency="<?= stock_currency($inv['exchange'] ?? null) ?>" data-price="<?= $inv['buy_price'] ?>"><?= format_price($inv['buy_price'], $inv['currency']) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300 inv-current-price cursor-pointer" data-currency="<?= stock_currency($inv['exchange'] ?? null) ?>" data-price="<?= $inv['current_price'] ?>"><?= format_price($inv['current_price'], $inv['currency']) ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300 inv-buy-price cursor-pointer" data-currency="<?= stock_currency($inv['exchange'] ?? null) ?>" data-price="<?= $inv['buy_price'] ?>"><?= format_price_stack((float) $inv['buy_price'], $inv['currency'], $base_currency) ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300 inv-current-price cursor-pointer" data-currency="<?= stock_currency($inv['exchange'] ?? null) ?>" data-price="<?= $inv['current_price'] ?>"><?= format_price_stack((float) $inv['current_price'], $inv['currency'], $base_currency) ?></td>
                         <td class="px-6 py-4 text-right text-gray-300"><?= (int) $inv['shares'] ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300 inv-invested cursor-pointer" data-currency="<?= stock_currency($inv['exchange'] ?? null) ?>" data-price="<?= $inv['total_invested'] ?>"><?= format_price($inv['total_invested'], $inv['currency']) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300 inv-value"><?= format_price($pl['current_value'], $inv['currency']) ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300 inv-invested cursor-pointer" data-currency="<?= stock_currency($inv['exchange'] ?? null) ?>" data-price="<?= $inv['total_invested'] ?>"><?= format_price_stack((float) $inv['total_invested'], $inv['currency'], $base_currency) ?></td>
+                        <td class="px-6 py-4 text-right text-gray-300 inv-value"><?= format_price_stack((float) $pl['current_value'], $inv['currency'], $base_currency) ?></td>
                         <td class="px-6 py-4 text-right inv-pl <?= $pl['gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
-                            <span class="inv-gross"><?= $pl['gross_profit'] >= 0 ? '+' : '' ?><?= format_price($pl['gross_profit'], $inv['currency']) ?></span>
+                            <span class="inv-gross"><?= $pl['gross_profit'] >= 0 ? '+' : '' ?><?= format_price_stack((float) $pl['gross_profit'], $inv['currency'], $base_currency) ?></span>
                             <div class="text-xs inv-gross-pct <?= $pl['gross_profit_pct'] >= 0 ? 'text-green-500' : 'text-red-500' ?>">
                                 <?= $pl['gross_profit_pct'] >= 0 ? '+' : '' ?><?= $pl['gross_profit_pct'] ?>%
                             </div>
