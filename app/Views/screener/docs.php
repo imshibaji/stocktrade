@@ -625,7 +625,7 @@
 
         <!-- Call to Action -->
         <section class="text-center py-12">
-            <div class="bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-xl p-8 border border-gray-700">
+            <div class="bg-linear-to-r from-blue-900/50 to-purple-900/50 rounded-xl p-8 border border-gray-700">
                 <h2 class="text-3xl font-bold text-white mb-4">&#x1F680; Ready to Build Your Screener Queries?</h2>
                 <p class="text-gray-300 mb-6">Use the interactive query builder above to create complex stock screening expressions, or refer to the documentation for syntax examples.</p>
                 <div class="flex flex-wrap justify-center gap-4">

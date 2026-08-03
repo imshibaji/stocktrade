@@ -156,7 +156,7 @@
                             value="<?= esc($param['default'] ?? '') ?>"
                             data-in="<?= $param['in'] ?? 'path' ?>"
                             data-name="<?= $param['name'] ?>"
-                            class="api-param w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:border-accent focus:outline-none font-mono">
+                            class="api-param w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden font-mono">
                     </div>
                     <?php endforeach; ?>
                     <button onclick="tryEndpoint('<?= $key ?>')"

@@ -68,13 +68,13 @@
                     <label class="block text-gray-300 mb-2 text-sm">Sell Price (per share)</label>
                     <input type="number" name="sell_price" id="sellPriceInput" required min="0.01" step="0.01"
                         value="<?= $investment['current_price'] ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none text-lg">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden text-lg">
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">Quantity to Sell</label>
                     <input type="number" name="quantity" id="sellQtyInput" required min="1" max="<?= (int) $investment['shares'] ?>" step="1"
                         value="<?= (int) $investment['shares'] ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none text-lg">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden text-lg">
                     <p class="text-gray-500 text-xs mt-1">Max <?= (int) $investment['shares'] ?> shares. Enter a lower number to sell partially.</p>
                 </div>
             </div>

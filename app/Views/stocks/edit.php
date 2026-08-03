@@ -18,12 +18,12 @@
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Name</label>
                     <input type="text" name="name" value="<?= old('name', $stock['name']) ?>" required
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Sector</label>
                     <input type="text" name="sector" list="sectorList" value="<?= old('sector', $stock['sector']) ?>" required
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <datalist id="sectorList">
                         <?php foreach (($sectors ?? []) as $s): ?>
                         <option value="<?= esc($s) ?>"><?= esc($s) ?></option>
@@ -33,47 +33,47 @@
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Current Price</label>
                     <input type="number" name="current_price" step="0.01" value="<?= old('current_price', $stock['current_price']) ?>" required
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Previous Close</label>
                     <input type="number" name="previous_close" step="0.01" value="<?= old('previous_close', $stock['previous_close']) ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Market Cap</label>
                     <input type="number" name="market_cap" step="0.01" value="<?= old('market_cap', $stock['market_cap']) ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Avg Volume</label>
                     <input type="number" name="avg_volume" step="1" value="<?= old('avg_volume', $stock['avg_volume']) ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">P/E Ratio</label>
                     <input type="number" name="pe_ratio" step="0.01" value="<?= old('pe_ratio', $stock['pe_ratio']) ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">52 Week High</label>
                     <input type="number" name="week_52_high" step="0.01" value="<?= old('week_52_high', $stock['week_52_high']) ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">52 Week Low</label>
                     <input type="number" name="week_52_low" step="0.01" value="<?= old('week_52_low', $stock['week_52_low']) ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Dividend Yield</label>
                     <input type="number" name="dividend_yield" step="0.0001" value="<?= old('dividend_yield', $stock['dividend_yield']) ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Beta</label>
                     <input type="number" name="beta" step="0.01" value="<?= old('beta', $stock['beta']) ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
             </div>
             <div class="flex justify-end space-x-3 mt-6">

@@ -122,7 +122,7 @@
                         <h2 class="text-white font-bold text-lg">Filter Criteria</h2>
                         <div class="flex items-center gap-4">
                             <label class="text-gray-400 text-xs">Match:</label>
-                            <select id="matchMode" class="bg-page border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:border-accent focus:outline-none">
+                            <select id="matchMode" class="bg-page border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:border-accent focus:outline-hidden">
                                 <option value="all">All (AND)</option>
                                 <option value="any">Any (OR)</option>
                             </select>
@@ -205,7 +205,7 @@
                         <div id="manualPanel" class="hidden">
                         <div class="mb-3">
                             <label class="block text-sm font-medium text-gray-300 mb-1">Stock Logic Query</label>
-                            <textarea id="manualQuery" rows="4" class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-accent" placeholder="e.g. pe_ratio &lt; 20 AND market_cap &gt; 1000000000"></textarea>
+                            <textarea id="manualQuery" rows="4" class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-hidden focus:border-accent" placeholder="e.g. pe_ratio &lt; 20 AND market_cap &gt; 1000000000"></textarea>
                         </div>
                         <p class="text-xs text-gray-500 mb-3">
                             Supported operators: <code class="text-gray-400">&gt; &gt;= &lt; &lt;= == !=</code>
@@ -281,7 +281,7 @@
     <div id="saveDialog" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
         <div class="bg-surface rounded-xl border border-gray-700 p-6 w-full max-w-md">
             <h3 class="text-white font-bold text-lg mb-4">Save Screener List</h3>
-            <input type="text" id="listNameInput" placeholder="Enter list name..." class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white text-sm focus:border-accent focus:outline-none mb-4">
+            <input type="text" id="listNameInput" placeholder="Enter list name..." class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white text-sm focus:border-accent focus:outline-hidden mb-4">
             <label class="flex items-center gap-2 text-sm text-gray-300 mb-4">
                 <input type="checkbox" id="listPublicInput" class="h-4 w-4 rounded accent-accent">
                 Make this list public (shown on the home page)
@@ -615,17 +615,17 @@ var FILTER_FIELDS = [
         
         div.innerHTML =
             '<span class="text-xs text-accent font-semibold shrink-0 w-14">FUND</span>' +
-            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
                 tabFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
             '</select>' +
-            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:52px">' +
+            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" placeholder="N" style="width:65px;display:none">' +
+            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" style="min-width:100px">' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="fundamental">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);
@@ -649,18 +649,18 @@ var FILTER_FIELDS = [
         div.id = 'filter-' + id;
         div.innerHTML =
             '<span class="text-xs text-blue-400 font-semibold shrink-0 w-14">TECH</span>' +
-            '<select class="indicator-select bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" onchange="updatePeriod(this)" style="min-width:170px">' +
+            '<select class="indicator-select bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden" onchange="updatePeriod(this)" style="min-width:170px">' +
                 buildIndicatorOptions() +
             '</select>' +
-            '<input type="number" class="period-input bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="P" style="width:58px" value="14">' +
-            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+            '<input type="number" class="period-input bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" placeholder="P" style="width:58px" value="14">' +
+            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:52px">' +
+            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" placeholder="N" style="width:65px;display:none">' +
+            '<select class="bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" style="min-width:100px">' +
+            '<input type="number" step="any" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="technical">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);
@@ -678,17 +678,17 @@ var FILTER_FIELDS = [
         
         div.innerHTML =
             '<span class="text-xs text-purple-400 font-semibold shrink-0 w-14">HIST</span>' +
-            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
                 historicalFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
             '</select>' +
-            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:52px">' +
+            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" placeholder="N" style="width:65px;display:none">' +
+            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" style="min-width:100px">' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="historical">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);
@@ -705,17 +705,17 @@ var FILTER_FIELDS = [
         
         div.innerHTML =
             '<span class="text-xs text-orange-400 font-semibold shrink-0 w-14">SUMM</span>' +
-            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
+            '<select class="bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden field-select" style="min-width:120px" onchange="updateFilterOperators(this)">' +
                 summariesFields.map(function(f) { return '<option value="' + f.value + '"' + (f.isString ? ' data-is-string="1"' : '') + '>' + f.label + '</option>'; }).join('') +
             '</select>' +
-            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:44px" onchange="toggleMathValue(this)">' +
+            '<select class="math-op bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="width:44px" onchange="toggleMathValue(this)">' +
                 MATH_OPS.map(function(m) { return '<option value="' + m.value + '">' + m.label + '</option>'; }).join('') +
             '</select>' +
-            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" placeholder="N" style="width:65px;display:none">' +
-            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-none" style="width:52px">' +
+            '<input type="number" step="any" class="math-value bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" placeholder="N" style="width:65px;display:none">' +
+            '<select class="op-select bg-page border border-gray-600 rounded px-2 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="width:52px">' +
                 OPS.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
             '</select>' +
-            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-none" style="min-width:100px">' +
+            '<input type="text" placeholder="Value" class="flex-1 bg-page border border-gray-600 rounded px-3 py-2 text-sm text-white focus:border-accent focus:outline-hidden" style="min-width:100px">' +
             '<input type="hidden" class="filter-type" value="summaries">' +
             '<button onclick="this.closest(\'.filter-row\').remove()" class="text-red-400 hover:text-red-300 text-sm px-2 shrink-0"><i class="fas fa-times"></i></button>';
         list.appendChild(div);

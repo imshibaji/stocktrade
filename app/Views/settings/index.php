@@ -21,12 +21,12 @@
             <div class="mb-4">
                 <label class="block text-gray-300 mb-2 text-sm">Full Name</label>
                 <input type="text" name="name" value="<?= old('name', $user['name']) ?>" required
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
             </div>
             <div class="mb-6">
                 <label class="block text-gray-300 mb-2 text-sm">Email Address</label>
                 <input type="email" name="email" value="<?= old('email', $user['email']) ?>" required
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
             </div>
             <button type="submit" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-6 py-3 rounded-lg text-sm transition">
                 <i class="fas fa-save mr-2"></i>Save Changes
@@ -64,13 +64,13 @@
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">STCG Rate (%)</label>
                     <input type="number" name="stcg_rate" value="<?= old('stcg_rate', $user['stcg_rate'] ?? 15) ?>" required min="0" max="100" step="0.01"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <p class="text-gray-500 text-xs mt-1">Short Term Capital Gains Tax (held &lt; 1 year)</p>
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">LTCG Rate (%)</label>
                     <input type="number" name="ltcg_rate" value="<?= old('ltcg_rate', $user['ltcg_rate'] ?? 10) ?>" required min="0" max="100" step="0.01"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <p class="text-gray-500 text-xs mt-1">Long Term Capital Gains Tax (held &gt; 1 year)</p>
                 </div>
             </div>
@@ -91,36 +91,36 @@
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">Brokerage (%)</label>
                     <input type="number" name="brokerage_pct" value="<?= old('brokerage_pct', $user['brokerage_pct'] ?? 0) ?>" min="0" max="100" step="0.0001"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <p class="text-gray-500 text-xs mt-1">Per trade</p>
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">STT (%)</label>
                     <input type="number" name="stt_pct" value="<?= old('stt_pct', $user['stt_pct'] ?? 0) ?>" min="0" max="100" step="0.0001"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <p class="text-gray-500 text-xs mt-1">Securities Transaction Tax</p>
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">Exchange Charges (%)</label>
                     <input type="number" name="exchange_pct" value="<?= old('exchange_pct', $user['exchange_pct'] ?? 0) ?>" min="0" max="100" step="0.0001"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <p class="text-gray-500 text-xs mt-1">NSE/BSE transaction charges</p>
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">GST on Brokerage (%)</label>
                     <input type="number" name="gst_pct" value="<?= old('gst_pct', $user['gst_pct'] ?? 18) ?>" min="0" max="100" step="0.01"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <p class="text-gray-500 text-xs mt-1">GST on (brokerage + exchange charges)</p>
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">Stamp Duty (%)</label>
                     <input type="number" name="stamp_duty_pct" value="<?= old('stamp_duty_pct', $user['stamp_duty_pct'] ?? 0) ?>" min="0" max="100" step="0.0001"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">SEBI Fees (%)</label>
                     <input type="number" name="sebi_fees" value="<?= old('sebi_fees', $user['sebi_fees'] ?? 0) ?>" min="0" max="100" step="0.000001"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <p class="text-gray-500 text-xs mt-1">SEBI regulatory fees per trade</p>
                 </div>
             </div>
@@ -139,7 +139,7 @@
             <?= csrf_field() ?>
             <div class="mb-4">
                 <label class="block text-gray-300 mb-2 text-sm">Default Display Currency</label>
-                <select name="base_currency" class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                <select name="base_currency" class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                     <option value="INR" <?= ($user['base_currency'] ?? 'INR') === 'INR' ? 'selected' : '' ?>>INR - Indian Rupee</option>
                     <option value="USD" <?= ($user['base_currency'] ?? 'INR') === 'USD' ? 'selected' : '' ?>>USD - US Dollar</option>
                     <option value="EUR" <?= ($user['base_currency'] ?? 'INR') === 'EUR' ? 'selected' : '' ?>>EUR - Euro</option>
@@ -169,18 +169,18 @@
             <div class="mb-4">
                 <label class="block text-gray-300 mb-2 text-sm">Current Password</label>
                 <input type="password" name="current_password" required
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
             </div>
             <div class="mb-4">
                 <label class="block text-gray-300 mb-2 text-sm">New Password</label>
                 <input type="password" name="new_password" required minlength="6"
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden"
                     placeholder="Minimum 6 characters">
             </div>
             <div class="mb-6">
                 <label class="block text-gray-300 mb-2 text-sm">Confirm New Password</label>
                 <input type="password" name="confirm_password" required minlength="6"
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
             </div>
             <button type="submit" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-6 py-3 rounded-lg text-sm transition">
                 <i class="fas fa-key mr-2"></i>Update Password

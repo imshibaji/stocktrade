@@ -26,19 +26,19 @@
                     <label class="block text-gray-300 mb-2 text-sm">Shares</label>
                     <input type="number" name="shares" required min="1" step="1"
                         value="<?= (int) $investment['shares'] ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">Buy Price (Rs)</label>
                     <input type="number" name="buy_price" required min="0.01" step="0.01"
                         value="<?= $investment['buy_price'] ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
                 <div>
                     <label class="block text-gray-300 mb-2 text-sm">Buy Date</label>
                     <input type="date" name="buy_date" required
                         value="<?= $investment['buy_date'] ?>"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                 </div>
             </div>
             <div class="flex space-x-4">

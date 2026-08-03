@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@source "../app/Views/**/*.php";
 
 /*
 =====================================================================
@@ -82,6 +82,28 @@ html[data-theme="day"] {
   --flash-ok-bg: 232 242 218 / 0.7;
   --flash-err-bg: 250 226 222 / 0.7;
   --flash-info-bg: 222 234 246 / 0.7;
+}
+
+@theme inline {
+  --color-page: rgb(var(--bg-page));
+  --color-surface: rgb(var(--bg-surface));
+  --color-accent: rgb(var(--accent));
+  --color-accent-2: rgb(var(--accent-2));
+  --color-on-accent: rgb(var(--on-accent));
+  --color-line: rgb(var(--border));
+  --color-line-strong: rgb(var(--border-strong));
+  --color-line-soft: rgb(var(--border) / 0.5);
+  --color-pos: rgb(var(--pos));
+  --color-pos-soft: rgb(var(--pos-soft));
+  --color-neg: rgb(var(--neg));
+  --color-neg-soft: rgb(var(--neg-soft));
+  --color-link: rgb(var(--blue-soft));
+  --color-ink-100: rgb(var(--ink));
+  --color-ink-200: rgb(var(--ink-2));
+  --color-ink-300: rgb(var(--ink-3));
+  --color-ink-400: rgb(var(--ink-4));
+  --color-ink-500: rgb(var(--ink-5));
+  --color-ink-600: rgb(var(--ink-6));
 }
 
 html {

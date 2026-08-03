@@ -7,8 +7,8 @@
     "test": "tests"
   },
   "scripts": {
-    "dev": "npx tailwindcss -i src/tailwind.css -o public/css/style.css --watch --content 'app/Views/**/*.php'",
-    "build:css": "npx tailwindcss -i src/tailwind.css -o public/css/style.css --minify --content 'app/Views/**/*.php'"
+    "dev": "npx @tailwindcss/cli -i src/tailwind.css -o public/css/style.css --watch",
+    "build:css": "npx @tailwindcss/cli -i src/tailwind.css -o public/css/style.css --minify"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/imshibaji/stocktrade#readme",
   "dependencies": {
-    "tailwindcss": "^3.4.19"
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
   }
 }

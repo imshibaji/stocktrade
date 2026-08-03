@@ -40,19 +40,19 @@
             <div class="mb-4">
                 <label class="block text-gray-300 mb-2 text-sm">Name</label>
                 <input type="text" name="name" value="<?= old('name') ?>" required
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden"
                     placeholder="Your full name">
             </div>
             <div class="mb-4">
                 <label class="block text-gray-300 mb-2 text-sm">Email</label>
                 <input type="email" name="email" value="<?= old('email') ?>" required
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden"
                     placeholder="your@email.com">
             </div>
             <div class="mb-6">
                 <label class="block text-gray-300 mb-2 text-sm">Message</label>
                 <textarea name="message" rows="5" required
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden"
                     placeholder="Tell us how we can help you..."><?= old('message') ?></textarea>
             </div>
             <button type="submit" class="w-full bg-accent hover:bg-accent-2 text-on-accent font-bold py-3 rounded-lg transition">

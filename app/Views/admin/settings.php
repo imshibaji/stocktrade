@@ -22,14 +22,14 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300 mb-1"><?= esc($setting['label']) ?></label>
                                         <?php if ($setting['type'] === 'boolean'): ?>
-                                            <select name="values[]" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent">
+                                            <select name="values[]" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-hidden focus:border-accent">
                                                 <option value="1" <?= $setting['value'] == '1' ? 'selected' : '' ?>>Enabled</option>
                                                 <option value="0" <?= $setting['value'] == '0' ? 'selected' : '' ?>>Disabled</option>
                                             </select>
                                         <?php elseif ($setting['type'] === 'textarea'): ?>
-                                            <textarea name="values[]" rows="3" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent"><?= esc($setting['value']) ?></textarea>
+                                            <textarea name="values[]" rows="3" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-hidden focus:border-accent"><?= esc($setting['value']) ?></textarea>
                                         <?php else: ?>
-                                            <input type="text" name="values[]" value="<?= esc($setting['value']) ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent">
+                                            <input type="text" name="values[]" value="<?= esc($setting['value']) ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-hidden focus:border-accent">
                                         <?php endif; ?>
                                         <input type="hidden" name="keys[]" value="<?= esc($setting['key']) ?>">
                                     </div>

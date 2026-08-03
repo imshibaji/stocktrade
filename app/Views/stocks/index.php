@@ -13,18 +13,18 @@
             <div class="relative" id="searchContainer">
                 <input type="text" id="stockSearch" value="<?= esc($search) ?>" placeholder="Search by symbol or name..."
                     autocomplete="off"
-                    class="bg-surface border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:border-accent focus:outline-none w-40 md:w-72">
+                    class="bg-surface border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:border-accent focus:outline-hidden w-40 md:w-72">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
                 <button id="searchClear" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-sm">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <?php if (is_logged_in()): ?>
-            <button onclick="toggleAddForm()" class="bg-surface hover:bg-accent-2 text-accent border border-accent font-semibold px-4 py-2 rounded-lg transition text-sm">
-                <i class="fas fa-plus mr-1"></i> New
+            <button onclick="toggleAddForm()" class="bg-surface hover:bg-accent text-accent dark:hover:text-white border border-accent font-semibold px-4 py-2.5 rounded-lg transition text-sm whitespace-nowrap">
+                <i class="fas fa-plus mr-1"></i>New
             </button>
-            <button id="bulkToggleBtn" onclick="toggleBulkForm()" class="bg-surface hover:bg-accent-2 text-accent border border-accent font-semibold px-4 py-2 rounded-lg transition text-sm">
-                <i class="fas fa-cloud-upload-alt mr-1"></i> Bulk
+            <button id="bulkToggleBtn" onclick="toggleBulkForm()" class="bg-surface hover:bg-accent text-accent dark:hover:text-white border border-accent font-semibold px-4 py-2.5 rounded-lg transition text-sm whitespace-nowrap">
+                <i class="fas fa-cloud-upload-alt mr-1"></i>Bulk
             </button>
             <?php endif; ?>
         </div>
@@ -38,13 +38,13 @@
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Symbol *</label>
                     <input type="text" id="addSymbol" placeholder="e.g. RELIANCE"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-none uppercase">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-hidden uppercase">
                     <p id="addSymbolStatus" class="text-xs mt-1 hidden"></p>
                 </div>
                 <div>
                     <label class="block text-gray-400 text-sm mb-1">Exchange</label>
                     <select id="addExchange"
-                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-hidden">
                         <option value="NSE" selected>NSE</option>
                         <option value="BSE">BSE</option>
                         <option value="GLOBAL">GLOBAL</option>
@@ -89,11 +89,11 @@
         </div>
         <label class="block text-gray-400 text-sm mb-1">Symbols <span class="text-gray-600">(max 30 per batch)</span></label>
         <textarea id="bulkSymbols" rows="5" placeholder="RELIANCE, TCS, HDFCBANK
-INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-none font-mono uppercase"></textarea>
+INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-hidden font-mono uppercase"></textarea>
         <div class="flex flex-wrap items-center gap-3 mt-3">
             <div>
                 <label class="block text-gray-400 text-sm mb-1">Exchange</label>
-                <select id="bulkExchange" class="bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-none">
+                <select id="bulkExchange" class="bg-page border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-accent focus:outline-hidden">
                     <option value="NSE" selected>NSE</option>
                     <option value="BSE">BSE</option>
                     <option value="GLOBAL">GLOBAL</option>

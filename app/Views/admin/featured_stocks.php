@@ -32,7 +32,7 @@
                         <div class="flex items-center gap-2">
                             <label class="text-sm text-gray-400" for="maxCount">Show up to</label>
                             <input type="number" id="maxCount" name="max_count" min="1" max="12" value="<?= $maxCount ?>"
-                                   class="w-20 px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-accent">
+                                   class="w-20 px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent">
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -55,12 +55,12 @@
                                     <td class="px-6 py-3">
                                         <input type="checkbox" name="ids[]" value="<?= (int) $stock['id'] ?>"
                                                <?= $isSel ? 'checked' : '' ?>
-                                               class="featured-check w-4 h-4 accent-[--accent]" data-id="<?= (int) $stock['id'] ?>">
+                                               class="featured-check w-4 h-4 accent-accent" data-id="<?= (int) $stock['id'] ?>">
                                     </td>
                                     <td class="px-6 py-3">
                                         <input type="number" name="positions[<?= (int) $stock['id'] ?>]"
                                                value="<?= $isSel ? $selPos + 1 : $i + 1 ?>"
-                                               class="w-20 px-2 py-1.5 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-accent <?= $isSel ? '' : 'opacity-50' ?>">
+                                               class="w-20 px-2 py-1.5 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent <?= $isSel ? '' : 'opacity-50' ?>">
                                     </td>
                                     <td class="px-6 py-3 text-white font-mono"><?= esc($stock['symbol']) ?></td>
                                     <td class="px-6 py-3 text-gray-300"><?= esc($stock['name']) ?></td>

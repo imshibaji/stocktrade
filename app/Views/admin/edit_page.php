@@ -15,22 +15,22 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Title</label>
-                        <input type="text" name="title" value="<?= esc($page['title'] ?? '') ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent">
+                        <input type="text" name="title" value="<?= esc($page['title'] ?? '') ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-hidden focus:border-accent">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Slug</label>
-                        <input type="text" name="slug" value="<?= esc($page['slug'] ?? '') ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent">
+                        <input type="text" name="slug" value="<?= esc($page['slug'] ?? '') ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-hidden focus:border-accent">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Meta Title</label>
-                        <input type="text" name="meta_title" value="<?= esc($page['meta_title'] ?? '') ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent">
+                        <input type="text" name="meta_title" value="<?= esc($page['meta_title'] ?? '') ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-hidden focus:border-accent">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Meta Description</label>
-                        <input type="text" name="meta_description" value="<?= esc($page['meta_description'] ?? '') ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent">
+                        <input type="text" name="meta_description" value="<?= esc($page['meta_description'] ?? '') ?>" class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-hidden focus:border-accent">
                     </div>
                 </div>
 
@@ -57,7 +57,7 @@
                         <button type="button" onclick="execCmd('formatBlock', 'code')" class="px-2 py-1 bg-page border border-gray-600 text-gray-300 text-xs rounded hover:text-white"><i class="fas fa-code"></i></button>
                     </div>
                     <div id="editor-container" class="mb-2">
-                        <div id="page-editor" contenteditable="true" class="min-h-[300px] w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent whitespace-pre-wrap"><?= $page['content'] ?? '' ?></div>
+                        <div id="page-editor" contenteditable="true" class="min-h-[300px] w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white focus:outline-hidden focus:border-accent whitespace-pre-wrap"><?= $page['content'] ?? '' ?></div>
                         <textarea name="content" id="page-content" class="hidden"></textarea>
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Use the toolbar above to format content. HTML is supported.</p>

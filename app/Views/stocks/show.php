@@ -239,13 +239,13 @@
             <div>
                 <label class="block text-gray-300 mb-2 text-sm">Investment Amount (Rs)</label>
                 <input type="number" name="amount" required min="1" step="0.01"
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden"
                     placeholder="e.g. 10000">
             </div>
             <div>
                 <label class="block text-gray-300 mb-2 text-sm">Buy Date</label>
                 <input type="date" name="buy_date" value="<?= date('Y-m-d') ?>"
-                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                    class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
             </div>
             <div>
                 <button type="submit" class="w-full bg-accent hover:bg-accent-2 text-on-accent font-bold py-3 rounded-lg transition">

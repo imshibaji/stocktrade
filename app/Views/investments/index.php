@@ -27,7 +27,7 @@
                     <?= csrf_field() ?>
                     <div>
                         <label class="block text-gray-300 mb-2 text-sm">Select Stock</label>
-                        <select name="stock_id" id="invStockSelect" required class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none">
+                        <select name="stock_id" id="invStockSelect" required class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
                             <option value="">Choose a stock...</option>
                             <?php foreach ($stocks as $s): ?>
                             <option value="<?= $s['id'] ?>" data-price="<?= $s['current_price'] ?>" data-currency="<?= stock_currency($s['exchange'] ?? null) ?>"><?= esc($s['symbol']) ?> - <?= esc($s['name']) ?> (<?= format_price($s['current_price'], stock_currency($s['exchange'] ?? null)) ?>)</option>
@@ -44,13 +44,13 @@
                         <div id="amountInput">
                             <label class="block text-gray-300 mb-2 text-sm">Investment Amount (Rs)</label>
                             <input type="number" name="amount" min="1" step="0.01" required
-                                class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
+                                class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden"
                                 placeholder="e.g. 50000">
                         </div>
                         <div id="quantityInput" class="hidden">
                             <label class="block text-gray-300 mb-2 text-sm">Number of Shares</label>
                             <input type="number" name="quantity" min="1" step="1"
-                                class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-none"
+                                class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden"
                                 placeholder="e.g. 10">
                         </div>
                         <div id="calcResult" class="text-gray-400 text-xs mt-2 hidden"></div>

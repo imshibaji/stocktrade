@@ -21,7 +21,7 @@
                 <div class="relative">
                     <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
                     <input type="email" name="email" value="<?= old('email') ?>" required
-                        class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white focus:border-accent focus:outline-none"
+                        class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white focus:border-accent focus:outline-hidden"
                         placeholder="your@email.com">
                 </div>
             </div>
@@ -30,7 +30,7 @@
                 <div class="relative">
                     <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
                     <input type="password" name="password" required
-                        class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white focus:border-accent focus:outline-none"
+                        class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-4 py-3 text-white focus:border-accent focus:outline-hidden"
                         placeholder="Your password">
                 </div>
             </div>

@@ -109,7 +109,7 @@ $ogType          = (string) ($ogType ?? 'website');
                     <div class="relative">
                         <input type="text" id="navSearch" placeholder="Search symbol, name or exchange..."
                             autocomplete="off"
-                            class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none">
+                            class="w-full bg-page border border-gray-600 rounded-lg pl-10 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-hidden">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
                         <div id="navSearchDropdown" class="hidden absolute top-full left-0 mt-1 w-full bg-surface border border-gray-600 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"></div>
                     </div>
@@ -186,7 +186,7 @@ $ogType          = (string) ($ogType ?? 'website');
                 <div class="relative mb-3">
                     <input type="text" id="mobileSearch" placeholder="Search symbol, name or exchange..."
                         autocomplete="off"
-                        class="w-full bg-page border border-gray-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none">
+                        class="w-full bg-page border border-gray-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-hidden">
                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
                     <div id="mobileSearchDropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-surface border border-gray-600 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto"></div>
                 </div>
