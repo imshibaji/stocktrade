@@ -137,9 +137,36 @@
             <h2 class="sd-section-title">Company</h2>
             <span class="sd-eyebrow" id="sdSummaryEyebrow">Loading profile&hellip;</span>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 sd-panel sd-panel-pad" id="sdProfile"></div>
             <div class="sd-panel sd-panel-pad" id="sdSnapshot"></div>
+        </div>
+        <div class="sd-panel" id="sdEarningsPanel">
+            <div class="sd-ledger-head">
+                <h3 class="sd-section-title">Earnings</h3>
+                <span class="sd-ledger-count"><b id="sdNextEarningsDate">&ndash;</b> next</span>
+            </div>
+            <div class="sd-ledger" id="sdEarningsRows"></div>
+        </div>
+     </section>
+
+    <section class="sd-section">
+        <div class="sd-section-head">
+            <h2 class="sd-section-title">Analyst growth</h2>
+            <span class="sd-eyebrow" id="sdTrendsEyebrow">Loading trends&hellip;</span>
+        </div>
+        <div class="sd-panel sd-panel-pad">
+            <div class="sd-ledger" id="sdGrowthRows"></div>
+        </div>
+    </section>
+
+    <section class="sd-section">
+        <div class="sd-section-head">
+            <h2 class="sd-section-title">Institutional activity</h2>
+            <span class="sd-eyebrow">Last 6 months</span>
+        </div>
+        <div class="sd-panel sd-panel-pad">
+            <div class="sd-ledger" id="sdInstRows"></div>
         </div>
     </section>
 
@@ -660,6 +687,11 @@
     var profileEl = el('sdProfile');
     var snapEl = el('sdSnapshot');
     var summaryEyebrow = el('sdSummaryEyebrow');
+    var earningsEl = el('sdEarningsRows');
+    var nextEarningsEl = el('sdNextEarningsDate');
+    var growthEl = el('sdGrowthRows');
+    var instEl = el('sdInstRows');
+    var trendsEyebrow = el('sdTrendsEyebrow');
 
     function chipHtml(label, primary) {
         return '<span class="sd-chip">' + (primary ? '<span class="sd-dot" aria-hidden="true"></span>' : '') + esc(label) + '</span>';
@@ -760,22 +792,152 @@
         snapEl.innerHTML = '<div class="sd-fade sd-spec">' + rows.join('') + '</div>';
     }
 
+    function renderEarnings(earn) {
+        earn = earn || {};
+        var chart = earn.earningsChart || {};
+        var fin = earn.financialsChart || earn.financials || {};
+        var finSym = SYMS[earn.financialCurrency || CONF.currency] || curSym;
+
+        var dates = chart.earningsDate || [];
+        var next = String(dates.length ? (dates[0].fmt || dates[0].date || '') : '');
+        if (nextEarningsEl) nextEarningsEl.textContent = next || '\u2014';
+
+        var cq = chart.currentQuarterEstimate || {};
+        var cqRaw = raw(cq);
+        var subtitle = '';
+        if (cqRaw !== null && cqRaw !== undefined) {
+            subtitle = '<div class="sd-ledger-count">Est. ' + esc(cq.fmt || num(cqRaw, 2)) + ' \u00B7 ' + esc(chart.currentCalendarQuarter || '') + '</div>';
+        }
+
+        var yearly = fin.yearly || [];
+        var quarterly = fin.quarterly || [];
+        if (!yearly.length && !quarterly.length) {
+            earningsEl.innerHTML = subtitle + sdNote('No earnings', 'No earnings or financials data for ' + CONF.symbol + '.');
+            return;
+        }
+
+        function moneyCell(obj) {
+            if (obj && obj.fmt) return finSym + esc(obj.fmt);
+            var r = raw(obj);
+            return (r !== null && r !== undefined) ? finSym + fmtLarge(r) : '\u2014';
+        }
+        function decodePeriod(s) {
+            var m = /^(\d)Q(\d{4})$/.exec(s);
+            if (m) return 'Q' + m[1] + ' ' + m[2];
+            m = /^(\d{4})$/.exec(s);
+            if (m) return 'FY ' + m[1];
+            return s;
+        }
+        function finTable(title, rows) {
+            if (!rows.length) return '';
+            var body = rows.map(function (r) {
+                var period = r.date !== undefined ? decodePeriod(String(r.date)) : '';
+                var margin = (r.profitMargin && r.profitMargin.fmt) ? esc(r.profitMargin.fmt) : '';
+                return '<tr><td class="sd-num">' + esc(period) + '</td>' +
+                    '<td class="sd-num sd-fin-amt">' + moneyCell(r.revenue) + '</td>' +
+                    '<td class="sd-num sd-fin-amt">' + moneyCell(r.earnings) + '</td>' +
+                    '<td class="sd-num">' + (margin || '\u2014') + '</td></tr>';
+            }).join('');
+            return '<div class="sd-fin-block">' +
+                '<h4 class="sd-fin-title">' + esc(title) + '</h4>' +
+                '<table class="sd-opt-table">' +
+                '<thead><tr><th class="sd-opt-col-head">Period</th><th class="sd-opt-col-head">Revenue</th><th class="sd-opt-col-head">Earnings</th><th class="sd-opt-col-head">Margin</th></tr></thead>' +
+                '<tbody>' + body + '</tbody></table></div>';
+        }
+
+        var html = subtitle + finTable('Quarterly', quarterly) + finTable('Annual', yearly);
+        earningsEl.innerHTML = '<div class="sd-fade">' + html + '</div>';
+    }
+
     function loadSummary() {
         profileEl.innerHTML = sdLoading('Reading company profile\u2026');
         snapEl.innerHTML = sdLoading('Pulling the numbers\u2026');
+        earningsEl.innerHTML = sdLoading('Reading earnings\u2026');
+        growthEl.innerHTML = sdLoading('Reading analyst trends\u2026');
+        instEl.innerHTML = sdLoading('Reading share activity\u2026');
         summaryEyebrow.textContent = 'Fetching from the data feed\u2026';
-        fetchJSON(apiUrl('summary/{sym}/{exch}') + '?modules=summaryProfile,assetProfile,financialData,defaultKeyStatistics', function (data) {
+        trendsEyebrow.textContent = 'Fetching analyst &amp; ownership trends\u2026';
+        fetchJSON(apiUrl('summary/{sym}/{exch}') + '?modules=summaryProfile,assetProfile,financialData,defaultKeyStatistics,earnings,netSharePurchaseActivity,indexTrend', function (data) {
             var prof = data.summaryProfile || data.assetProfile || {};
             renderProfile(prof);
             renderSnapshot(data.financialData || {}, data.defaultKeyStatistics || {});
+            renderEarnings(data.earnings || {});
+            renderGrowth(data);
+            renderActivity(data.netSharePurchaseActivity || {});
             summaryEyebrow.textContent = CONF.symbol + ' \u00B7 ' + (prof.sector || CONF.exchange);
         }, function () {
             profileEl.innerHTML = sdError('The profile feed didn\u2019t respond for ' + CONF.symbol + '.', 'summary');
             snapEl.innerHTML = '';
+            earningsEl.innerHTML = sdNote('Earnings unavailable', 'No earnings data came back for ' + CONF.symbol + '.');
+            growthEl.innerHTML = sdError('Trends feed unavailable for ' + CONF.symbol + '.', 'summary');
+            instEl.innerHTML = sdNote('Activity unavailable', 'The ownership feed didn\u2019t respond for ' + CONF.symbol + '.');
             summaryEyebrow.textContent = 'Profile unavailable';
+            trendsEyebrow.textContent = 'Trends unavailable';
         });
     }
     retryHandlers.summary = loadSummary;
+
+    /* ================= ANALYST TRENDS + INSTITUTIONAL ACTIVITY (rendered by loadSummary) ================= */
+
+    function decodeGrowthPeriod(p) {
+        var map = {
+            '0q': 'Quarter (current)',
+            '+1q': 'Quarter (next)',
+            '0y': 'Year (current)',
+            '+1y': 'Year (next)',
+            'LTG': 'Long-term growth'
+        };
+        return map[p] || p;
+    }
+
+    function renderGrowth(ins) {
+        var trend = (ins && ins.indexTrend) || {};
+        var estimates = trend.estimates || [];
+        if (!estimates.length) {
+            growthEl.innerHTML = sdNote('No growth estimates', 'The analyst trend feed didn\u2019t return estimates for ' + CONF.symbol + '.');
+            return;
+        }
+        var rows = estimates.map(function (e) {
+            var g = raw(e.growth);
+            var gStr = pct(g, 1);
+            var cls = '';
+            if (g !== null && g !== undefined) cls = g >= 0 ? 'text-green-400' : 'text-red-400';
+            return '<div class="sd-ledger-row"><span class="sd-ledger-date">' + esc(decodeGrowthPeriod(e.period)) + '</span>' +
+                '<span class="sd-ledger-amt sd-num ' + cls + '">' + (gStr || '\u2014') + '</span></div>';
+        }).join('');
+        trendsEyebrow.textContent = (trend.symbol ? (trend.symbol + ' growth') : 'Analyst growth');
+        growthEl.innerHTML = '<div class="sd-fade">' + rows + '</div>';
+    }
+
+    function renderActivity(nspa) {
+        var n = nspa || {};
+        var rows = [];
+        function add(label, valueHtml) {
+            if (!valueHtml || valueHtml === '\u2014') return;
+            rows.push('<div class="sd-ledger-row"><span class="sd-ledger-date">' + esc(label) + '</span>' +
+                '<span class="sd-ledger-amt sd-num">' + valueHtml + '</span></div>');
+        }
+        function addColored(label, fmt, rawVal) {
+            if (!fmt && (rawVal === null || rawVal === undefined)) return;
+            var cls = (rawVal !== null && rawVal !== undefined) ? (rawVal >= 0 ? 'text-green-400' : 'text-red-400') : '';
+            rows.push('<div class="sd-ledger-row"><span class="sd-ledger-date">' + esc(label) + '</span>' +
+                '<span class="sd-ledger-amt sd-num ' + cls + '">' + esc(fmt) + '</span></div>');
+        }
+        var period = n.period || '6m';
+        addColored('Net institutional buying (' + period + ')',
+            (n.netInstSharesBuying && n.netInstSharesBuying.fmt) ? n.netInstSharesBuying.fmt : (raw(n.netInstSharesBuying) != null ? fmtLarge(raw(n.netInstSharesBuying)) : ''),
+            raw(n.netInstSharesBuying));
+        addColored('Net buying % of float',
+            (n.netInstBuyingPercent && n.netInstBuyingPercent.fmt) ? n.netInstBuyingPercent.fmt : (raw(n.netInstBuyingPercent) != null ? pct(raw(n.netInstBuyingPercent), 2) : ''),
+            raw(n.netInstBuyingPercent));
+        add('Total insider shares',
+            (n.totalInsiderShares && n.totalInsiderShares.fmt) ? n.totalInsiderShares.fmt : (raw(n.totalInsiderShares) != null ? fmtLarge(raw(n.totalInsiderShares)) : ''));
+        if (raw(n.buyInfoCount)) add('Buy orders', fmtInt(raw(n.buyInfoCount)));
+        if (raw(n.sellInfoCount)) add('Sell orders', fmtInt(raw(n.sellInfoCount)));
+        instEl.innerHTML = rows.length
+            ? '<div class="sd-fade">' + rows.join('') + '</div>'
+            : sdNote('No activity', 'No institutional/share-purchase activity for ' + CONF.symbol + '.');
+    }
 
     /* ================= CORPORATE EVENTS ================= */
 

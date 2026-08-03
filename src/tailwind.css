@@ -588,7 +588,7 @@ same brand variables above and the day/night themes keep working.
   }
 
   .sd-panel {
-    @apply overflow-hidden rounded-xl border border-line bg-surface;
+    @apply overflow-hidden rounded-xl border border-line bg-surface my-4;
   }
 
   .sd-panel-pad {
@@ -791,6 +791,18 @@ same brand variables above and the day/night themes keep working.
 
   .sd-ledger-amt.sd-amt-accent {
     @apply text-accent;
+  }
+
+  .sd-fin-block {
+    @apply mt-6;
+  }
+
+  .sd-fin-title {
+    @apply mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-300;
+  }
+
+  .sd-opt-table td.sd-fin-amt {
+    @apply text-ink-100 font-semibold;
   }
 
   /* ---------- options chain ---------- */
