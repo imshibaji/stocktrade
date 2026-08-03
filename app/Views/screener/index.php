@@ -273,7 +273,21 @@
                     <h2 class="text-white font-bold text-lg">Saved Lists</h2>
                     <button onclick="toggleSavedLists()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
                 </div>
+                <?php if (!empty($publicLists)): ?>
+                <div class="mb-4">
+                    <h3 class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Community Lists</h3>
+                    <div id="communityListsContainer"></div>
+                </div>
+                <hr class="border-gray-700 my-3">
+                <?php endif; ?>
                 <div id="savedListsContainer"></div>
+                <?php if (empty($isLoggedIn) && empty($savedLists)): ?>
+                <div class="text-gray-500 text-sm text-center py-4">
+                    <i class="fas fa-lock mb-2 text-lg"></i>
+                    <p>Login to save and manage your own screener lists.</p>
+                    <a href="/login" class="text-accent hover:underline text-sm mt-2 inline-block">Log in</a>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -294,9 +308,10 @@
     </div>
 </section>
 
-<script>
-(function() {
-var FILTER_FIELDS = [
+ <script>
+ var IS_LOGGED_IN = <?= json_encode($isLoggedIn) ?>;
+ (function() {
+ var FILTER_FIELDS = [
         // Price / Valuation (Fundamental)
         { value: 'price', label: 'Current Price', category: 'fundamental' },
         { value: 'previous_close', label: 'Previous Close', category: 'fundamental' },
@@ -876,12 +891,13 @@ var FILTER_FIELDS = [
         });
     };
 
-    window.showSaveDialog = function() {
-        if (lastResults.length === 0) { alert('No results to save.'); return; }
-        document.getElementById('saveDialog').classList.remove('hidden');
-        document.getElementById('listNameInput').value = '';
-        document.getElementById('listNameInput').focus();
-    };
+     window.showSaveDialog = function() {
+         if (!IS_LOGGED_IN) { alert('Please log in to save screener lists.'); return; }
+         if (lastResults.length === 0) { alert('No results to save.'); return; }
+         document.getElementById('saveDialog').classList.remove('hidden');
+         document.getElementById('listNameInput').value = '';
+         document.getElementById('listNameInput').focus();
+     };
     window.closeSaveDialog = function() { document.getElementById('saveDialog').classList.add('hidden'); };
 
     window.saveList = function() {
@@ -929,7 +945,7 @@ var FILTER_FIELDS = [
         var container = document.getElementById('savedListsContainer');
         container.innerHTML = '<div class="text-gray-400 text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</div>';
         fetch('/api/screener/lists').then(function(r) { return r.json(); }).then(function(lists) {
-            if (lists.length === 0) { container.innerHTML = '<div class="text-gray-500 text-center py-4 text-sm">No saved lists yet.</div>'; return; }
+            if (lists.length === 0) { container.innerHTML = '<div class="text-gray-500 text-center py-4 text-sm">No lists found.</div>'; return; }
             container.innerHTML = '';
             lists.forEach(function(l) {
                 var div = document.createElement('div');
@@ -941,7 +957,7 @@ var FILTER_FIELDS = [
                             '<p class="text-gray-500 text-xs">' + l.stock_count + ' stocks \u00B7 ' + new Date(l.created_at).toLocaleDateString() + '</p>' +
                         '</div>' +
                         '<div class="flex gap-1 ml-2">' +
-                            '<button onclick="togglePublic(' + l.id + ')" class="' + (l.is_public ? 'text-green-400 hover:text-green-300 border-green-400/40' : 'text-gray-500 hover:text-gray-300 border-gray-600') + ' text-xs px-2 py-1 rounded border transition" title="' + (l.is_public ? 'Public \u2014 click to make private' : 'Private \u2014 click to make public') + '"><i class="fas ' + (l.is_public ? 'fa-globe' : 'fa-lock') + '"></i></button>' +
+                            '<button onclick="togglePublic(' + l.id + ')" class="' + (l.is_public ? 'text-green-400 bg-green-400/10 border-green-400/40' : 'text-gray-400 bg-gray-700/50 border-gray-600') + ' text-xs px-3 py-1 rounded-full border transition font-medium" title="' + (l.is_public ? 'Public \u2014 click to make private' : 'Private \u2014 click to make public') + '"><i class="fas ' + (l.is_public ? 'fa-globe' : 'fa-lock') + ' mr-1"></i>' + (l.is_public ? 'Public' : 'Private') + '</button>' +
                             '<button onclick="loadList(' + l.id + ')" class="text-accent hover:text-accent-2 text-xs px-2 py-1 rounded border border-accent/30 hover:border-accent transition" title="Load"><i class="fas fa-upload"></i></button>' +
                             '<button onclick="deleteList(' + l.id + ')" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded border border-red-400/30 hover:border-red-400 transition" title="Delete"><i class="fas fa-trash"></i></button>' +
                         '</div>' +
@@ -949,6 +965,29 @@ var FILTER_FIELDS = [
                 container.appendChild(div);
             });
         }).catch(function() { container.innerHTML = '<div class="text-red-400 text-center py-4 text-sm">Failed to load lists.</div>'; });
+    }
+
+    function loadCommunityLists() {
+        var container = document.getElementById('communityListsContainer');
+        if (!container) return;
+        container.innerHTML = '<div class="text-gray-400 text-center py-2 text-xs"><i class="fas fa-spinner fa-spin mr-1"></i>Loading community lists...</div>';
+        fetch('/api/screener/public-lists').then(function(r) { return r.json(); }).then(function(lists) {
+            if (lists.length === 0) { container.innerHTML = '<div class="text-gray-500 text-center py-2 text-xs">No public lists yet.</div>'; return; }
+            container.innerHTML = '';
+            lists.forEach(function(l) {
+                var div = document.createElement('div');
+                div.className = 'border-b border-gray-700/30 py-2';
+                div.innerHTML =
+                    '<div class="flex items-center justify-between">' +
+                        '<div class="flex-1 min-w-0">' +
+                            '<p class="text-white text-sm font-semibold truncate">' + escHtml(l.name) + '</p>' +
+                            '<p class="text-gray-500 text-xs">' + l.stock_count + ' stocks \u00B7 by User #' + l.user_id + '</p>' +
+                        '</div>' +
+                        '<button onclick="loadList(' + l.id + ')" class="text-accent hover:text-accent-2 text-xs px-2 py-1 rounded border border-accent/30 hover:border-accent transition" title="Load"><i class="fas fa-upload"></i></button>' +
+                    '</div>';
+                container.appendChild(div);
+            });
+        }).catch(function() { container.innerHTML = '<div class="text-red-400 text-center py-2 text-xs">Failed to load community lists.</div>'; });
     }
 
     window.loadList = function(id) {
@@ -1084,30 +1123,32 @@ var FILTER_FIELDS = [
         }).catch(function() { alert('Failed to load list.'); });
     };
 
-    window.deleteList = function(id) {
-        if (!confirm('Delete this saved list?')) return;
-        var formData = new FormData();
-        formData.append('id', id);
-        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
-        fetch('/api/screener/delete-list', { method: 'POST', body: formData })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) { loadSavedLists(); var c = document.getElementById('savedCount'); c.textContent = Math.max(0, parseInt(c.textContent || '0', 10) - 1); }
-                else { alert(data.message); }
-            }).catch(function() { alert('Delete failed'); });
-    };
-
-    window.togglePublic = function(id) {
-        var formData = new FormData();
-        formData.append('id', id);
-        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
-        fetch('/api/screener/toggle-public', { method: 'POST', body: formData })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) { loadSavedLists(); }
-                else { alert(data.message); }
-            }).catch(function() { alert('Toggle failed'); });
-    };
+     window.deleteList = function(id) {
+         if (!IS_LOGGED_IN) { alert('Please log in to manage saved lists.'); return; }
+         if (!confirm('Delete this saved list?')) return;
+         var formData = new FormData();
+         formData.append('id', id);
+         formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+         fetch('/api/screener/delete-list', { method: 'POST', body: formData })
+             .then(function(r) { return r.json(); })
+             .then(function(data) {
+                 if (data.success) { loadSavedLists(); var c = document.getElementById('savedCount'); c.textContent = Math.max(0, parseInt(c.textContent || '0', 10) - 1); }
+                 else { alert(data.message); }
+             }).catch(function() { alert('Delete failed'); });
+     };
+ 
+     window.togglePublic = function(id) {
+         if (!IS_LOGGED_IN) { alert('Please log in to toggle public status.'); return; }
+         var formData = new FormData();
+         formData.append('id', id);
+         formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+         fetch('/api/screener/toggle-public', { method: 'POST', body: formData })
+             .then(function(r) { return r.json(); })
+             .then(function(data) {
+                 if (data.success) { loadSavedLists(); }
+                 else { alert(data.message); }
+             }).catch(function() { alert('Toggle failed'); });
+     };
 
     function buildIndicatorOptions() {
         var html = '';

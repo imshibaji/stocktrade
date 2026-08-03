@@ -113,20 +113,75 @@ class Api extends BaseController
 
         if (empty($results) && preg_match('/^[A-Za-z0-9.\-]{1,15}$/', trim($query))) {
             $symbol = strtoupper(trim($query));
-            $yahoo = new YahooFinanceService();
-            $quote = $yahoo->getQuote($symbol, $exchange);
+            $yahoo  = new YahooFinanceService();
+            $quote  = $yahoo->getQuote($symbol, $exchange);
             if ($quote) {
                 $d = $yahoo->quoteToArray($quote);
-                $results[] = [
-                    'id'             => null,
-                    'symbol'         => $d['symbol'],
-                    'name'           => $d['longName'] ?? $d['shortName'] ?? $symbol,
-                    'sector'         => $d['fullExchangeName'] ?? 'N/A',
-                    'current_price'  => $d['regularMarketPrice'],
-                    'previous_close' => $d['regularMarketPreviousClose'],
-                    'from_yahoo'     => true,
-                    'exchange'       => $exchange,
-                ];
+                $price = (float) ($d['regularMarketPrice'] ?? 0);
+
+                if ($price > 0) {
+                    $stockModel = new StockModel();
+                    $existing   = $stockModel->where('symbol', $symbol)->first();
+
+                    if (! $existing) {
+                        $name      = $d['longName'] ?? $d['shortName'] ?? $symbol;
+                        $sector    = $d['sector'] ?? 'Unknown';
+                        $prevClose = $d['regularMarketPreviousClose'] ?? round($price * 0.99, 2);
+                        $marketCap = $d['marketCap'] ?? null;
+                        $avgVol    = $d['averageDailyVolume3Month'] ?? null;
+                        $peRatio   = $d['trailingPE'] ?? null;
+                        $wkHigh    = $d['fiftyTwoWeekHigh'] ?? null;
+                        $wkLow     = $d['fiftyTwoWeekLow'] ?? null;
+                        $divYield  = $d['trailingAnnualDividendYield'] ?? null;
+                        $beta      = $d['beta'] ?? null;
+
+                        $stockId = $stockModel->insert([
+                            'symbol'          => $symbol,
+                            'name'            => $name,
+                            'sector'          => $sector,
+                            'exchange'        => $exchange,
+                            'exchange_display'=> $d['exchange'] ?? $d['fullExchangeName'] ?? $exchange,
+                            'current_price'   => $price,
+                            'previous_close'  => $prevClose,
+                            'market_cap'      => $marketCap,
+                            'avg_volume'      => $avgVol,
+                            'pe_ratio'        => $peRatio,
+                            'week_52_high'    => $wkHigh,
+                            'week_52_low'     => $wkLow,
+                            'dividend_yield'  => $divYield,
+                            'beta'            => $beta,
+                            'from_yahoo'      => true,
+                            'last_fetched'    => date('Y-m-d H:i:s'),
+                            'created_at'      => date('Y-m-d H:i:s'),
+                            'updated_at'      => date('Y-m-d H:i:s'),
+                        ]);
+
+                        generate_price_history($stockId, $price);
+                        generate_predictions($stockId, $price);
+
+                        $results[] = [
+                            'id'             => $stockId,
+                            'symbol'         => $d['symbol'],
+                            'name'           => $name,
+                            'sector'         => $sector,
+                            'current_price'  => $price,
+                            'previous_close' => $prevClose,
+                            'from_yahoo'     => true,
+                            'exchange'       => $exchange,
+                        ];
+                    } else {
+                        $results[] = [
+                            'id'             => (int) $existing['id'],
+                            'symbol'         => $symbol,
+                            'name'           => $d['longName'] ?? $d['shortName'] ?? $symbol,
+                            'sector'         => $d['sector'] ?? 'Unknown',
+                            'current_price'  => $price,
+                            'previous_close' => $d['regularMarketPreviousClose'] ?? null,
+                            'from_yahoo'     => true,
+                            'exchange'       => $exchange,
+                        ];
+                    }
+                }
             }
         }
 

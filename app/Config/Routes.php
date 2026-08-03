@@ -98,6 +98,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->post('/api/screener/run-manual', 'Screener::runManualQuery');
     $routes->post('/api/screener/save', 'Screener::save');
     $routes->get('/api/screener/lists', 'Screener::lists');
+    $routes->get('/api/screener/public-lists', 'Screener::publicLists');
     $routes->get('/api/screener/load-list', 'Screener::loadList');
     $routes->post('/api/screener/delete-list', 'Screener::deleteList');
     $routes->post('/api/screener/toggle-public', 'Screener::togglePublic');

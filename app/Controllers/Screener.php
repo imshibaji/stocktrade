@@ -13,13 +13,16 @@ class Screener extends BaseController
     {
         $stockListModel = new StockListModel();
         $userId = current_user_id();
-        $savedLists = $stockListModel->where('user_id', $userId)
-            ->orderBy('created_at', 'DESC')
-            ->findAll();
+        $savedLists = $userId
+            ? $stockListModel->where('user_id', $userId)->orderBy('created_at', 'DESC')->findAll()
+            : [];
+        $publicLists = $stockListModel->where('is_public', 1)->orderBy('created_at', 'DESC')->findAll();
 
         $data = [
-            'title'      => 'Stock Screener - StockTrade Tips',
-            'savedLists' => $savedLists,
+            'title'       => 'Stock Screener - StockTrade Tips',
+            'savedLists'  => $savedLists,
+            'publicLists' => $publicLists,
+            'isLoggedIn'  => !empty($userId),
         ];
         return view('templates/header', $data)
             . view('screener/index', $data)
@@ -366,11 +369,23 @@ class Screener extends BaseController
     public function lists()
     {
         $userId = current_user_id();
-        if (!$userId) {
-            return $this->response->setJSON([]);
+        $model  = new StockListModel();
+        if ($userId) {
+            $lists = $model->where('user_id', $userId)
+                ->orderBy('created_at', 'DESC')
+                ->findAll();
+        } else {
+            $lists = $model->where('is_public', 1)
+                ->orderBy('created_at', 'DESC')
+                ->findAll();
         }
+        return $this->response->setJSON($lists);
+    }
+
+    public function publicLists()
+    {
         $model = new StockListModel();
-        $lists = $model->where('user_id', $userId)
+        $lists = $model->where('is_public', 1)
             ->orderBy('created_at', 'DESC')
             ->findAll();
         return $this->response->setJSON($lists);
@@ -384,7 +399,13 @@ class Screener extends BaseController
         }
         $userId = current_user_id();
         $model  = new StockListModel();
-        $list   = $model->where('id', $listId)->where('user_id', $userId)->first();
+        $list   = $model->where('id', $listId);
+        if ($userId) {
+            $list = $list->where('user_id', $userId);
+        } else {
+            $list = $list->where('is_public', 1);
+        }
+        $list = $list->first();
         if (!$list) {
             return $this->response->setJSON(['success' => false, 'message' => 'Not found']);
         }
