@@ -58,7 +58,7 @@ corresponding to the latest version of the framework.
 
 This is a long-term open project. If you find it useful and would like to support its continued development, please consider sponsoring:
 
-- **GitHub Sponsors**: [Shibaji Debnath](https://github.com/sponsors/shibaji) — recurring or one-time contributions via GitHub.
+- **GitHub Sponsors**: [Shibaji Debnath](https://github.com/sponsors/imshibaji) — recurring or one-time contributions via GitHub.
 - **Buy Me a Coffee**: [shibajidebnath.com](https://www.shibajidebnath.com) — one-time or monthly support.
 
 Sponsorship funds go toward ongoing maintenance, new features, and infrastructure costs. Even a small contribution helps keep the project alive and independent.
