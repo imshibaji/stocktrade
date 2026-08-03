@@ -1,6 +1,60 @@
 @import 'tailwindcss';
-
 @source "../app/Views/**/*.php";
+@plugin "daisyui" {
+  themes: night, day;
+}
+@plugin "daisyui/theme" {
+  name: "night";
+  default: true;
+  prefersdark: false;
+  color-scheme: dark;
+  --color-base-100: rgb(var(--bg-page));
+  --color-base-200: rgb(var(--bg-surface));
+  --color-base-300: rgb(var(--bg-hover));
+  --color-base-content: rgb(var(--ink));
+  --color-accent: rgb(var(--accent));
+  --color-accent-content: rgb(var(--on-accent));
+  --color-primary: rgb(var(--accent));
+  --color-primary-content: rgb(var(--on-accent));
+  --color-secondary: rgb(var(--blue));
+  --color-secondary-content: rgb(var(--ink));
+  --color-neutral: rgb(var(--border));
+  --color-neutral-content: rgb(var(--ink));
+  --color-info: rgb(var(--blue));
+  --color-info-content: rgb(var(--ink));
+  --color-success: rgb(var(--pos));
+  --color-success-content: rgb(var(--ink));
+  --color-warning: rgb(var(--yellow));
+  --color-warning-content: rgb(var(--ink));
+  --color-error: rgb(var(--neg));
+  --color-error-content: rgb(var(--ink));
+}
+@plugin "daisyui/theme" {
+  name: "day";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+  --color-base-100: rgb(var(--bg-page));
+  --color-base-200: rgb(var(--bg-surface));
+  --color-base-300: rgb(var(--bg-hover));
+  --color-base-content: rgb(var(--ink));
+  --color-accent: rgb(var(--accent));
+  --color-accent-content: rgb(var(--on-accent));
+  --color-primary: rgb(var(--accent));
+  --color-primary-content: rgb(var(--on-accent));
+  --color-secondary: rgb(var(--blue));
+  --color-secondary-content: rgb(var(--ink));
+  --color-neutral: rgb(var(--border));
+  --color-neutral-content: rgb(var(--ink));
+  --color-info: rgb(var(--blue));
+  --color-info-content: rgb(var(--ink));
+  --color-success: rgb(var(--pos));
+  --color-success-content: rgb(var(--ink));
+  --color-warning: rgb(var(--yellow));
+  --color-warning-content: rgb(var(--ink));
+  --color-error: rgb(var(--neg));
+  --color-error-content: rgb(var(--ink));
+}
 
 /*
 =====================================================================
@@ -810,4 +864,32 @@ same brand variables above and the day/night themes keep working.
       border-top-color: rgb(var(--ink-5));
     }
   }
+}
+
+/* --- pagination --- */
+
+.pagination {
+  @apply flex items-center justify-center gap-2;
+}
+
+.pagination a {
+  @apply flex items-center justify-center rounded-xs border border-line-soft text-[11px] font-semibold text-ink-300 p-2;
+}
+
+.pagination a:hover,
+.pagination .active {
+  @apply bg-accent text-accent dark:hover:text-white border-accent;
+}
+
+.pagination .active {
+  @apply border-accent text-accent bg-accent;
+}
+.pagination li:first-child a,
+.pagination li:last-child a {
+  @apply rounded-xs px-3;
+}
+
+/* --- misc --- */
+.menu {
+  @apply w-full;
 }

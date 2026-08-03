@@ -46,12 +46,15 @@ class Home extends BaseController
             unset($list);
         }
 
-        $predictionStocks = $topStocks;
-        foreach ([$topPerformer, $topLoser] as $entry) {
-            if ($entry !== null) {
-                $predictionStocks[] = $entry['stock'];
+        $stocksBySector = [];
+        foreach ($allStocks as $stock) {
+            $sector = $stock['sector'] ?? 'Uncategorized';
+            if (!isset($stocksBySector[$sector])) {
+                $stocksBySector[$sector] = [];
             }
+            $stocksBySector[$sector][] = $stock;
         }
+        ksort($stocksBySector);
 
         $data = [
             'title'         => '',
@@ -60,7 +63,8 @@ class Home extends BaseController
             'topPerformer'  => $sameStock ? null : $topPerformer,
             'topLoser'      => $sameStock ? null : $topLoser,
             'publicLists'   => $publicLists,
-            'predictionsMap'=> $this->buildPredictionsMap($predictionStocks),
+            'predictionsMap'=> $this->buildPredictionsMap($allStocks),
+            'stocksBySector'=> $stocksBySector,
         ];
         return view('templates/header', $data)
             . view('home', $data)

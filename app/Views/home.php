@@ -299,6 +299,77 @@ if ($heroHighlight !== '' && str_contains($heroTitle, $heroHighlight)) {
 </section>
 
 <section class="mb-16">
+    <h2 class="text-3xl font-bold text-white text-center mb-8"><?= esc(home_setting('home_sectorlists_title', 'Stocks Lists By Sector')) ?></h2>
+    <?php if (!empty($stocksBySector)): ?>
+    <?php $sectorKeys = array_keys($stocksBySector); ?>
+    <?php $firstSector = $sectorKeys[0] ?? null; ?>
+    <div role="tablist" class="tabs tabs-box mb-6 p-3">
+        <?php foreach ($stocksBySector as $sectorName => $sectorStocks): ?>
+        <?php $panelId = 'sector-panel-' . preg_replace('/[^a-zA-Z0-9]/', '-', $sectorName); ?>
+        <?php $isActive = $sectorName === $firstSector; ?>
+        <input type="radio" name="sector_tabs" class="tab"
+            id="tab-<?= esc($panelId) ?>"
+            aria-label="<?= esc($sectorName) ?>"
+            <?= $isActive ? 'checked' : '' ?>
+            data-panel="<?= esc($panelId) ?>" />
+        <div id="<?= esc($panelId) ?>" class="tab-content" role="tabpanel" aria-labelledby="tab-<?= esc($panelId) ?>">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <?php foreach ($sectorStocks as $stock): ?>
+                <?php $change = get_price_change((float) $stock['current_price'], (float) $stock['previous_close']); ?>
+                <?php $cur = stock_currency($stock['exchange'] ?? null); ?>
+                <?php $pred = $predictionsMap[$stock['id']] ?? null; ?>
+                <?php $bullish = $pred !== null && $pred['avg'] >= (float) $stock['current_price']; ?>
+                <div class="bg-surface rounded-xl p-6 border border-gray-700 hover:border-accent transition cursor-pointer flex flex-col"
+                     onclick="<?= is_logged_in() ? "window.location.href='/stocks/{$stock['id']}'" : "window.location.href='/login'" ?>">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="text-white font-bold text-base"><?= esc($stock['symbol']) ?> <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-page border border-gray-600 text-gray-400 align-middle"><?= esc(exchange_display($stock['exchange'] ?? null, $stock['exchange_display'] ?? null)) ?></span></h4>
+                            <p class="text-gray-400 text-sm"><?= esc($stock['name']) ?></p>
+                        </div>
+                    </div>
+                    <?php if ($pred !== null): ?>
+                    <div class="mt-3 pt-3 border-t border-gray-700/50">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs text-gray-500 uppercase tracking-wider">30-Day Outlook</span>
+                            <span class="text-xs font-semibold <?= $bullish ? 'text-green-400' : 'text-red-400' ?>">
+                                <i class="fas fa-<?= $bullish ? 'arrow-trend-up' : 'arrow-trend-down' ?> mr-1"></i><?= $bullish ? 'Bullish' : 'Bearish' ?>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="text-gray-500">Target</span>
+                            <span class="text-white font-semibold"><?= format_price($pred['avg'], $cur) ?></span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="text-gray-500">Range</span>
+                            <span class="text-gray-300"><?= format_price($pred['low'], $cur) ?> &ndash; <?= format_price($pred['high'], $cur) ?></span>
+                        </div>
+                        <?php if (!empty($pred['prices'])): ?>
+                        <svg viewBox="0 0 100 28" preserveAspectRatio="none" class="w-full h-7">
+                            <polyline fill="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"
+                                      stroke="<?= $bullish ? '#22c55e' : '#ef4444' ?>"
+                                      points="<?= sparkline_points($pred['prices']) ?>" />
+                        </svg>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+                    <div class="flex justify-between items-end mt-auto pt-3">
+                        <span class="text-2xl font-bold text-white"><?= format_price($stock['current_price'], $cur) ?></span>
+                        <span class="<?= $change['change'] >= 0 ? 'text-green-400' : 'text-red-400' ?> text-sm">
+                            <?= $change['change'] >= 0 ? '+' : '' ?><?= $change['percent'] ?>%
+                        </span>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <p class="text-center text-gray-500">No stocks available by sector yet.</p>
+    <?php endif; ?>
+</section>
+
+<section class="mb-16">
     <h2 class="text-3xl font-bold text-white text-center mb-8"><?= esc(home_setting('home_how_title', 'How It Works')) ?></h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="text-center">
