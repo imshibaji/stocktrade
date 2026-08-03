@@ -1,4 +1,6 @@
-# CodeIgniter 4 Application Starter
+# StockTrade — Stock Analysis & Prediction Platform
+
+A CodeIgniter 4 web application for stock market analysis, AI-driven predictions, portfolio tracking, and investment management. Built with PHP 8.2+, Tailwind CSS v4, daisyUI 5, and Yahoo Finance data.
 
 ## What is CodeIgniter?
 
@@ -14,30 +16,52 @@ More information about the plans for version 4 can be found in [CodeIgniter 4](h
 You can read the [user guide](https://codeigniter.com/user_guide/)
 corresponding to the latest version of the framework.
 
-## Installation & updates
+## Project Structure
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+| Path | Purpose |
+|------|---------|
+| `app/Controllers/` | Application controllers (e.g. `Pricing`, `Terms`, `Privacy`, `Docs`, `Faq`) |
+| `app/Views/` | PHP views + Tailwind-rendered HTML templates (`templates/header.php`, `templates/footer.php`) |
+| `app/Config/Routes.php` | Route definitions for guest pages and API endpoints |
+| `src/tailwind.css` | Tailwind source with custom `sd-*` component classes |
+| `public/css/style.css` | Compiled CSS (`npx @tailwindcss/cli -i src/tailwind.css -o public/css/style.css`) |
+| `tests/` | PHPUnit feature tests (TDD red→green workflow) |
+| `docs/research/` | Research artifacts (e.g. competitor FAQ research) |
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+## Key Features
 
-## Setup
+- Guest pages: Pricing, Terms, Privacy, FAQ, User Docs, Developer Docs
+- Stock detail page with consolidated summary (profile, snapshot, earnings, growth, institutional activity)
+- Yahoo Finance data import & search autocomplete
+- Theme switching (day / system / night) persisted in localStorage
+- Responsive header with slide-over mobile nav, search, and theme controls
+- TDD-tested: 48 tests / 246 assertions all green
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+## Usage Tracking & Contributions
 
-## Important Change with index.php
+### Tracking user and contributor activity
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+- **GitHub Traffic** — the repository's Traffic tab shows page views and unique visitors over time.
+- **GitHub Insights → Contributors** — tracks commit count, additions, and deletions per contributor; the contribution graph shows activity frequency.
+- **GitHub Actions** — CI runs (PHPUnit test suite) are logged per push/PR, giving a proxy for contributor engagement.
+- **Git history** — `git log --oneline` provides a chronological record of all contributions; tags and release commits mark milestones.
+- **Google Analytics / Plausible** (optional) — add a lightweight script to `templates/header.php` before `</head>` to track page views, session duration, and referrers in production.
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+### How contributors can participate
 
-**Please** read the user guide for a better explanation of how CI4 works!
+1. Fork the repository and create a feature branch.
+2. Write tests first (TDD red), then implement (green), then refactor.
+3. Run `php vendor/bin/phpunit` to verify all 48 tests still pass.
+4. Open a pull request with a clear description of changes.
+
+## Sponsorship
+
+This is a long-term open project. If you find it useful and would like to support its continued development, please consider sponsoring:
+
+- **GitHub Sponsors**: [Shibaji Debnath](https://github.com/sponsors/shibaji) — recurring or one-time contributions via GitHub.
+- **Buy Me a Coffee**: [shibajidebnath.com](https://www.shibajidebnath.com) — one-time or monthly support.
+
+Sponsorship funds go toward ongoing maintenance, new features, and infrastructure costs. Even a small contribution helps keep the project alive and independent.
 
 ## Repository Management
 

@@ -40,7 +40,7 @@
             <a href="/stocks" class="border border-accent text-accent hover:bg-accent/10 font-semibold px-6 py-3 rounded-lg transition">
                 <i class="fas fa-search mr-2"></i>Browse Stocks
             </a>
-            <a href="/" class="text-gray-400 hover:text-white text-sm">
+            <a href="/" class="border border-gray-600 text-gray-400 hover:text-white font-semibold px-6 py-3 rounded-lg transition">
                 <i class="fas fa-home mr-1"></i>Back to Home
             </a>
         </div>

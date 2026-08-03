@@ -9,6 +9,13 @@ $routes->get('/about', 'About::index');
 $routes->get('/contact', 'Contact::index');
 $routes->post('/contact/send', 'Contact::send');
 
+$routes->get('/pricing', 'Pricing::index');
+$routes->get('/terms', 'Terms::index');
+$routes->get('/privacy', 'Privacy::index');
+$routes->get('/faq', 'Faq::index');
+$routes->get('/docs/user', 'Docs::user');
+$routes->get('/docs/developer', 'Docs::developer');
+
 $routes->get('/stocks', 'Stocks::index');
 $routes->get('/stocks/(:num)', 'Stocks::show/$1');
 $routes->get('/stocks/(:num)/predictions', 'Stocks::predictions/$1');

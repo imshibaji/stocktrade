@@ -168,20 +168,26 @@ $ogType          = (string) ($ogType ?? 'website');
                                 <i class="fas fa-sign-out-alt w-5 mr-2"></i>Logout
                             </a>
                         </div>
-                    </div>
-                    <button class="md:hidden text-gray-300" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                         </div>
+                    <button id="mobileMenuBtn" type="button" class="md:hidden text-gray-300" aria-label="Toggle menu" aria-controls="mobile-menu" aria-expanded="false">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                </div>
+                    <div id="mobile-backdrop" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+                 </div>
             </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-700">
-            <div class="px-4 py-3">
-                <div class="flex items-center space-x-3 mb-3">
-                    <i class="fas fa-chart-line text-accent text-xl"></i>
-                    <span class="text-lg font-bold text-accent"><?= esc($brandHead) ?><?php if ($brandTail !== ''): ?><span class="text-white"><?= esc($brandTail) ?></span><?php endif; ?></span>
+        <div id="mobile-menu" class="fixed top-0 left-0 z-50 h-screen w-72 max-w-[80vw] -translate-x-full overflow-y-auto border-r border-gray-700 bg-page transform transition-transform duration-300 ease-in-out md:hidden">
+            <div class="px-4 py-3 space-y-1">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-chart-line text-accent text-xl"></i>
+                        <span class="text-lg font-bold text-accent"><?= esc($brandHead) ?><?php if ($brandTail !== ''): ?><span class="text-white"><?= esc($brandTail) ?></span><?php endif; ?></span>
+                    </div>
+                    <button id="mobileMenuClose" type="button" class="md:hidden text-gray-400 hover:text-white" aria-label="Close menu">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
                 </div>
                 <div class="relative mb-3">
                     <input type="text" id="mobileSearch" placeholder="Search symbol, name or exchange..."
@@ -250,63 +256,6 @@ $ogType          = (string) ($ogType ?? 'website');
                 if (menu) menu.classList.add('hidden');
             }
         });
-
-        (function() {
-            var si = document.getElementById('mobileSearch');
-            var sd = document.getElementById('mobileSearchDropdown');
-            var t = null;
-            if (!si || !sd) return;
-
-            function eh(s) {
-                if (!s) return '';
-                var d = document.createElement('div');
-                d.textContent = s;
-                return d.innerHTML;
-            }
-
-            si.addEventListener('input', function() {
-                var v = this.value.trim();
-                if (t) clearTimeout(t);
-                if (v.length < 2) { sd.classList.add('hidden'); return; }
-                t = setTimeout(function() {
-                    fetch('/api/search?q=' + encodeURIComponent(v))
-                        .then(function(r) { return r.json(); })
-                        .then(function(data) {
-                            if (!data.results || data.results.length === 0) {
-                                sd.innerHTML = '<div class="p-3 text-gray-400 text-sm text-center">No results</div>';
-                                sd.classList.remove('hidden');
-                                return;
-                            }
-                            var h = '';
-                            data.results.forEach(function(s) {
-                                var ps = s.price ? '\u20B9' + parseFloat(s.price).toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '\u2014';
-                                var cs = '';
-                                if (s.change_percent !== null) {
-                                    var cl = s.change_percent >= 0 ? 'text-green-400' : 'text-red-400';
-                                    cs = '<span class="' + cl + ' text-xs">' + (s.change_percent >= 0 ? '+' : '') + s.change_percent + '%</span>';
-                                }
-                                h += '<div class="flex justify-between items-center px-4 py-3 hover:bg-page border-b border-gray-700/50 last:border-0' + (s.from_yahoo ? '' : ' cursor-pointer') + '"' + (s.from_yahoo ? '' : ' onclick="location.href=\'/stocks/' + s.id + '\'"') + '>' +
-                                    '<div class="min-w-0 flex-1"><span class="text-white text-sm font-semibold">' + eh(s.symbol) + '</span> <span class="text-gray-500 text-xs truncate">' + eh(s.name) + '</span></div>' +
-                                    '<div class="text-right ml-3 flex items-center space-x-2">' +
-                                    '<div><span class="text-white text-sm">' + ps + '</span> ' + cs + '</div>';
-                                if (s.from_yahoo) {
-                                    h += '<button onclick="importStock(\'' + eh(s.symbol) + '\', \'' + eh(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-accent text-on-accent font-semibold hover:bg-accent-2 transition whitespace-nowrap">+ Add</button>';
-                                } else {
-                                    h += '<a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
-                                }
-                                h += '</div></div>';
-                            });
-                            sd.innerHTML = h;
-                            sd.classList.remove('hidden');
-                        })
-                        .catch(function() { sd.classList.add('hidden'); });
-                }, 250);
-            });
-
-            si.addEventListener('blur', function() {
-                setTimeout(function() { sd.classList.add('hidden'); }, 200);
-            });
-        })();
         </script>
 
     </nav>
@@ -325,6 +274,9 @@ $ogType          = (string) ($ogType ?? 'website');
                         <a href="/" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Home</a>
                         <a href="/stocks" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Stocks</a>
                         <a href="/about" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">About</a>
+                        <a href="/pricing" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Pricing</a>
+                        <a href="/docs/user" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Docs</a>
+                        <a href="/faq" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">FAQ</a>
                         <a href="/contact" class="px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Contact</a>
                     </div>
                 </div>
@@ -342,21 +294,53 @@ $ogType          = (string) ($ogType ?? 'website');
                     </div>
                     <a href="/login" class="px-4 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-page transition">Login</a>
                     <a href="/register" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-4 py-2 rounded-lg text-sm transition">Get Started</a>
-                    <button class="md:hidden text-gray-300" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                    <button id="mobileMenuBtn" type="button" class="md:hidden text-gray-300" aria-label="Toggle menu" aria-controls="mobile-menu" aria-expanded="false">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
+                    <div id="mobile-backdrop" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
                 </div>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-700">
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 w-72 max-w-xs bg-surface border-r border-gray-700 shadow-xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden">
             <div class="px-4 py-3 space-y-1">
-                <a href="/" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Home</a>
-                <a href="/stocks" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Stocks</a>
-                <a href="/about" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">About</a>
-                <a href="/contact" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Contact</a>
+                <div class="flex items-center justify-between mb-3">
+                    <a href="/" class="flex items-center space-x-2">
+                        <i class="fas fa-chart-line text-accent text-xl"></i>
+                        <span class="text-xl font-bold text-accent"><?= esc($brandHead) ?><?php if ($brandTail !== ''): ?><span class="text-white"><?= esc($brandTail) ?></span><?php endif; ?></span>
+                    </a>
+                    <button id="mobileMenuClose" type="button" class="text-gray-400 hover:text-white" aria-label="Close menu">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="relative mb-3">
+                    <input type="text" id="mobileSearch" placeholder="Search symbol, name..." autocomplete="off" class="w-full bg-page border border-gray-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-hidden">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <div id="mobileSearchDropdown" class="hidden absolute top-full left-0 mt-1 w-full bg-surface border border-gray-600 rounded-lg shadow-xl z-50 max-h-72 overflow-y-auto"></div>
+                </div>
+                <div class="theme-switch mb-3" data-theme-switch-wrap>
+                    <button type="button" data-theme-switch="day" onclick="setTheme('day')" title="Light theme" aria-label="Switch to light theme">
+                        <i class="fa-regular fa-sun icon-off"></i><i class="fa-solid fa-sun icon-on"></i> Day
+                    </button>
+                    <button type="button" data-theme-switch="system" onclick="setTheme('system')" title="Match system" aria-label="Switch to system theme">
+                        <i class="fa-regular fa-circle icon-off"></i><i class="fa-solid fa-circle-half-stroke icon-on"></i> System
+                    </button>
+                    <button type="button" data-theme-switch="night" onclick="setTheme('night')" title="Dark theme" aria-label="Switch to dark theme">
+                        <i class="fa-regular fa-moon icon-off"></i><i class="fa-solid fa-moon icon-on"></i> Night
+                    </button>
+                </div>
                 <hr class="border-gray-700 my-2">
-                <a href="/login" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Login</a>
-                <a href="/register" class="block px-3 py-2 rounded-lg text-accent hover:text-accent-2 hover:bg-page font-semibold">Get Started</a>
+                <div class="space-y-1">
+                    <a href="/" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Home</a>
+                    <a href="/stocks" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Stocks</a>
+                    <a href="/about" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">About</a>
+                    <a href="/pricing" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Pricing</a>
+                    <a href="/docs/user" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Docs</a>
+                    <a href="/faq" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">FAQ</a>
+                    <a href="/contact" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Contact</a>
+                    <hr class="border-gray-700 my-2">
+                    <a href="/login" class="block px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">Login</a>
+                    <a href="/register" class="block px-3 py-2 rounded-lg text-accent hover:text-accent-2 hover:bg-page font-semibold">Get Started</a>
+                </div>
             </div>
         </div>
     </nav>
@@ -389,6 +373,93 @@ $ogType          = (string) ($ogType ?? 'website');
         </div>
     </div>
     <?php endif; ?>
+
+<script>
+function initMobileNav() {
+    var btn = document.getElementById('mobileMenuBtn');
+    var menu = document.getElementById('mobile-menu');
+    var backdrop = document.getElementById('mobile-backdrop');
+    var closeBtn = document.getElementById('mobileMenuClose');
+    if (!btn || !menu) return;
+    function open() {
+        menu.classList.remove('-translate-x-full');
+        menu.classList.add('translate-x-0');
+        if (backdrop) backdrop.classList.remove('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+    }
+    function close() {
+        menu.classList.add('-translate-x-full');
+        menu.classList.remove('translate-x-0');
+        if (backdrop) backdrop.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+    }
+    btn.addEventListener('click', function() {
+        if (menu.classList.contains('translate-x-0')) close(); else open();
+    });
+    if (backdrop) backdrop.addEventListener('click', close);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    menu.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', close);
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && menu.classList.contains('translate-x-0')) close();
+    });
+}
+(function() {
+    var si = document.getElementById('mobileSearch');
+    var sd = document.getElementById('mobileSearchDropdown');
+    var t = null;
+    if (!si || !sd) return;
+    function eh(s) {
+        if (!s) return '';
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+    si.addEventListener('input', function() {
+        var v = this.value.trim();
+        if (t) clearTimeout(t);
+        if (v.length < 2) { sd.classList.add('hidden'); return; }
+        t = setTimeout(function() {
+            fetch('/api/search?q=' + encodeURIComponent(v))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.results || data.results.length === 0) {
+                        sd.innerHTML = '<div class="p-3 text-gray-400 text-sm text-center">No results</div>';
+                        sd.classList.remove('hidden');
+                        return;
+                    }
+                    var h = '';
+                    data.results.forEach(function(s) {
+                        var ps = s.price ? '\u20B9' + parseFloat(s.price).toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '\u2014';
+                        var cs = '';
+                        if (s.change_percent !== null) {
+                            var cl = s.change_percent >= 0 ? 'text-green-400' : 'text-red-400';
+                            cs = '<span class="' + cl + ' text-xs">' + (s.change_percent >= 0 ? '+' : '') + s.change_percent + '%</span>';
+                        }
+                        h += '<div class="flex justify-between items-center px-4 py-3 hover:bg-page border-b border-gray-700/50 last:border-0' + (s.from_yahoo ? '' : ' cursor-pointer') + '"' + (s.from_yahoo ? '' : ' onclick="location.href=\'/stocks/' + s.id + '\'"') + '>' +
+                            '<div class="min-w-0 flex-1"><span class="text-white text-sm font-semibold">' + eh(s.symbol) + '</span> <span class="text-gray-500 text-xs truncate">' + eh(s.name) + '</span></div>' +
+                            '<div class="text-right ml-3 flex items-center space-x-2">' +
+                            '<div><span class="text-white text-sm">' + ps + '</span> ' + cs + '</div>';
+                        if (s.from_yahoo) {
+                            h += '<button onclick="importStock(\'' + eh(s.symbol) + '\', \'' + eh(s.exchange || 'NSE') + '\')" class="text-xs px-2 py-1 rounded bg-accent text-on-accent font-semibold hover:bg-accent-2 transition whitespace-nowrap">+ Add</button>';
+                        } else {
+                            h += '<a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300 hover:text-white transition">View</a>';
+                        }
+                        h += '</div></div>';
+                    });
+                    sd.innerHTML = h;
+                    sd.classList.remove('hidden');
+                })
+                .catch(function() { sd.classList.add('hidden'); });
+        }, 250);
+    });
+    si.addEventListener('blur', function() {
+        setTimeout(function() { sd.classList.add('hidden'); }, 200);
+    });
+})();
+document.addEventListener('DOMContentLoaded', initMobileNav);
+</script>
 
 <script>
 (function() {
