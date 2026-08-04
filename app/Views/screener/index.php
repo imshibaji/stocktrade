@@ -1,22 +1,27 @@
 <section>
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-white">Stock Screener</h1>
-            <p class="text-gray-400 mt-1">Filter stocks by fundamental and technical criteria</p>
+            <div class="flex items-center space-x-3">
+                <h1 class="text-3xl font-bold text-white">Stock Screener</h1>
+                <span class="text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400">
+                    <i class="fas fa-filter text-accent mr-1"></i><?= count($savedLists) ?> saved
+                </span>
+            </div>
+            <p class="text-gray-400 mt-1">Screen the universe by fundamental, technical, and manual query criteria.</p>
         </div>
-        <div class="flex space-x-3">
-            <button onclick="toggleGuide()" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
-                <i class="fas fa-book mr-2"></i>Guide
+        <div class="flex items-center space-x-2 mt-4 md:mt-0">
+            <button onclick="toggleGuide()" class="bg-surface hover:bg-page border border-gray-600 text-gray-300 hover:text-white px-4 py-2.5 rounded-lg transition text-sm font-semibold">
+                <i class="fas fa-book mr-1"></i>Guide
             </button>
-            <a href="/screener/docs" class="border border-blue-400 text-blue-400 hover:bg-blue-400/10 px-4 py-2 rounded-lg text-sm transition">
-                <i class="fas fa-file-alt mr-2"></i>Documentation
+            <a href="/screener/docs" class="bg-surface hover:bg-page border border-gray-600 text-gray-300 hover:text-white px-4 py-2.5 rounded-lg transition text-sm font-semibold">
+                <i class="fas fa-file-alt mr-1"></i>Documentation
             </a>
-            <button onclick="toggleSavedLists()" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
-                <i class="fas fa-save mr-2"></i>Saved Lists
+            <button onclick="toggleSavedLists()" class="bg-surface hover:bg-page border border-gray-600 text-gray-300 hover:text-white px-4 py-2.5 rounded-lg transition text-sm font-semibold">
+                <i class="fas fa-save mr-1"></i>Saved Lists
                 <span id="savedCount" class="ml-1 text-accent text-xs"><?= count($savedLists) ?></span>
             </button>
-            <a href="/stocks" class="border border-accent text-accent hover:bg-accent/10 px-4 py-2 rounded-lg text-sm transition">
-                <i class="fas fa-list mr-2"></i>All Stocks
+            <a href="/stocks" class="bg-accent hover:bg-accent-2 text-on-accent font-semibold px-4 py-2.5 rounded-lg transition text-sm">
+                <i class="fas fa-list mr-1"></i>All Stocks
             </a>
         </div>
     </div>
@@ -203,28 +208,29 @@
                             Tech Indicators: <code class="text-gray-400">rsi &lt; 30</code> <code class="text-gray-400">sma_pct(20) &gt; 100</code> <code class="text-gray-400">macd &gt; 0</code> <code class="text-gray-400">rsi&lt;30 AND macd&gt;0</code>
                         </p>
                         <div id="manualPanel" class="hidden">
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Stock Logic Query</label>
-                            <textarea id="manualQuery" rows="4" class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-hidden focus:border-accent" placeholder="e.g. pe_ratio &lt; 20 AND market_cap &gt; 1000000000"></textarea>
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div class="lg:col-span-2">
+                                    <div class="mb-3">
+                                        <label class="block text-sm font-medium text-gray-300 mb-1">Stock Logic Query</label>
+                                        <textarea id="manualQuery" rows="4" class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white font-mono text-sm focus:outline-hidden focus:border-accent" placeholder="e.g. pe_ratio &lt; 20 AND market_cap &gt; 1000000000"></textarea>
+                                    </div>
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <button onclick="runManualQuery()" class="bg-accent hover:bg-accent-2 text-on-accent font-bold px-6 py-3 rounded-lg transition">
+                                            <i class="fas fa-search mr-2"></i>Compile &amp; Run
+                                        </button>
+                                    </div>
+                                    <div id="manualResultCount" class="text-gray-400 text-sm mb-2"></div>
+                                    <div id="manualSaveBtn" class="hidden">
+                                        <button onclick="showSaveDialog()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                                            <i class="fas fa-save mr-1"></i>Save as Query List
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-1">
+                                    <?= view('screener/_help_panel') ?>
+                                </div>
+                            </div>
                         </div>
-                        <p class="text-xs text-gray-500 mb-3">
-                            Supported operators: <code class="text-gray-400">&gt; &gt;= &lt; &lt;= == !=</code>
-                            Logical: <code class="text-gray-400">AND OR</code>
-                            Math: <code class="text-gray-400">price * 2 &gt; 5000</code>
-                            String: <code class="text-gray-400">sector == 'Technology'</code>
-                        </p>
-                        <div class="flex items-center gap-3 mb-4">
-                            <button onclick="runManualQuery()" class="bg-accent hover:bg-accent-2 text-on-accent font-bold px-6 py-3 rounded-lg transition">
-                                <i class="fas fa-search mr-2"></i>Compile &amp; Run
-                            </button>
-                        </div>
-                        <div id="manualResultCount" class="text-gray-400 text-sm mb-2"></div>
-                        <div id="manualSaveBtn" class="hidden">
-                            <button onclick="showSaveDialog()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
-                                <i class="fas fa-save mr-1"></i>Save as Query List
-                            </button>
-                        </div>
-                    </div>
                 </div>
                 </div>
 
@@ -253,10 +259,7 @@
                                     <th class="text-right px-6 py-3">P/E</th>
                                     <th class="text-right px-6 py-3">M Cap</th>
                                     <th class="text-right px-6 py-3">Div Yield</th>
-                        <th class="text-right px-6 py-3">Beta</th>
                             <th class="text-right px-6 py-3">Volume</th>
-                            <th class="text-right px-6 py-3">14D Hist</th>
-                            <th class="text-right px-6 py-3">Summary</th>
                             <th class="text-center px-6 py-3">Actions</th>
                         </tr>
                             </thead>
@@ -294,7 +297,7 @@
 
     <div id="saveDialog" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
         <div class="bg-surface rounded-xl border border-gray-700 p-6 w-full max-w-md">
-            <h3 class="text-white font-bold text-lg mb-4">Save Screener List</h3>
+            <h3 id="saveDialogTitle" class="text-white font-bold text-lg mb-4">Save Screener List</h3>
             <input type="text" id="listNameInput" placeholder="Enter list name..." class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white text-sm focus:border-accent focus:outline-hidden mb-4">
             <label class="flex items-center gap-2 text-sm text-gray-300 mb-4">
                 <input type="checkbox" id="listPublicInput" class="h-4 w-4 rounded accent-accent">
@@ -302,7 +305,7 @@
             </label>
             <div class="flex justify-end gap-3">
                 <button onclick="closeSaveDialog()" class="border border-gray-600 text-gray-300 px-4 py-2 rounded-lg text-sm">Cancel</button>
-                <button onclick="saveList()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">Save</button>
+                <button id="saveDialogSubmit" onclick="saveList()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">Save</button>
             </div>
         </div>
     </div>
@@ -573,15 +576,12 @@
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
-                        '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
-                            '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
-                        '</div></td>';
+                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
+                         '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
+                             '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                             '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                             '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
+                         '</div></td>';
                     tbody.appendChild(tr);
                 });
             }
@@ -871,10 +871,7 @@
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
                         '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
                             '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
                             '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
@@ -891,11 +888,27 @@
         });
     };
 
+    var editingListId = 0;
+
      window.showSaveDialog = function() {
          if (!IS_LOGGED_IN) { alert('Please log in to save screener lists.'); return; }
          if (lastResults.length === 0) { alert('No results to save.'); return; }
-         document.getElementById('saveDialog').classList.remove('hidden');
+         editingListId = 0;
+         document.getElementById('saveDialogTitle').textContent = 'Save Screener List';
+         document.getElementById('saveDialogSubmit').textContent = 'Save';
          document.getElementById('listNameInput').value = '';
+         document.getElementById('saveDialog').classList.remove('hidden');
+         document.getElementById('listNameInput').focus();
+     };
+
+     window.showEditSaveDialog = function(listId, name) {
+         if (!IS_LOGGED_IN) { alert('Please log in to manage saved lists.'); return; }
+         if (lastResults.length === 0) { alert('No results to save. Run the screener first.'); return; }
+         editingListId = listId;
+         document.getElementById('saveDialogTitle').textContent = 'Update Screener List';
+         document.getElementById('saveDialogSubmit').textContent = 'Update';
+         document.getElementById('listNameInput').value = name || '';
+         document.getElementById('saveDialog').classList.remove('hidden');
          document.getElementById('listNameInput').focus();
      };
     window.closeSaveDialog = function() { document.getElementById('saveDialog').classList.add('hidden'); };
@@ -908,6 +921,7 @@
         formData.append('name', name);
         formData.append('match_mode', document.getElementById('matchMode').value);
         formData.append('is_public', document.getElementById('listPublicInput').checked ? '1' : '0');
+        if (editingListId > 0) formData.append('list_id', editingListId);
         if (isManualQuery) {
             formData.append('query_text', document.getElementById('manualQuery').value.trim());
             formData.append('stock_ids', JSON.stringify(lastResults.map(function(s) { return s.id; })));
@@ -916,7 +930,11 @@
             fetch('/api/screener/save', { method: 'POST', body: formData })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
-                    if (data.success) { closeSaveDialog(); var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0', 10) + 1; }
+                    if (data.success) {
+                        closeSaveDialog();
+                        if (editingListId > 0) { editingListId = 0; loadSavedLists(); }
+                        else { var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0', 10) + 1; }
+                    }
                     else { alert(data.message || 'Save failed'); }
                 })
                 .catch(function() { alert('Save failed'); });
@@ -934,7 +952,11 @@
             fetch('/api/screener/save', { method: 'POST', body: formData })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
-                    if (data.success) { closeSaveDialog(); var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0', 10) + 1; }
+                    if (data.success) {
+                        closeSaveDialog();
+                        if (editingListId > 0) { editingListId = 0; loadSavedLists(); }
+                        else { var c = document.getElementById('savedCount'); c.textContent = parseInt(c.textContent || '0', 10) + 1; }
+                    }
                     else { alert(data.message || 'Save failed'); }
                 })
                 .catch(function() { alert('Save failed'); });
@@ -959,6 +981,7 @@
                         '<div class="flex gap-1 ml-2">' +
                             '<button onclick="togglePublic(' + l.id + ')" class="' + (l.is_public ? 'text-green-400 bg-green-400/10 border-green-400/40' : 'text-gray-400 bg-gray-700/50 border-gray-600') + ' text-xs px-3 py-1 rounded-full border transition font-medium" title="' + (l.is_public ? 'Public \u2014 click to make private' : 'Private \u2014 click to make public') + '"><i class="fas ' + (l.is_public ? 'fa-globe' : 'fa-lock') + ' mr-1"></i>' + (l.is_public ? 'Public' : 'Private') + '</button>' +
                             '<button onclick="loadList(' + l.id + ')" class="text-accent hover:text-accent-2 text-xs px-2 py-1 rounded border border-accent/30 hover:border-accent transition" title="Load"><i class="fas fa-upload"></i></button>' +
+                            '<button onclick="updateList(' + l.id + ')" class="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 rounded border border-blue-400/30 hover:border-blue-400 transition" title="Edit name & refresh results"><i class="fas fa-edit"></i></button>' +
                             '<button onclick="deleteList(' + l.id + ')" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded border border-red-400/30 hover:border-red-400 transition" title="Delete"><i class="fas fa-trash"></i></button>' +
                         '</div>' +
                     '</div>';
@@ -990,7 +1013,7 @@
         }).catch(function() { container.innerHTML = '<div class="text-red-400 text-center py-2 text-xs">Failed to load community lists.</div>'; });
     }
 
-    window.loadList = function(id) {
+    window.loadList = function(id, onLoaded) {
         fetch('/api/screener/load-list?id=' + id).then(function(r) { return r.json(); }).then(function(data) {
             if (!data.success) { alert(data.message); return; }
             if (data.is_manual_query) {
@@ -1018,16 +1041,13 @@
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
-                             '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                             '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
-                             '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
-                             '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                                '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                                '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
-                                '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
-                             '</div></td>';
-                        tbody.appendChild(tr);
+                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
+                        '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
+                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                            '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
+                        '</div></td>';
+                    tbody.appendChild(tr);
                     });
                     document.getElementById('resultsContainer').classList.remove('hidden');
                     document.getElementById('resultCount2').textContent = '(' + total + ')';
@@ -1035,6 +1055,7 @@
                     if (sb) sb.classList.remove('hidden');
                 }
                 document.getElementById('savedListsPanel').classList.add('hidden');
+                if (onLoaded) onLoaded(data);
                 return;
             }
             document.getElementById('filterList').innerHTML = '';
@@ -1106,22 +1127,27 @@
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.beta || '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/historical/' + s.symbol + '/' + (s.exchange || 'NSE') + '/14%20days" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:text-blue-300 text-xs" title="14-Day Historical Data">14D</a></td>' +
-                        '<td class="px-6 py-4 text-right"><a href="/api/summary/' + s.symbol + '/' + (s.exchange || 'NSE') + '?modules=summaryProfile,netSharePurchaseActivity,earnings,sectorTrend,indexTrend" target="_blank" onclick="event.stopPropagation()" class="text-purple-400 hover:text-purple-300 text-xs" title="Stock Summary">Summary</a></td>' +
-                        '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
-                            '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
-                        '</div></td>';
+                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
+                         '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
+                             '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                             '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                             '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
+                         '</div></td>';
                     tbody.appendChild(tr);
                 });
                 document.getElementById('resultsContainer').classList.remove('hidden');
             }
             document.getElementById('savedListsPanel').classList.add('hidden');
+            if (onLoaded) onLoaded(data);
         }).catch(function() { alert('Failed to load list.'); });
     };
+
+     window.updateList = function(id) {
+         if (!IS_LOGGED_IN) { alert('Please log in to manage saved lists.'); return; }
+         loadList(id, function(data) {
+             showEditSaveDialog(id, (data.list && data.list.name) || '');
+         });
+     };
 
      window.deleteList = function(id) {
          if (!IS_LOGGED_IN) { alert('Please log in to manage saved lists.'); return; }

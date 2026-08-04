@@ -370,6 +370,74 @@ if ($heroHighlight !== '' && str_contains($heroTitle, $heroHighlight)) {
 </section>
 
 <section class="mb-16">
+    <h2 class="text-3xl font-bold text-white text-center mb-4"><?= esc(home_setting('home_quick_predictions_title', 'Quick Predictions List')) ?></h2>
+    <p class="text-center text-gray-400 mb-8 max-w-2xl mx-auto"><?= esc(home_setting('home_quick_predictions_subtitle', 'Screening strategies shared by the community — browse their matched stocks and forecast confidence.')) ?></p>
+    <?php if (!empty($quickPredictions)): ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <?php foreach ($quickPredictions as $query): ?>
+        <?php $methodMeta = prediction_methods()[$query['method']] ?? null; ?>
+        <?php $status = prediction_status_meta($query['status']); ?>
+        <?php $avgConfidence = $query['avg_confidence'] ?? null; ?>
+        <a href="/predictions/public/<?= (int) $query['id'] ?>" class="bg-surface rounded-xl border border-gray-700 hover:border-accent transition flex flex-col">
+            <div class="p-6 flex-1">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[11px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full border <?= prediction_method_chip($query['method']) ?>">
+                        <?= esc(prediction_method_label($query['method'])) ?>
+                    </span>
+                    <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full border <?= $status['class'] ?>">
+                        <?= $status['label'] ?>
+                    </span>
+                </div>
+
+                <h3 class="text-white font-bold text-lg leading-snug"><?= esc($query['name']) ?></h3>
+                <p class="text-gray-500 text-xs mt-2 mb-4"><?= esc($methodMeta['description'] ?? '') ?></p>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Horizon</span>
+                        <span class="text-gray-300"><?= (int) $query['horizon_days'] ?> days</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Matches</span>
+                        <span class="text-gray-300"><?= (int) ($query['results_count'] ?? 0) ?> stocks</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500">Confidence</span>
+                        <span class="text-gray-300"><?= $avgConfidence !== null ? round((float) $avgConfidence) . '%' : '—' ?></span>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <div class="h-1.5 rounded-full bg-page overflow-hidden">
+                        <div class="h-full rounded-full bg-accent" style="width: <?= $avgConfidence !== null ? min(100, max(2, round((float) $avgConfidence))) : 0 ?>%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 flex items-center justify-between px-4 py-3">
+                <span class="text-xs text-gray-600">
+                    <i class="fas fa-user mr-1"></i><?= esc($query['creator_name'] ?? 'Community') ?>
+                    <span class="mx-1">·</span>
+                    <?= esc(date('M j, Y', strtotime($query['created_at']))) ?>
+                </span>
+                <span class="text-sm font-semibold text-accent">
+                    View <i class="fas fa-arrow-right ml-1"></i>
+                </span>
+            </div>
+        </a>
+        <?php endforeach; ?>
+    </div>
+    <p class="text-center mt-6">
+        <a href="/predictions/public" class="inline-flex items-center bg-surface hover:bg-page border border-gray-600 text-gray-300 hover:text-white px-4 py-2.5 rounded-lg transition text-sm font-semibold">
+            <i class="fas fa-globe mr-1"></i>All Public Prediction Queries
+        </a>
+    </p>
+    <?php else: ?>
+    <p class="text-center text-gray-500">No public prediction queries yet.</p>
+    <?php endif; ?>
+</section>
+
+<section class="mb-16">
     <h2 class="text-3xl font-bold text-white text-center mb-8"><?= esc(home_setting('home_how_title', 'How It Works')) ?></h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="text-center">

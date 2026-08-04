@@ -153,6 +153,9 @@ $ogType          = (string) ($ogType ?? 'website');
                             <a href="/screener" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-filter w-5 mr-2 text-indigo-400"></i>Screener
                             </a>
+                            <a href="/predictions" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
+                                <i class="fas fa-chart-line w-5 mr-2 text-purple-400"></i>Predictions
+                            </a>
                             <a href="/stocks" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-search w-5 mr-2 text-green-400"></i>Stocks
                             </a>
@@ -226,6 +229,9 @@ $ogType          = (string) ($ogType ?? 'website');
                     </a>
                     <a href="/screener" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-filter w-5 mr-2 text-indigo-400"></i>Screener
+                    </a>
+                    <a href="/predictions" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
+                        <i class="fas fa-chart-line w-5 mr-2 text-purple-400"></i>Predictions
                     </a>
                     <a href="/stocks" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-search w-5 mr-2 text-green-400"></i>Stocks

@@ -175,7 +175,7 @@ class Screener extends BaseController
         return $this->response->setJSON($response);
     }
 
-    private function compileManualQuery(string $query): array
+    public function compileManualQuery(string $query): array
     {
         $query = trim($query);
         if (empty($query)) {
@@ -245,20 +245,21 @@ class Screener extends BaseController
              if ($isTech) {
                  $filterExtra = ['is_technical' => true, 'indicator' => strtolower($m[1]), 'period' => (int) $m[2]];
              } else {
-                 $techIndicatorNames = [
-                     'sma_pct', 'ema_pct', 'vwap_ratio', 'macd', 'macd_signal', 'macd_histogram',
-                     'atr', 'natr', 'bb_pct', 'bb_width', 'kc_pct', 'dc_pct',
-                     'rsi', 'stoch_k', 'stoch_d', 'cci', 'roc', 'williams_r', 'rvi', 'coppock',
-                     'supertrend', 'supertrend_dir', 'psar',
-                     'obv', 'cmf', 'vpt', 'mfi', 'volume_ratio', 'force_index', 'eom',
-                     'pivot', 'fib_61.8',
-                     'linreg_slope', 'linreg_rsq', 'zscore', 'efficiency_ratio', 'chop', 'hurst', 'dpo', 'ulcer_index',
-                     'kama', 'volume_delta',
-                     'ttm_squeeze', 'ttm_momentum', 'sortino_ratio', 'cvar', 'historical_var', 'martin_ratio', 'downside_dev',
-                     'aroon_up', 'aroon_down', 'aroon_osc', 'tsi', 'vi_plus', 'vi_minus', 'cmo', 'mass_index', 'connors_rsi', 'rmi',
-                     'klinger_osc', 'rainbow_sma1',
-                     'vp_poc', 'vp_vah', 'vp_val',
-                 ];
+                  $techIndicatorNames = [
+                      'sma', 'ema', 'sma_pct', 'ema_pct', 'vwap_ratio', 'macd', 'macd_signal', 'macd_histogram',
+                      'atr', 'natr', 'bb_pct', 'bb_width', 'kc_pct', 'dc_pct',
+                      'rsi', 'stoch_k', 'stoch_d', 'cci', 'roc', 'williams_r', 'rvi', 'coppock',
+                      'supertrend', 'supertrend_dir', 'psar',
+                      'obv', 'cmf', 'vpt', 'mfi', 'volume_ratio', 'force_index', 'eom',
+                      'pivot', 'fib_61.8',
+                      'linreg_slope', 'linreg_rsq', 'zscore', 'efficiency_ratio', 'chop', 'hurst', 'dpo', 'ulcer_index',
+                      'kama', 'volume_delta',
+                      'ttm_squeeze', 'ttm_momentum', 'sortino_ratio', 'cvar', 'historical_var', 'martin_ratio', 'downside_dev',
+                      'aroon_up', 'aroon_down', 'aroon_osc', 'tsi', 'vi_plus', 'vi_minus', 'cmo', 'mass_index', 'connors_rsi', 'rmi',
+                      'klinger_osc', 'rainbow_sma1',
+                      'vp_poc', 'vp_vah', 'vp_val',
+                      'close', 'open', 'high', 'low', 'volume',
+                  ];
                  if (in_array(strtolower($field), $techIndicatorNames)) {
                      $filterExtra = ['is_technical' => true, 'indicator' => strtolower($field), 'period' => 0];
                  }
@@ -289,32 +290,45 @@ class Screener extends BaseController
     {
         $value = trim($value);
 
-        foreach ($validMathOps as $mo) {
-            if ($mo === '=') continue;
-            $parts = explode($mo, $value, 2);
-            if (count($parts) === 2 && trim($parts[0]) !== '' && trim($parts[1]) !== '') {
-                $left = trim($parts[0]);
-                $right = trim($parts[1]);
-                if (is_numeric($left) && is_numeric($right)) {
-                    return ['math_op' => $mo, 'math_value' => $right, 'value' => $left];
-                }
-                if (is_numeric($left)) {
-                    return ['math_op' => $mo, 'math_value' => $right, 'value' => $left];
-                }
-                return ['math_op' => '=', 'math_value' => '', 'value' => $value];
-            }
-        }
-
+        // Quoted string literal, e.g. sector == "Technology"
         if (strlen($value) >= 2 && (($value[0] === "'" && $value[strlen($value) - 1] === "'") || ($value[0] === '"' && $value[strlen($value) - 1] === '"'))) {
             return ['math_op' => '=', 'math_value' => '', 'value' => substr($value, 1, -1), 'is_string' => true];
         }
 
-        if (preg_match('~^([a-zA-Z_][a-zA-Z0-9_]*)\\s*([+\\-*%])\\s*(\\d+\\.?\\d*)$~', $value, $m)) {
-            return ['math_op' => $m[2], 'math_value' => $m[3], 'value' => $m[1], 'is_field_ref' => true];
+        // <base> <mathop> <number>, where base is an indicator ref, field name, or literal.
+        // e.g. close > sma(50) * 1.05, current_price > 100 * 1.05, pe_ratio < 15 + 2,
+        //      current_price > fifty_day_average * 1.1
+        if (preg_match('~^\\s*([a-z_][a-z0-9_]*\\(\\d+\\)|[a-z_][a-z0-9_]*|\\d+(?:\\.\\d+)?)\\s*([+\\-*/%])\\s*(\\d+(?:\\.\\d+)?)\\s*$~i', $value, $m)) {
+            $base      = trim($m[1]);
+            $mathOp    = $m[2];
+            $mathValue = $m[3];
+
+            if (preg_match('~^([a-z_]+)\\((\\d+)\\)$~i', $base, $bm)) {
+                return [
+                    'math_op' => $mathOp,
+                    'math_value' => $mathValue,
+                    'value' => strtolower($bm[1]),
+                    'is_indicator_ref' => true,
+                    'indicator_period' => (int) $bm[2],
+                ];
+            }
+
+            if (is_numeric($base)) {
+                return ['math_op' => $mathOp, 'math_value' => $mathValue, 'value' => floatval($base)];
+            }
+
+            return ['math_op' => $mathOp, 'math_value' => $mathValue, 'value' => $base, 'value_is_field' => true];
         }
 
-        if (preg_match('~^(\\d+\\.?\\d*)\\s*([+\\-*%])\\s*([a-zA-Z_][a-zA-Z0-9_]*)$~', $value, $m)) {
-            return ['math_op' => $m[2], 'math_value' => $m[3], 'value' => $m[1], 'is_field_ref' => true, 'math_value_is_field' => true];
+        // Indicator reference alone, e.g. ema(21), sma(50)
+        if (preg_match('~^([a-z_]+)\\((\\d+)\\)$~i', $value, $m)) {
+            return [
+                'math_op' => '=',
+                'math_value' => '',
+                'value' => strtolower($m[1]),
+                'is_indicator_ref' => true,
+                'indicator_period' => (int) $m[2],
+            ];
         }
 
         if (is_numeric($value)) {
@@ -339,6 +353,7 @@ class Screener extends BaseController
         $stockSymbols  = $this->request->getPost('stock_symbols');
         $queryText     = $this->request->getPost('query_text');
         $isPublic      = $this->request->getPost('is_public') ? 1 : 0;
+        $listId        = (int) ($this->request->getPost('list_id') ?? 0);
 
         if (empty($name)) {
             return $this->response->setJSON(['success' => false, 'message' => 'List name is required']);
@@ -351,8 +366,7 @@ class Screener extends BaseController
         }
         $techData     = ['match_mode' => $matchMode, 'filters' => is_array($techCriteria) ? $techCriteria : json_decode($techCriteria ?? '[]', true)];
 
-        $model = new StockListModel();
-        $model->save([
+        $data = [
             'user_id'            => $userId,
             'name'               => $name,
             'criteria'           => json_encode($criteriaData),
@@ -361,7 +375,20 @@ class Screener extends BaseController
             'stock_symbols'      => is_array($stockSymbols) ? json_encode($stockSymbols) : $stockSymbols,
             'stock_count'        => is_array($stockIds) ? count($stockIds) : count((array) json_decode($stockIds ?? '[]', true)),
             'is_public'          => $isPublic,
-        ]);
+        ];
+
+        $model = new StockListModel();
+
+        if ($listId > 0) {
+            $existing = $model->where('id', $listId)->where('user_id', $userId)->first();
+            if (!$existing) {
+                return $this->response->setJSON(['success' => false, 'message' => 'List not found']);
+            }
+            $model->update($listId, $data);
+            return $this->response->setJSON(['success' => true, 'message' => 'List updated']);
+        }
+
+        $model->save($data);
 
         return $this->response->setJSON(['success' => true, 'message' => 'List saved']);
     }
@@ -502,9 +529,26 @@ class Screener extends BaseController
         }
         if (!empty($f['value_is_field'])) {
             $fieldVal = $this->getFieldValue($stock, $f['value'] ?? '');
-            return $fieldVal !== null ? (float) $fieldVal : 0.0;
+            $base = $fieldVal !== null ? (float) $fieldVal : 0.0;
+        } else {
+            $base = (float) ($f['value'] ?? 0);
         }
-        return (float) ($f['value'] ?? 0);
+        return $this->applyMath($base, (string) ($f['math_op'] ?? '='), (float) ($f['math_value'] ?? 0));
+    }
+
+    private function applyMath(float $base, string $op, float $val): float
+    {
+        if ($op === '=') {
+            return $base;
+        }
+        switch ($op) {
+            case '+': return $base + $val;
+            case '-': return $base - $val;
+            case '*': return $base * $val;
+            case '/': return $val != 0 ? $base / $val : $base;
+            case '%': return $val != 0 ? fmod($base, $val) : $base;
+            default:  return $base;
+        }
     }
 
     private function resolveFilterStringValue(array $f, array $stock): ?string
@@ -522,7 +566,7 @@ class Screener extends BaseController
         return $raw;
     }
 
-    private function matchesFilters(array $stock, array $filters, string $mode = 'all'): bool
+    public function matchesFilters(array $stock, array $filters, string $mode = 'all'): bool
     {
         if (empty($filters)) return true;
 
@@ -530,8 +574,6 @@ class Screener extends BaseController
         foreach ($filters as $f) {
             $field    = $f['field'] ?? '';
             $op       = $f['op'] ?? '';
-            $mathOp   = $f['math_op'] ?? '=';
-            $mathVal  = (float) ($f['math_value'] ?? 0);
             $filterLogic = $f['logic'] ?? 'AND';
             $isString = !empty($f['is_string']);
 
@@ -553,16 +595,6 @@ class Screener extends BaseController
             if ($stockVal === null) { $results[] = false; continue; }
 
             $stockVal = (float) $stockVal;
-            if ($mathOp !== '=') {
-                switch ($mathOp) {
-                    case '+': $stockVal += $mathVal; break;
-                    case '-': $stockVal -= $mathVal; break;
-                    case '*': $stockVal *= $mathVal; break;
-                    case '/': $stockVal = $mathVal != 0 ? $stockVal / $mathVal : $stockVal; break;
-                    case '%': $stockVal = $mathVal != 0 ? fmod($stockVal, $mathVal) : $stockVal; break;
-                }
-            }
-
             $compareVal = $this->resolveFilterValue($f, $stock);
 
             $pass = false;
@@ -733,7 +765,7 @@ class Screener extends BaseController
         return $filtered;
     }
 
-    private function matchesTechnicalFilters(array $ohlcv, array $techFilters, string $mode = 'all', ?array $stock = null): bool
+    public function matchesTechnicalFilters(array $ohlcv, array $techFilters, string $mode = 'all', ?array $stock = null): bool
     {
         if (empty($techFilters)) return true;
         if (empty($ohlcv)) return false;
@@ -743,23 +775,17 @@ class Screener extends BaseController
             $indicator = $f['indicator'] ?? '';
             $op        = $f['op'] ?? '';
             $period    = (int) ($f['period'] ?? 14);
-            $mathOp    = $f['math_op'] ?? '=';
-            $mathVal   = (float) ($f['math_value'] ?? 0);
 
             $indicatorValue = $this->calculateIndicator($ohlcv, $indicator, $period);
             if ($indicatorValue === null) { $results[] = false; continue; }
 
-            if ($mathOp !== '=') {
-                switch ($mathOp) {
-                    case '+': $indicatorValue += $mathVal; break;
-                    case '-': $indicatorValue -= $mathVal; break;
-                    case '*': $indicatorValue *= $mathVal; break;
-                    case '/': $indicatorValue = $mathVal != 0 ? $indicatorValue / $mathVal : $indicatorValue; break;
-                    case '%': $indicatorValue = $mathVal != 0 ? fmod($indicatorValue, $mathVal) : $indicatorValue; break;
-                }
-            }
-
             $compareVal = $this->resolveFilterValue($f, $stock ?? []);
+
+            if (!empty($f['is_indicator_ref'])) {
+                $rhsValue = $this->calculateIndicator($ohlcv, $f['value'] ?? '', (int) ($f['indicator_period'] ?? 14));
+                if ($rhsValue === null) { $results[] = false; continue; }
+                $compareVal = $this->applyMath((float) $rhsValue, (string) ($f['math_op'] ?? '='), (float) ($f['math_value'] ?? 0));
+            }
 
             switch ($op) {
                 case '>':  $results[] = $indicatorValue > $compareVal; break;
@@ -786,9 +812,24 @@ class Screener extends BaseController
         $engine = new StockTechnicalAnalysisEngine();
         $engine->loadData($ohlcv);
 
-        $p = max($period, 2);
+        $p = $period >= 2 ? $period : 14;
 
         switch ($indicator) {
+            case 'sma':
+                return $engine->calculateSMA($prices, $p);
+            case 'ema':
+                return $engine->calculateEMA($prices, $p);
+            case 'close':
+                return !empty($prices) ? (float) end($prices) : null;
+            case 'open':
+                $opens = array_map('floatval', array_column($ohlcv, 'open'));
+                return !empty($opens) ? (float) end($opens) : null;
+            case 'high':
+                return !empty($highs) ? (float) end($highs) : null;
+            case 'low':
+                return !empty($lows) ? (float) end($lows) : null;
+            case 'volume':
+                return !empty($volumes) ? (float) end($volumes) : null;
             case 'sma_pct':
                 $sma = $engine->calculateSMA($prices, $p);
                 return $sma !== null && $sma > 0 ? round((end($prices) / $sma) * 100, 2) : null;

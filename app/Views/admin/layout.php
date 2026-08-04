@@ -49,6 +49,7 @@
                 'users'     => ['/admin/users', 'fa-users', 'Users'],
                 'stocks'    => ['/admin/stocks', 'fa-chart-line', 'Stocks'],
                 'screeners' => ['/admin/screeners', 'fa-filter', 'Screeners'],
+                'predictions' => ['/admin/predictions', 'fa-chart-line', 'Predictions'],
                 'pages'     => ['/admin/pages', 'fa-file-alt', 'Pages'],
                 'featured'  => ['/admin/featured-stocks', 'fa-star', 'Home Stocks'],
                 'settings'  => ['/admin/settings', 'fa-cog', 'Settings'],

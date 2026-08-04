@@ -7240,3 +7240,7 @@ html[data-theme-mode="day"] [data-theme-switch="day"] .icon-off, html[data-theme
     }
   }
 }
+.method-option:has(input:checked) {
+  border-color: rgb(var(--accent));
+  box-shadow: 0 0 0 1px rgb(var(--accent));
+}

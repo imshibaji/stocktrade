@@ -56,6 +56,10 @@ class Home extends BaseController
         }
         ksort($stocksBySector);
 
+        $quickPredictions = (new \App\Models\PredictionQueryModel())
+            ->getPublic();
+        $quickPredictions = array_slice($quickPredictions, 0, 6);
+
         $data = [
             'title'         => '',
             'topStocks'     => $topStocks,
@@ -65,6 +69,7 @@ class Home extends BaseController
             'publicLists'   => $publicLists,
             'predictionsMap'=> $this->buildPredictionsMap($allStocks),
             'stocksBySector'=> $stocksBySector,
+            'quickPredictions' => $quickPredictions,
         ];
         return view('templates/header', $data)
             . view('home', $data)
