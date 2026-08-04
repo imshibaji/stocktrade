@@ -12,6 +12,8 @@ class Stocks extends BaseController
     {
         $stockModel = new StockModel();
         $search = trim((string) $this->request->getGet('search'));
+        $exchange = trim((string) $this->request->getGet('exchange'));
+        $sector = trim((string) $this->request->getGet('sector'));
         $sort   = $this->request->getGet('sort') ?? 'symbol';
         $dir    = $this->request->getGet('dir') === 'desc' ? 'DESC' : 'ASC';
         $perPage = (int) ($this->request->getGet('per_page') ?? 10);
@@ -30,19 +32,32 @@ class Stocks extends BaseController
                 ->orLike('sector', $search)
                 ->groupEnd();
         }
+        if ($exchange !== '') {
+            $builder->where('exchange', $exchange);
+        }
+        if ($sector !== '') {
+            $builder->where('sector', $sector);
+        }
         $builder->orderBy($sort, $dir);
 
         $stocks = $builder->paginate($perPage);
         $pager = $stockModel->pager;
+
+        $exchangeOptions = $stockModel->select('exchange')->distinct()->orderBy('exchange', 'ASC')->findAll();
+        $sectorOptions = $stockModel->select('sector')->distinct()->orderBy('sector', 'ASC')->findAll();
 
         $data = [
             'title' => 'Stocks - Admin - StockTrade Tips',
             'stocks' => $stocks,
             'pager' => $pager,
             'search' => $search,
+            'exchange' => $exchange,
+            'sector' => $sector,
             'sort' => $sort,
             'dir' => $dir,
             'perPage' => $perPage,
+            'exchangeOptions' => $exchangeOptions,
+            'sectorOptions' => $sectorOptions,
         ];
 
         return view('templates/header', $data)

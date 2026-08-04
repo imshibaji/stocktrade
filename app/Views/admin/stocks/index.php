@@ -30,13 +30,37 @@
                            class="w-full px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent pl-10">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
+                <select name="exchange"
+                        class="px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent">
+                    <option value="">All Exchanges</option>
+                    <?php foreach (($exchangeOptions ?? []) as $opt): ?>
+                        <option value="<?= esc($opt['exchange']) ?>" <?= (($exchange ?? '') === $opt['exchange']) ? 'selected' : '' ?>><?= esc($opt['exchange']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select name="sector"
+                        class="px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent">
+                    <option value="">All Sectors</option>
+                    <?php foreach (($sectorOptions ?? []) as $opt): ?>
+                        <option value="<?= esc($opt['sector']) ?>" <?= (($sector ?? '') === $opt['sector']) ? 'selected' : '' ?>><?= esc($opt['sector'] !== '' ? $opt['sector'] : 'N/A') ?></option>
+                    <?php endforeach; ?>
+                </select>
                 <select name="per_page"
                         class="px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent">
                     <?php foreach ([10, 25, 50, 100] as $opt): ?>
                         <option value="<?= $opt ?>" <?= (($perPage ?? 25) === $opt) ? 'selected' : '' ?>><?= $opt ?> per page</option>
                     <?php endforeach; ?>
                 </select>
+                <button type="submit" class="px-4 py-2 bg-page border border-gray-600 text-gray-300 rounded-lg text-sm hover:text-white transition">Filter</button>
             </form>
+
+            <div class="mb-3 text-sm text-gray-400">
+                <?php if (isset($pager)): ?>
+                    <?= $pager->getTotal() ?> stock<?= $pager->getTotal() === 1 ? '' : 's' ?> match<?= $pager->getTotal() === 1 ? 'es' : '' ?> the current filters.
+                <?php endif; ?>
+                <?php if (($exchange ?? '') !== '' || ($sector ?? '') !== ''): ?>
+                    <a href="/admin/stocks" class="text-accent hover:underline ml-1">Clear filters</a>
+                <?php endif; ?>
+            </div>
 
             <form method="post" id="bulkForm">
                 <?= csrf_field() ?>
@@ -44,6 +68,8 @@
                 <input type="hidden" name="dir" value="<?= esc($dir ?? 'asc') ?>">
                 <input type="hidden" name="per_page" value="<?= esc($perPage ?? 25) ?>">
                 <input type="hidden" name="search" value="<?= esc($search ?? '') ?>">
+                <input type="hidden" name="exchange" value="<?= esc($exchange ?? '') ?>">
+                <input type="hidden" name="sector" value="<?= esc($sector ?? '') ?>">
                 <div class="bg-surface rounded-xl border border-gray-700 p-4 mb-4 flex flex-wrap items-center gap-3">
                     <span class="text-sm text-gray-400">Select stocks to</span>
                     <div class="flex items-center gap-2">
@@ -69,7 +95,7 @@
                                     $isActive    = $currentSort === $col;
                                     $newDir      = $isActive && $currentDir === 'asc' ? 'desc' : 'asc';
                                     $icon        = $isActive ? ($currentDir === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort';
-                                    $query       = http_build_query(['sort' => $col, 'dir' => $newDir, 'per_page' => $perPage, 'search' => $search ?? '']);
+                                    $query       = http_build_query(['sort' => $col, 'dir' => $newDir, 'per_page' => $perPage, 'search' => $search ?? '', 'exchange' => $exchange ?? '', 'sector' => $sector ?? '']);
                                     $url         = current_url() . '?' . $query;
                                 ?>
                                 <th class="text-left px-4 py-3 text-gray-300 font-medium cursor-pointer hover:text-white select-none">
@@ -156,14 +182,20 @@
                 var bulkForm = document.getElementById('bulkForm');
                 var searchVal = this.querySelector('input[name="search"]').value;
                 var perPageVal = this.querySelector('select[name="per_page"]').value;
+                var exchangeVal = this.querySelector('select[name="exchange"]').value;
+                var sectorVal = this.querySelector('select[name="sector"]').value;
                 bulkForm.querySelector('input[name="search"]').value = searchVal;
                 bulkForm.querySelector('input[name="per_page"]').value = perPageVal;
+                bulkForm.querySelector('input[name="exchange"]').value = exchangeVal;
+                bulkForm.querySelector('input[name="sector"]').value = sectorVal;
             });
 
             document.getElementById('searchForm').addEventListener('reset', function() {
                 var bulkForm = document.getElementById('bulkForm');
                 bulkForm.querySelector('input[name="search"]').value = '';
                 bulkForm.querySelector('input[name="per_page"]').value = '25';
+                bulkForm.querySelector('input[name="exchange"]').value = '';
+                bulkForm.querySelector('input[name="sector"]').value = '';
             });
 
             document.querySelectorAll('select[name="per_page"]').forEach(function(sel) {
