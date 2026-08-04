@@ -12,6 +12,21 @@ class Api extends BaseController
         $this->response->setHeader('Cache-Control', "public, max-age={$ttl}, s-maxage={$ttl}");
     }
 
+    /**
+     * Fetch the sector for a symbol from the Yahoo summaryProfile API.
+     */
+    private function fetchYahooSector(YahooFinanceService $yahoo, string $symbol, string $exchange = 'GLOBAL'): ?string
+    {
+        try {
+            $summary = $yahoo->getSummary($symbol, $exchange, ['summaryProfile']);
+            $sector = $summary['summaryProfile']['sector'] ?? null;
+            return is_string($sector) && trim($sector) !== '' ? trim($sector) : null;
+        } catch (\Throwable $e) {
+            log_message('error', 'Yahoo summary error for ' . $symbol . ': ' . $e->getMessage());
+            return null;
+        }
+    }
+
     public function index()
     {
         return $this->response->setJSON([
@@ -125,7 +140,7 @@ class Api extends BaseController
 
                     if (! $existing) {
                         $name      = $d['longName'] ?? $d['shortName'] ?? $symbol;
-                        $sector    = $d['sector'] ?? 'Unknown';
+                        $sector    = $this->fetchYahooSector($yahoo, $symbol, $exchange) ?? $d['sector'] ?? 'Unknown';
                         $prevClose = $d['regularMarketPreviousClose'] ?? round($price * 0.99, 2);
                         $marketCap = $d['marketCap'] ?? null;
                         $avgVol    = $d['averageDailyVolume3Month'] ?? null;
@@ -250,7 +265,7 @@ class Api extends BaseController
         $d = $yahoo->quoteToArray($quote);
 
         $name = $d['longName'] ?? $d['shortName'] ?? $symbol;
-        $sector = $d['fullExchangeName'] ?? 'N/A';
+        $sector = $this->fetchYahooSector($yahoo, $symbol, $exchange) ?? $d['fullExchangeName'] ?? 'N/A';
 
         $price = (float) ($d['regularMarketPrice'] ?? 0);
         if ($price <= 0) {
@@ -365,7 +380,7 @@ class Api extends BaseController
                 $stockId = $stockModel->insert([
                     'symbol'         => $symbol,
                     'name'           => $d['longName'] ?? $d['shortName'] ?? $symbol,
-                    'sector'         => $d['fullExchangeName'] ?? 'N/A',
+                    'sector'         => $this->fetchYahooSector($yahoo, $symbol, $exchange) ?? $d['fullExchangeName'] ?? 'N/A',
                     'exchange'       => $exchange,
                     'exchange_display' => $d['exchange'] ?? $d['fullExchangeName'] ?? $exchange,
                     'current_price'  => $d['regularMarketPrice'],
@@ -437,6 +452,7 @@ class Api extends BaseController
         $update = [
             'name'             => $d['longName'] ?? $d['shortName'] ?? $stock['name'],
             'exchange_display' => $d['exchange'] ?? $d['fullExchangeName'] ?? $stock['exchange_display'] ?? $stock['exchange'],
+            'sector'           => $this->fetchYahooSector($yahoo, $stock['symbol'], $stock['exchange']) ?? $stock['sector'],
             'current_price'    => $d['regularMarketPrice'] ?? $stock['current_price'],
             'previous_close' => $d['regularMarketPreviousClose'] ?? $stock['previous_close'],
             'market_cap'     => $d['marketCap'] ?? $stock['market_cap'],
@@ -469,7 +485,10 @@ class Api extends BaseController
             return $this->response->setJSON(['error' => 'Symbol required'])->setStatusCode(400);
         }
 
-        $exchange = YahooFinanceService::detectExchange($symbol);
+        $exchange = strtoupper(trim((string) $this->request->getGet('exchange')));
+        if ($exchange === '') {
+            $exchange = YahooFinanceService::detectExchange($symbol);
+        }
         $yahoo = new YahooFinanceService();
 
         $quote = $yahoo->getQuote($symbol, $exchange);

@@ -177,7 +177,7 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
                         </div>
                     </div>
                 </div>
-                <?php if (is_logged_in()): ?>
+                <?php if (!empty(session()->get('user')['is_admin'])): ?>
                 <div class="border-t border-gray-700 flex">
                     <a href="/stocks/<?= $stock['id'] ?>/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-accent hover:bg-page text-sm transition border-r border-gray-700">
                         <i class="fas fa-edit mr-1"></i>Edit
@@ -202,6 +202,7 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
     var CSRF_NAME = '<?= csrf_token() ?>';
     var CSRF_HASH = '<?= csrf_hash() ?>';
     var IS_LOGGED_IN = <?= is_logged_in() ? 'true' : 'false' ?>;
+    var IS_ADMIN = <?= !empty(session()->get('user')['is_admin']) ? 'true' : 'false' ?>;
     var searchInput = document.getElementById('stockSearch');
     var searchClear = document.getElementById('searchClear');
     var searchStatus = document.getElementById('searchStatus');
@@ -268,7 +269,7 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
             '<button class="watch-btn absolute top-3 right-3 text-xl transition z-10" data-sid="' + s.id + '" data-watched="0" onclick="event.stopPropagation(); toggleWatch(this)" title="Add to watchlist">' +
             '<i class="far fa-star text-gray-500 hover:text-accent"></i>' +
             '</button>' : '';
-        var actionsHtml = IS_LOGGED_IN ?
+        var actionsHtml = IS_ADMIN ?
             '<div class="border-t border-gray-700 flex">' +
             '<a href="/stocks/' + s.id + '/edit" onclick="event.stopPropagation()" class="flex-1 text-center py-3 text-gray-400 hover:text-accent hover:bg-page text-sm transition border-r border-gray-700">' +
             '<i class="fas fa-edit mr-1"></i>Edit</a>' +
@@ -322,7 +323,9 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
         fetch('/api/stocks/import', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
             .then(function(r){ return r.json(); })
             .then(function(d){
-                if (d.success) {
+                if (d.success && d.id) {
+                    window.location.href = '/stocks/' + d.id;
+                } else if (d.success) {
                     window.location.reload();
                 } else {
                     alert(d.message);
@@ -533,7 +536,9 @@ INFY, WIPRO, PFC" class="w-full bg-page border border-gray-600 rounded-lg px-3 p
         fetch('/api/stocks/import', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
             .then(function(r) { return r.json(); })
             .then(function(d) {
-                if (d.success) {
+                if (d.success && d.id) {
+                    window.location.href = '/stocks/' + d.id;
+                } else if (d.success) {
                     window.location.reload();
                 } else if (d.id) {
                     window.location.href = '/stocks/' + d.id;

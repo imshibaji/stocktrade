@@ -177,10 +177,12 @@ class Stocks extends BaseController
         $sectors = $stockModel->distinct()->select('sector')->findAll();
         $sectorList = array_unique(array_column($sectors, 'sector'));
         sort($sectorList);
+        $exchangeList = ['GLOBAL', 'NSE', 'BSE', 'NYSE', 'NASDAQ', 'LSE'];
         $data = [
             'title' => 'Edit ' . $stock['symbol'] . ' - StockTrade Tips',
             'stock' => $stock,
             'sectors' => $sectorList,
+            'exchanges' => $exchangeList,
         ];
         return view('templates/header', $data)
             . view('stocks/edit', $data)
@@ -194,7 +196,28 @@ class Stocks extends BaseController
         if (!$stock) {
             return redirect()->to('/stocks')->with('error', 'Stock not found.');
         }
+
+        $symbol = strtoupper(trim((string) $this->request->getPost('symbol')));
+        $exchange = strtoupper(trim((string) $this->request->getPost('exchange')));
+
+        if ($symbol === '' || !preg_match('/^[A-Z0-9.\-]+$/', $symbol)) {
+            return redirect()->to('/stocks/' . $id . '/edit')->with('error', 'A valid stock symbol is required.');
+        }
+
+        if ($exchange === '') {
+            $exchange = 'GLOBAL';
+        }
+
+        if (strtoupper($symbol) !== strtoupper($stock['symbol'])) {
+            $duplicate = $stockModel->where('symbol', $symbol)->where('id !=', (int) $id)->first();
+            if ($duplicate) {
+                return redirect()->to('/stocks/' . $id . '/edit')->with('error', 'Stock with symbol ' . $symbol . ' already exists.');
+            }
+        }
+
         $data = [
+            'symbol'         => $symbol,
+            'exchange'       => $exchange,
             'name'           => $this->request->getPost('name'),
             'sector'         => $this->request->getPost('sector'),
             'current_price'  => (float) $this->request->getPost('current_price'),
@@ -208,7 +231,7 @@ class Stocks extends BaseController
             'beta'           => $this->request->getPost('beta') ? (float) $this->request->getPost('beta') : null,
         ];
         $stockModel->update((int) $id, $data);
-        return redirect()->to('/stocks/' . $id)->with('success', $stock['symbol'] . ' updated successfully.');
+        return redirect()->to('/stocks/' . $id)->with('success', $symbol . ' updated successfully.');
     }
 
     public function delete($id)

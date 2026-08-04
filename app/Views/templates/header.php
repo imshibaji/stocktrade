@@ -92,6 +92,21 @@ $ogType          = (string) ($ogType ?? 'website');
 
 <?php if (is_logged_in()): ?>
 
+    <?php if (is_impersonating()): ?>
+    <?php $impUser = current_user(); ?>
+    <div class="bg-yellow-500">
+        <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-sm font-semibold text-black">
+                <i class="fas fa-user-secret"></i>
+                <span>Viewing as <strong><?= esc($impUser['name'] ?? '') ?></strong> <span class="hidden sm:inline">(<?= esc($impUser['email'] ?? '') ?>)</span></span>
+            </div>
+            <a href="/admin/users/stop-viewing" class="px-3 py-1.5 bg-black text-white rounded-lg text-xs font-semibold hover:bg-gray-800 transition whitespace-nowrap">
+                <i class="fas fa-sign-out-alt mr-1"></i>Exit view
+            </a>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <nav class="bg-surface border-b border-gray-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex items-center justify-between h-16">
@@ -160,9 +175,11 @@ $ogType          = (string) ($ogType ?? 'website');
                                 <i class="fas fa-search w-5 mr-2 text-green-400"></i>Stocks
                             </a>
                             <hr class="border-gray-700 my-1">
+                            <?php if (!empty(session()->get('user')['is_admin'])): ?>
                             <a href="/api-playground" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-code w-5 mr-2 text-accent"></i>API Docs
                             </a>
+                            <?php endif; ?>
                             <hr class="border-gray-700 my-1">
                             <a href="/settings" class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-page transition">
                                 <i class="fas fa-cog w-5 mr-2 text-gray-400"></i>Settings
@@ -237,9 +254,11 @@ $ogType          = (string) ($ogType ?? 'website');
                         <i class="fas fa-search w-5 mr-2 text-green-400"></i>Stocks
                     </a>
                     <hr class="border-gray-700 my-2">
+                    <?php if (!empty(session()->get('user')['is_admin'])): ?>
                     <a href="/api-playground" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-code w-5 mr-2 text-accent"></i>API Docs
                     </a>
+                    <?php endif; ?>
                     <hr class="border-gray-700 my-2">
                     <a href="/settings" class="flex items-center px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-page">
                         <i class="fas fa-cog w-5 mr-2"></i>Settings

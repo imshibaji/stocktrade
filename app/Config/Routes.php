@@ -34,6 +34,8 @@ $routes->group('admin', ['filter' => 'admin'], static function ($routes) {
     $routes->get('users/make-admin/(:num)', 'Admin\Users::makeAdmin/$1');
     $routes->get('users/remove-admin/(:num)', 'Admin\Users::removeAdmin/$1');
     $routes->get('users/delete/(:num)', 'Admin\Users::deleteUser/$1');
+    $routes->get('users/view/(:num)', 'Admin\Users::viewAsUser/$1');
+    $routes->get('users/stop-viewing', 'Admin\Users::stopViewing');
     $routes->get('stocks', 'Admin\Stocks::stocks');
     $routes->get('stocks/create', 'Admin\Stocks::createStock');
     $routes->post('stocks/save', 'Admin\Stocks::saveStock');
@@ -79,13 +81,15 @@ $routes->post('/api/stocks/import', 'Api::importStock', ['filter' => 'auth']);
 $routes->post('/api/stocks/bulk-import', 'Api::bulkImport', ['filter' => 'auth']);
 $routes->post('/api/stocks/refresh', 'Api::refreshStock', ['filter' => 'auth']);
 
+$routes->get('/api-playground', 'ApiDocs::index', ['filter' => 'admin']);
+
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/dashboard', 'Dashboard::index');
-    $routes->post('/stocks/create', 'Stocks::create');
     $routes->get('/stocks/search', 'Stocks::search');
-    $routes->get('/stocks/(:num)/edit', 'Stocks::edit/$1');
-    $routes->post('/stocks/(:num)/edit', 'Stocks::update/$1');
-    $routes->post('/stocks/(:num)/delete', 'Stocks::delete/$1');
+    $routes->post('/stocks/create', 'Stocks::create', ['filter' => 'admin']);
+    $routes->get('/stocks/(:num)/edit', 'Stocks::edit/$1', ['filter' => 'admin']);
+    $routes->post('/stocks/(:num)/edit', 'Stocks::update/$1', ['filter' => 'admin']);
+    $routes->post('/stocks/(:num)/delete', 'Stocks::delete/$1', ['filter' => 'admin']);
     $routes->get('/watchlist', 'Watchlist::index');
     $routes->get('/watchlist/add/(:num)', 'Watchlist::add/$1');
     $routes->get('/watchlist/remove/(:num)', 'Watchlist::remove/$1');
@@ -95,7 +99,6 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->post('/watchlist/move-to-bucket', 'Watchlist::moveToBucket');
     $routes->get('/screener', 'Screener::index');
     $routes->get('/screener/docs', 'Screener::docs');
-    $routes->get('/api-playground', 'ApiDocs::index');
     $routes->get('/api/screener/run', 'Screener::run');
     $routes->post('/api/screener/run-manual', 'Screener::runManualQuery');
     $routes->post('/api/screener/save', 'Screener::save');

@@ -12,8 +12,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Symbol</label>
-                    <input type="text" value="<?= esc($stock['symbol']) ?>" disabled
-                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-gray-400">
+                    <input type="text" name="symbol" value="<?= old('symbol', $stock['symbol']) ?>" required
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden uppercase">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 mb-2 text-sm">Exchange</label>
+                    <select name="exchange"
+                        class="w-full bg-page border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-accent focus:outline-hidden">
+                        <?php $currentExchange = $stock['exchange'] ?? 'GLOBAL'; ?>
+                        <?php foreach (($exchanges ?? ['GLOBAL', 'NSE', 'BSE']) as $ex): ?>
+                        <option value="<?= esc($ex) ?>" <?= $currentExchange === $ex ? 'selected' : '' ?>><?= esc($ex) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-300 mb-2 text-sm">Name</label>
@@ -96,7 +106,15 @@ document.getElementById('autoFillBtn').addEventListener('click', function() {
     var btn = this;
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Fetching...';
-    fetch('/api/quote/<?= $stock['symbol'] ?>')
+    var symbol = document.querySelector('input[name="symbol"]').value.trim().toUpperCase();
+    var exchange = document.querySelector('select[name="exchange"]').value;
+    if (!symbol) {
+        alert('Enter a symbol first.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-cloud-download-alt mr-2"></i>Auto-fill from Yahoo';
+        return;
+    }
+    fetch('/api/quote/' + encodeURIComponent(symbol) + '?exchange=' + encodeURIComponent(exchange))
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.error) {
