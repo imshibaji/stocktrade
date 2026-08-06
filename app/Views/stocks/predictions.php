@@ -2,6 +2,11 @@
 $isWatched = $isWatched ?? false;
 $cur = stock_currency($stock['exchange'] ?? null);
 $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
+$methods = $methods ?? prediction_methods();
+$selectedMethod = $selectedMethod ?? null;
+$isCustom = $isCustom ?? false;
+$methodLabel = $selectedMethod ? ($methods[$selectedMethod]['label'] ?? $selectedMethod) : 'Monte Carlo & EMA';
+$methodDesc = $selectedMethod ? ($methods[$selectedMethod]['description'] ?? '') : '30-Day forecast using Monte Carlo simulation and EMA analysis';
 ?>
 <section>
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -12,7 +17,7 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
                     <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>
                 </span>
             </div>
-            <p class="text-gray-400 mt-1">30-Day forecast using Monte Carlo & EMA analysis</p>
+            <p class="text-gray-400 mt-1"><?= esc($methodDesc) ?></p>
         </div>
         <div class="flex space-x-3 mt-4 md:mt-0">
             <a href="/stocks/<?= $stock['id'] ?>" class="border border-gray-600 text-gray-300 hover:border-accent px-4 py-2 rounded-lg text-sm transition">
@@ -34,7 +39,29 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="lg:col-span-2 bg-surface rounded-xl border border-gray-700 p-6">
-            <h3 class="text-white font-semibold mb-4">Price Prediction Chart</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-white font-semibold">Price Prediction Chart</h3>
+                <form action="" method="get" class="flex items-center space-x-2">
+                    <label for="predictionMethod" class="text-sm text-gray-400">Method</label>
+                    <select id="predictionMethod" name="method" onchange="this.form.submit()"
+                            class="bg-page border border-gray-600 text-gray-200 text-sm rounded-lg px-3 py-1.5 focus:border-accent outline-none">
+                        <option value="">Default (Monte Carlo + EMA)</option>
+                        <?php foreach ($methods as $key => $meta): ?>
+                            <option value="<?= esc($key) ?>" <?= $selectedMethod === $key ? 'selected' : '' ?>>
+                                <?= esc($meta['label']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </form>
+            </div>
+            <?php if ($isCustom): ?>
+            <div class="flex items-center justify-between mb-4 bg-accent/10 border border-accent/40 rounded-lg px-4 py-2">
+                <p class="text-sm text-gray-300">
+                    <span class="text-accent font-semibold"><?= esc($methodLabel) ?></span> method applied — predictions below were generated on the fly.
+                </p>
+                <a href="/stocks/<?= $stock['id'] ?>/predictions" class="text-sm text-accent hover:underline whitespace-nowrap">Reset to default</a>
+            </div>
+            <?php endif; ?>
             <div class="h-72">
                 <canvas id="predictionChart"></canvas>
             </div>
@@ -127,7 +154,7 @@ $lastPrice = !empty($priceData) ? (float) $priceData[count($priceData) - 1] : 0;
                                 <span class="text-gray-300 w-12 text-left"><?= $p['confidence_score'] ?>%</span>
                             </div>
                         </td>
-                        <td class="px-6 py-3 text-right text-gray-500"><?= esc($p['method']) ?></td>
+                        <td class="px-6 py-3 text-right text-gray-500"><?= esc(prediction_method_label($p['method'])) ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

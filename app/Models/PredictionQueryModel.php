@@ -36,22 +36,23 @@ class PredictionQueryModel extends Model
             ->findAll();
     }
 
-    public function getPublic(): array
+    public function getPublic(?int $perPage = null): array
     {
-        $query = $this->db->table('prediction_queries');
-        $query->select([
-            'prediction_queries.*',
-            'users.name as creator_name',
-            'COUNT(prediction_query_results.id) as results_count',
-            'AVG(prediction_query_results.confidence_score) as avg_confidence',
-        ])
+        $this->select('prediction_queries.*')
+            ->select('users.name as creator_name')
+            ->selectCount('prediction_query_results.id', 'results_count')
+            ->selectAvg('prediction_query_results.confidence_score', 'avg_confidence')
             ->join('users', 'users.id = prediction_queries.user_id', 'left')
             ->join('prediction_query_results', 'prediction_query_results.query_id = prediction_queries.id', 'left')
             ->where('prediction_queries.is_public', 1)
             ->groupBy('prediction_queries.id')
             ->orderBy('prediction_queries.created_at', 'DESC');
 
-        return $query->get()->getResultArray();
+        if ($perPage) {
+            return $this->paginate($perPage);
+        }
+
+        return $this->findAll();
     }
 
     public function getAllForAdmin(): array
@@ -99,18 +100,20 @@ class PredictionQueryModel extends Model
         return $query->get()->getRowArray() ?: null;
     }
 
-    public function getUserWithResults(int $userId): array
+    public function getUserWithResults(int $userId, ?int $perPage = null): array
     {
-        $query = $this->db->table('prediction_queries');
-        $query->select([
-            'prediction_queries.*',
-            'COUNT(prediction_query_results.id) as results_count',
-            'AVG(prediction_query_results.confidence_score) as avg_confidence',
-        ])
+        $this->select('prediction_queries.*')
+            ->selectCount('prediction_query_results.id', 'results_count')
+            ->selectAvg('prediction_query_results.confidence_score', 'avg_confidence')
             ->join('prediction_query_results', 'prediction_query_results.query_id = prediction_queries.id', 'left')
             ->where('prediction_queries.user_id', $userId)
-            ->groupBy('prediction_queries.id');
+            ->groupBy('prediction_queries.id')
+            ->orderBy('prediction_queries.created_at', 'DESC');
 
-        return $query->get()->getResultArray();
+        if ($perPage) {
+            return $this->paginate($perPage);
+        }
+
+        return $this->findAll();
     }
 }

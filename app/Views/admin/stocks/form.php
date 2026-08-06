@@ -19,7 +19,7 @@
             <?php endif; ?>
 
             <?php
-            $exchangeOptions = ['GLOBAL', 'NSE', 'BSE', 'NYSE', 'NASDAQ', 'LSE'];
+            $exchangeOptions = ['GLOBAL', 'NSE', 'BSE'];
             $inputClass = 'w-full px-3 py-2.5 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent transition';
             ?>
 

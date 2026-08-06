@@ -62,95 +62,13 @@ if ($heroHighlight !== '' && str_contains($heroTitle, $heroHighlight)) {
 <section class="mb-16">
     <h2 class="text-3xl font-bold text-white text-center mb-4"><?= esc(home_setting('home_public_lists_title', 'Community Screener Lists')) ?></h2>
     <p class="text-center text-gray-400 mb-8 max-w-2xl mx-auto"><?= esc(home_setting('home_public_lists_subtitle', 'Discover stock lists shared by the community. Click a list to view its stocks.')) ?></p>
-    <?php if (!empty($publicLists)): ?>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <?php foreach ($publicLists as $list): ?>
-        <div class="bg-surface rounded-xl p-5 border border-gray-700 hover:border-accent transition cursor-pointer public-list-card"
-             data-list-id="<?= (int) $list['id'] ?>">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <h3 class="text-white font-bold text-lg"><?= esc($list['name']) ?></h3>
-                    <p class="text-gray-400 text-sm"><?= (int) $list['stock_count'] ?> stocks</p>
-                </div>
-                <span class="text-xs px-2 py-1 rounded bg-page border border-gray-600 text-gray-300"><i class="fas fa-globe mr-1"></i>Public</span>
-            </div>
-            <p class="text-xs text-gray-500">Shared by <?= esc($list['owner_name'] ?? 'Member') ?> &middot; <?= esc(date('M j, Y', strtotime($list['created_at']))) ?></p>
-            <p class="mt-3 text-xs text-accent"><i class="fas fa-chevron-down mr-1"></i>Click to view stocks</p>
-        </div>
-        <?php endforeach; ?>
+    <?= view('partials/public_lists', ['publicLists' => $publicLists]) ?>
+    <div class="text-center mt-8">
+        <a href="/screener/lists" class="inline-flex items-center bg-accent hover:bg-accent-2 text-on-accent font-semibold px-6 py-2.5 rounded-lg transition text-sm">
+            <i class="fas fa-globe mr-2"></i>All Public Screener List <i class="fas fa-arrow-right ml-2"></i>
+        </a>
     </div>
-    <div id="publicListDetail" class="hidden mt-6 bg-surface rounded-xl border border-gray-700 p-6"></div>
-    <?php else: ?>
-    <p class="text-center text-gray-500">No community lists yet.</p>
-    <?php endif; ?>
 </section>
-<script>
-(function() {
-    function escHtml(s) { if (s == null) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-    function curFor(ex) {
-        var m = { 'NSE': 'INR', 'BSE': 'INR', 'NSI': 'INR',
-                  'LSE': 'GBP', 'TSE': 'JPY', 'HKEX': 'HKD',
-                  'KRX': 'KRW', 'TSX': 'CAD', 'ASX': 'AUD',
-                  'SWX': 'CHF', 'FRA': 'EUR', 'ETR': 'EUR',
-                  'Euronext': 'EUR', 'MEX': 'MXN', 'BVMF': 'BRL',
-                  'NMS': 'USD', 'NYQ': 'USD', 'NGM': 'USD' };
-        return m[ex] || 'USD';
-    }
-    function symFor(c) {
-        var m = { 'INR': '\u20B9', 'USD': '$', 'EUR': '\u20AC', 'GBP': '\u00A3',
-                  'JPY': '\u00A5', 'AUD': 'A$', 'CAD': 'C$', 'CHF': 'CHF ',
-                  'CNY': '\u00A5', 'SGD': 'S$', 'HKD': 'HK$', 'KRW': '\u20A9',
-                  'MXN': 'Mex$', 'BRL': 'R$', 'NZD': 'NZ$', 'ZAR': 'R',
-                  'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr', 'PLN': 'z\u0142',
-                  'CZK': 'K\u010D', 'HUF': 'Ft', 'RUB': '\u20BD', 'TRY': '\u20BA',
-                  'ILS': '\u20AA', 'THB': '\u0E3F', 'MYR': 'RM', 'IDR': 'Rp',
-                  'PHP': '\u20B1', 'TWD': 'NT$', 'VND': '\u20AB', 'AED': '\u062F.\u0625',
-                  'SAR': '\u0631.\u0639', 'QAR': 'QR', 'KWD': 'KD', 'OMR': '\u0631.\u0639', 'BHD': '.\u062F.\u0628' };
-        return m[c] || (c + ' ');
-    }
-    window.loadPublicList = function(id, card) {
-        var detail = document.getElementById('publicListDetail');
-        detail.classList.remove('hidden');
-        detail.innerHTML = '<div class="text-gray-400 text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</div>';
-        document.querySelectorAll('.public-list-card').forEach(function(c) { c.classList.remove('border-accent'); });
-        if (card) card.classList.add('border-accent');
-        fetch('/api/screener/public-list/' + id)
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (!data.success) { detail.innerHTML = '<p class="text-red-400">' + escHtml(data.message) + '</p>'; return; }
-                var stocks = data.stocks || [];
-                var html = '<div class="flex items-center justify-between mb-4">' +
-                    '<h3 class="text-white font-bold text-lg">' + escHtml(data.list.name) + '</h3>' +
-                    '<button onclick="document.getElementById(\'publicListDetail\').classList.add(\'hidden\')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button></div>';
-                if (stocks.length === 0) {
-                    html += '<p class="text-gray-500 text-sm">This list has no stocks.</p>';
-                } else {
-                    html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
-                    stocks.forEach(function(s) {
-                        var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
-                        var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
-                        var cur = curFor(s.exchange);
-                        html += '<div class="bg-page rounded-lg border border-gray-700 p-4 cursor-pointer hover:border-accent transition" onclick="window.location.href=\'/stocks/' + s.id + '\'">' +
-                            '<div class="flex justify-between items-start mb-2"><p class="text-white font-bold">' + escHtml(s.symbol) + ' <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-400 align-middle">' + escHtml(s.exchange || '') + '</span></p>' +
-                            '<span class="text-xs px-1.5 py-0.5 rounded bg-surface border border-gray-600 text-gray-300">' + escHtml(s.sector || '') + '</span></div>' +
-                            '<p class="text-gray-400 text-xs mb-2">' + escHtml(s.name) + '</p>' +
-                            '<div class="flex justify-between items-end"><span class="text-white font-bold">' + symFor(cur) + cp.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</span>' +
-                            '<span class="text-sm ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</span></div></div>';
-                    });
-                    html += '</div>';
-                }
-                detail.innerHTML = html;
-            })
-            .catch(function() { detail.innerHTML = '<p class="text-red-400">Failed to load list.</p>'; });
-    };
-    document.querySelectorAll('.public-list-card').forEach(function(card) {
-        card.addEventListener('click', function() {
-            loadPublicList(card.getAttribute('data-list-id'), card);
-        });
-    });
-})();
-</script>
-
 <section class="mb-16">
     <h2 class="text-3xl font-bold text-white text-center mb-8"><?= esc(home_setting('home_topstocks_title', 'Top Stocks by Market Cap')) ?></h2>
     <?php if (!empty($topPerformer) || !empty($topLoser)): ?>

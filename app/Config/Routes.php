@@ -5,6 +5,8 @@ use CodeIgniter\Router\RouteCollection;
 /** @var RouteCollection $routes */
 
 $routes->get('/', 'Home::index');
+$routes->get('/screener/lists', 'Screener::publicListPage');
+$routes->get('/screener/(:num)', 'Screener::publicListDetail/$1');
 $routes->get('/about', 'About::index');
 $routes->get('/contact', 'Contact::index');
 $routes->post('/contact/send', 'Contact::send');

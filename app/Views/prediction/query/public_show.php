@@ -39,7 +39,43 @@
         </div>
     </div>
 
-    <h2 class="text-lg font-semibold text-white mb-3">Forecast Results</h2>
+    <h2 class="text-lg font-semibold text-white mb-3">Query Logic</h2>
+
+    <?php
+    $logicText = trim((string) ($query['query_text'] ?? ''));
+    if ($logicText === '') {
+        $logicText = prediction_criteria_to_query_text($query['criteria'] ?? null, $query['technical_criteria'] ?? null);
+    }
+    $matchModeLabel = ($query['match_mode'] ?? 'all') === 'any' ? 'Any condition matches' : 'All conditions must match';
+    ?>
+    <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-6">
+        <div class="flex flex-wrap items-start justify-between gap-4 mb-3">
+            <div>
+                <p class="text-white font-semibold text-sm mb-0.5">How matched stocks are picked</p>
+                <p class="text-gray-400 text-sm">The screening conditions used to pick matched stocks, shared for learning.</p>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded-full border bg-purple-900/30 text-purple-300 border-purple-700 whitespace-nowrap">
+                <i class="fas fa-list-check mr-1"></i><?= esc($matchModeLabel) ?>
+            </span>
+        </div>
+        <code class="block w-full bg-page border border-gray-700 rounded-lg px-4 py-3 text-sm font-mono text-white whitespace-pre-wrap"><?= esc($logicText !== '' ? $logicText : 'No conditions specified.') ?></code>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <h2 class="text-lg font-semibold text-white">Forecast Results</h2>
+        <?php if (!empty($query['results'])): ?>
+        <form method="get" class="flex items-center gap-3" aria-label="Items per page">
+            <label for="resultsPerPage" class="text-sm text-gray-400">Show</label>
+            <select name="per_page" id="resultsPerPage"
+                    class="px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent"
+                    onchange="this.form.submit()">
+                <?php foreach ([10, 25, 50, 100] as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ((int) ($perPage ?? 10) === (int) $opt) ? 'selected' : '' ?>><?= $opt ?></option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+        <?php endif; ?>
+    </div>
 
     <?php if (empty($query['results'])): ?>
     <div class="bg-surface rounded-xl border border-gray-700 p-12 text-center">
@@ -97,5 +133,6 @@
             </table>
         </div>
     </div>
+    <?= view('partials/pagination', ['pager' => $pager, 'label' => 'results']) ?>
     <?php endif; ?>
 </section>

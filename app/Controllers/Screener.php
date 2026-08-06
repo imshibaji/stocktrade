@@ -34,6 +34,43 @@ class Screener extends BaseController
         return view('templates/header'). view('screener/docs') . view('templates/footer');
     }
 
+    public function publicListPage(): string
+    {
+        $perPage = (int) ($this->request->getGet('per_page') ?? 6);
+        if (!in_array($perPage, [6, 12, 24, 48], true)) {
+            $perPage = 6;
+        }
+
+        $listModel = new StockListModel();
+        $lists = $listModel
+            ->where('is_public', 1)
+            ->orderBy('updated_at', 'DESC')
+            ->paginate($perPage);
+
+        if (!empty($lists)) {
+            $userIds = array_unique(array_column($lists, 'user_id'));
+            $users = (new \App\Models\UserModel())->whereIn('id', $userIds)->findAll();
+            $names = [];
+            foreach ($users as $user) {
+                $names[(int) $user['id']] = $user['name'];
+            }
+            foreach ($lists as &$list) {
+                $list['owner_name'] = $names[(int) $list['user_id']] ?? 'Member';
+            }
+            unset($list);
+        }
+
+        $data = [
+            'title'    => 'Community Screener Lists - StockTrade Tips',
+            'lists'    => $lists,
+            'pager'    => $listModel->pager,
+            'perPage'  => $perPage,
+        ];
+        return view('templates/header', $data)
+            . view('screener/public_lists', $data)
+            . view('templates/footer');
+    }
+
     public function run()
     {
         $stockModel = new StockModel();
@@ -511,11 +548,101 @@ class Screener extends BaseController
             ? (new StockModel())->whereIn('id', $stockIds)->findAll()
             : [];
 
+        $criteriaData     = json_decode($list['criteria'] ?? '{}', true);
+        $techData         = json_decode($list['technical_criteria'] ?? '{}', true);
+        $matchMode        = $criteriaData['match_mode'] ?? 'all';
+        $filters          = $criteriaData['filters'] ?? [];
+        $techFilters      = $techData['filters'] ?? [];
+        $isManualQuery    = !empty($criteriaData['is_manual_query']);
+        $queryText        = $criteriaData['query_text'] ?? '';
+
         return $this->response->setJSON([
-            'success' => true,
-            'list'    => $list,
-            'stocks'  => array_values($stocks),
+            'success'            => true,
+            'list'               => $list,
+            'stocks'             => array_values($stocks),
+            'match_mode'         => $matchMode,
+            'criteria'           => $filters,
+            'technical_criteria' => $techFilters,
+            'is_manual_query'    => $isManualQuery,
+            'query_text'         => $queryText,
         ]);
+    }
+
+    public function publicListDetail(int $id): string
+    {
+        $listModel = new StockListModel();
+        $list = $listModel->find($id);
+        if (!$list) {
+            return view('templates/header')
+                . view('errors/html/error_404')
+                . view('templates/footer');
+        }
+
+        $userId = current_user_id();
+        if (!$list['is_public'] && (!$userId || (int) $list['user_id'] !== (int) $userId)) {
+            return view('templates/header')
+                . view('errors/html/error_404')
+                . view('templates/footer');
+        }
+
+        $perPage = (int) ($this->request->getGet('per_page') ?? 10);
+        if (!in_array($perPage, [10, 25, 50, 100], true)) {
+            $perPage = 10;
+        }
+
+        $stockIds = json_decode($list['stock_ids'] ?? '[]', true);
+        $stockIds = array_values(array_filter(array_map('intval', (array) $stockIds)));
+
+        $stockModel = new StockModel();
+        $stocks = !empty($stockIds)
+            ? $stockModel->whereIn('id', $stockIds)->orderBy('symbol', 'ASC')->paginate($perPage)
+            : [];
+        $pager = $stockModel->pager;
+
+        $ownerName = 'Member';
+        $user = (new \App\Models\UserModel())->find((int) $list['user_id']);
+        if ($user) {
+            $ownerName = $user['name'];
+        }
+
+        $predictions = [];
+        if (!empty($stocks)) {
+            $pageIds = array_column($stocks, 'id');
+            $predRows = (new \App\Models\PredictionModel())->getPredictionsForStocks($pageIds, 30);
+            foreach ($predRows as $p) {
+                $sid = (int) $p['stock_id'];
+                $predictions[$sid]['prices'][] = (float) $p['predicted_price'];
+                $predictions[$sid]['scores'][] = (float) $p['confidence_score'];
+            }
+            foreach ($predictions as $sid => $d) {
+                $predictions[$sid]['avg']  = array_sum($d['prices']) / count($d['prices']);
+                $predictions[$sid]['high'] = max($d['prices']);
+                $predictions[$sid]['low']  = min($d['prices']);
+                $predictions[$sid]['conf'] = round(array_sum($d['scores']) / count($d['scores']), 0);
+            }
+        }
+
+        $criteriaData = json_decode($list['criteria'] ?? '{}', true);
+        $techData     = json_decode($list['technical_criteria'] ?? '{}', true);
+
+        $data = [
+            'title'         => $list['name'] . ' - Community Screener List',
+            'list'          => $list,
+            'stocks'        => $stocks,
+            'pager'         => $pager,
+            'perPage'       => $perPage,
+            'ownerName'     => $ownerName,
+            'predictions'   => $predictions,
+            'matchMode'     => $criteriaData['match_mode'] ?? 'all',
+            'filters'       => $criteriaData['filters'] ?? [],
+            'techFilters'   => $techData['filters'] ?? [],
+            'isManualQuery' => !empty($criteriaData['is_manual_query']),
+            'queryText'     => $criteriaData['query_text'] ?? '',
+        ];
+
+        return view('templates/header', $data)
+            . view('screener/public_list_detail', $data)
+            . view('templates/footer');
     }
 
     // ------------------------------------------------------------------ //

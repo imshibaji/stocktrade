@@ -4,7 +4,7 @@
             <div class="flex items-center space-x-3">
                 <h1 class="text-3xl font-bold text-white">Prediction Queries</h1>
                 <span class="text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400">
-                    <i class="fas fa-chart-line text-accent mr-1"></i><?= count($queries) ?>
+                    <i class="fas fa-chart-line text-accent mr-1"></i><?= isset($pager) ? $pager->getTotal() : count($queries) ?>
                 </span>
             </div>
             <p class="text-gray-400 mt-1">Define a screening query, pick a forecast method, and let the engine scan every stock.</p>
@@ -41,6 +41,23 @@
         </a>
     </div>
     <?php else: ?>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <?php if (isset($pager)): ?>
+        <p class="text-sm text-gray-400">
+            <?= $pager->getTotal() ?> quer<?= $pager->getTotal() === 1 ? 'y' : 'ies' ?> found.
+        </p>
+        <form method="get" class="flex items-center gap-3" aria-label="Items per page">
+            <label for="perPageSelect" class="text-sm text-gray-400">Show</label>
+            <select name="per_page" id="perPageSelect"
+                    class="px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent"
+                    onchange="this.form.submit()">
+                <?php foreach ([6, 12, 24, 48] as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ((int) ($perPage ?? 6) === (int) $opt) ? 'selected' : '' ?>><?= $opt ?></option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+        <?php endif; ?>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($queries as $query): ?>
         <?php
@@ -107,7 +124,7 @@
                 <a href="/predictions/<?= $query['id'] ?>" class="flex-1 text-center py-3 text-sm text-gray-400 hover:text-accent hover:bg-page transition border-r border-gray-700">
                     <i class="fas fa-eye mr-1"></i>View
                 </a>
-                <a href="/predictions/<?= $query['id'] ?>/results" class="flex-1 text-center py-3 text-sm text-gray-400 hover:text-accent hover:bg-page transition">
+                <a href="/predictions/<?= $query['id'] ?>" class="flex-1 text-center py-3 text-sm text-gray-400 hover:text-accent hover:bg-page transition">
                     <i class="fas fa-table mr-1"></i>Results
                 </a>
                 <button onclick="runQuery(<?= $query['id'] ?>)" class="flex-1 text-center py-3 text-sm text-green-400 hover:text-green-300 hover:bg-page transition border-r border-gray-700 border-t border-gray-700">
@@ -128,6 +145,7 @@
         </div>
         <?php endforeach; ?>
     </div>
+    <?= view('partials/pagination', ['pager' => $pager, 'label' => 'queries']) ?>
     <?php endif; ?>
 </section>
 
@@ -139,7 +157,7 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.success) {
-                    window.location.href = '/predictions/' + id + '/results';
+                    window.location.href = '/predictions/' + id;
                 } else {
                     alert('Error: ' + (data.message || 'Could not run query'));
                 }

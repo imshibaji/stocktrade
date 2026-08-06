@@ -21,6 +21,21 @@
         <?php endif; ?>
     </div>
     <?php else: ?>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <p class="text-sm text-gray-400">
+            <?= $pager->getTotal() ?> quer<?= $pager->getTotal() === 1 ? 'y' : 'ies' ?> shared by the community.
+        </p>
+        <form method="get" class="flex items-center gap-3" aria-label="Items per page">
+            <label for="perPageSelect" class="text-sm text-gray-400">Show</label>
+            <select name="per_page" id="perPageSelect"
+                    class="px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent"
+                    onchange="this.form.submit()">
+                <?php foreach ([6, 12, 24, 48] as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ((int) ($perPage ?? 6) === (int) $opt) ? 'selected' : '' ?>><?= $opt ?></option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($queries as $query): ?>
         <?php $methodMeta = prediction_methods()[$query['method']] ?? null; ?>
@@ -83,5 +98,6 @@
         </div>
         <?php endforeach; ?>
     </div>
+    <?= view('partials/pagination', ['pager' => $pager, 'label' => 'queries']) ?>
     <?php endif; ?>
 </section>

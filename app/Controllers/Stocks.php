@@ -177,7 +177,7 @@ class Stocks extends BaseController
         $sectors = $stockModel->distinct()->select('sector')->findAll();
         $sectorList = array_unique(array_column($sectors, 'sector'));
         sort($sectorList);
-        $exchangeList = ['GLOBAL', 'NSE', 'BSE', 'NYSE', 'NASDAQ', 'LSE'];
+        $exchangeList = ['GLOBAL', 'NSE', 'BSE'];
         $data = [
             'title' => 'Edit ' . $stock['symbol'] . ' - StockTrade Tips',
             'stock' => $stock,
@@ -259,6 +259,34 @@ class Stocks extends BaseController
             return redirect()->to('/stocks')->with('error', 'Stock not found.');
         }
 
+        $methods = prediction_methods();
+        $requestedMethod = (string) $this->request->getGet('method');
+        $selectedMethod = null;
+        $isCustom = false;
+
+        if ($requestedMethod !== '' && array_key_exists($requestedMethod, $methods)) {
+            $engine = new \App\Libraries\ForecastEngine();
+            $engine->loadData($stock['price_history']);
+
+            $custom = [];
+            for ($day = 1; $day <= 30; $day++) {
+                $forecast = $engine->predict($requestedMethod, $day);
+                if ($forecast === null) break;
+                $custom[] = [
+                    'predicted_date'    => date('Y-m-d', strtotime("+{$day} days")),
+                    'predicted_price'   => $forecast['predicted_price'],
+                    'confidence_score'  => $forecast['confidence_score'],
+                    'method'            => $requestedMethod,
+                ];
+            }
+
+            if (!empty($custom) && count($custom) === 30) {
+                $selectedMethod = $requestedMethod;
+                $isCustom = true;
+                $stock['predictions'] = $custom;
+            }
+        }
+
         $predictionDates = [];
         $predictionPrices = [];
         $confidenceScores = [];
@@ -292,6 +320,9 @@ class Stocks extends BaseController
             'dateLabels'       => $dateLabels,
             'showChartJs'      => true,
             'isWatched'        => $isWatched,
+            'methods'          => $methods,
+            'selectedMethod'   => $selectedMethod,
+            'isCustom'         => $isCustom,
         ];
 
         return view('templates/header', $data)

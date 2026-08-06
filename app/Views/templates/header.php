@@ -71,7 +71,7 @@ $ogType          = (string) ($ogType ?? 'website');
     (function() {
         try {
             var saved = localStorage.getItem('stt_theme');
-            var mode = (saved === 'day' || saved === 'night' || saved === 'system') ? saved : 'night';
+            var mode = (saved === 'day' || saved === 'night' || saved === 'system') ? saved : 'system';
             var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             var eff = mode === 'system' ? (dark ? 'night' : 'day') : mode;
             document.documentElement.setAttribute('data-theme', eff);
@@ -578,7 +578,7 @@ document.addEventListener('DOMContentLoaded', initMobileNav);
             var s = localStorage.getItem(KEY);
             if (s === 'day' || s === 'night' || s === 'system') return s;
         } catch (e) {}
-        return 'night';
+        return 'system';
     }
 
     function prefersDark() {

@@ -348,6 +348,43 @@ h1, h2, h3, h4, h5, h6 {
 .border-yellow-700 { border-color: rgb(var(--yellow) / 0.45); }
 .border-yellow-700\/50 { border-color: rgb(var(--yellow) / 0.45); }
 
+/* --- prediction method chip accents (theme-aware across night/day) --- */
+.text-sky-300 { color: rgb(var(--blue-soft)); }
+.bg-sky-900\/40 { background-color: rgb(var(--blue) / 0.12); }
+.border-sky-700 { border-color: rgb(var(--blue) / 0.45); }
+
+.text-violet-300 { color: rgb(var(--purple)); }
+.bg-violet-900\/40 { background-color: rgb(var(--purple) / 0.12); }
+.border-violet-700 { border-color: rgb(var(--purple) / 0.45); }
+
+.text-amber-300 { color: rgb(var(--yellow)); }
+.bg-amber-900\/40 { background-color: rgb(var(--yellow) / 0.12); }
+.border-amber-700 { border-color: rgb(var(--yellow) / 0.45); }
+
+.text-rose-300 { color: rgb(var(--neg-soft)); }
+.bg-rose-900\/40 { background-color: rgb(var(--neg) / 0.12); }
+.border-rose-700 { border-color: rgb(var(--neg) / 0.45); }
+
+.text-teal-300 { color: rgb(var(--teal)); }
+.bg-teal-900\/40 { background-color: rgb(var(--teal) / 0.12); }
+.border-teal-700 { border-color: rgb(var(--teal) / 0.45); }
+
+.text-fuchsia-300 { color: rgb(var(--indigo)); }
+.bg-fuchsia-900\/40 { background-color: rgb(var(--indigo) / 0.12); }
+.border-fuchsia-700 { border-color: rgb(var(--indigo) / 0.45); }
+
+.text-cyan-300 { color: rgb(var(--blue-soft)); }
+.bg-cyan-900\/40 { background-color: rgb(var(--blue) / 0.08); }
+.border-cyan-700 { border-color: rgb(var(--blue) / 0.35); }
+
+.text-orange-300 { color: rgb(var(--orange)); }
+.bg-orange-900\/40 { background-color: rgb(var(--orange) / 0.12); }
+.border-orange-700 { border-color: rgb(var(--orange) / 0.45); }
+
+/* status / signal chips share the same soft tints */
+.bg-green-900\/40 { background-color: rgb(var(--pos) / 0.18); }
+.bg-red-900\/40 { background-color: rgb(var(--neg) / 0.18); }
+
 /* --- neutral fills that adapt to the theme (code blocks, chips, tracks) --- */
 .bg-gray-900 { background-color: rgb(var(--bg-page)); }
 .bg-gray-800 { background-color: rgb(var(--bg-surface)); }
@@ -436,7 +473,9 @@ html[data-theme="day"] .bg-blue-700.text-white,
 html[data-theme="day"] .bg-purple-600.text-white,
 html[data-theme="day"] .bg-purple-700.text-white,
 html[data-theme="day"] .bg-accent.text-white,
+html[data-theme="day"] .bg-gray-900.text-white,
 html[data-theme="day"] .bg-gray-900\/50.text-white,
+html[data-theme="day"] .bg-black.text-white,
 html[data-theme="day"] .bg-black\/60.text-white {
   color: rgb(255 255 255);
 }
@@ -885,16 +924,16 @@ same brand variables above and the day/night themes keep working.
 }
 
 .pagination a {
-  @apply flex items-center justify-center rounded-xs border border-line-soft text-[11px] font-semibold text-ink-300 p-2;
+  @apply flex items-center justify-center rounded-xs border border-line-soft text-[11px] font-semibold text-ink-300 p-2 transition-colors;
 }
 
 .pagination a:hover,
-.pagination .active {
-  @apply bg-accent text-accent dark:hover:text-white border-accent;
+.pagination li.active a {
+  @apply bg-accent text-on-accent border-accent;
 }
 
-.pagination .active {
-  @apply border-accent text-accent bg-accent;
+.pagination a:hover {
+  @apply bg-accent/90;
 }
 .pagination li:first-child a,
 .pagination li:last-child a {

@@ -81,19 +81,19 @@
             <a href="/investments" class="text-accent text-sm hover:text-accent-2 transition">View All</a>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full table-auto text-sm">
+            <table class="w-full table-auto text-sm min-w-[1000px]">
                 <thead>
                     <tr class="text-gray-400 text-sm border-b border-gray-700">
-                        <th class="text-left px-6 py-3">Stock</th>
-                        <th class="text-right px-6 py-3">Buy Price</th>
-                        <th class="text-right px-6 py-3">Current</th>
-                        <th class="text-right px-6 py-3">Shares</th>
-                        <th class="text-right px-6 py-3">Invested</th>
-                        <th class="text-right px-6 py-3">Current Value</th>
-                        <th class="text-right px-6 py-3">Gross P/L</th>
-                        <th class="text-right px-6 py-3">Fees + Tax</th>
-                        <th class="text-right px-6 py-3">Net P/L</th>
-                        <th class="text-center px-6 py-3">Action</th>
+                        <th class="text-left px-4 py-3">Stock</th>
+                        <th class="text-right px-4 py-3">Buy Price</th>
+                        <th class="text-right px-4 py-3">Current</th>
+                        <th class="text-right px-4 py-3">Shares</th>
+                        <th class="text-right px-4 py-3">Invested</th>
+                        <th class="text-right px-4 py-3">Current Value</th>
+                        <th class="text-right px-4 py-3">Gross P/L</th>
+                        <th class="text-right px-4 py-3">Fees + Tax</th>
+                        <th class="text-right px-4 py-3">Net P/L</th>
+                        <th class="text-center px-4 py-3">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,26 +103,26 @@
                         $baseCurrency = $inv['base_currency'] ?? 'INR';
                     ?>
                     <tr class="border-b border-gray-700/50 hover:bg-page/50 cursor-pointer" onclick="location.href='/stocks/<?= $inv['stock_id'] ?>'">
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-4">
                             <span class="text-white font-semibold"><?= esc($inv['symbol']) ?></span>
                             <div class="text-gray-500 text-xs"><?= esc($inv['name']) ?></div>
                         </td>
-                        <td class="px-6 py-4 text-right text-gray-300 dash-bp"><?= format_price_dual($inv['buy_price'] ?? 0, $currency, $baseCurrency) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300 dash-cp"><?= format_price_dual($inv['current_price'] ?? 0, $currency, $baseCurrency) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300"><?= (int) $inv['shares'] ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300 dash-invested"><?= format_price_dual($inv['total_invested'] ?? 0, $currency, $baseCurrency) ?></td>
-                        <td class="px-6 py-4 text-right text-gray-300 dash-value"><?= format_price_dual($inv['current_value'] ?? 0, $currency, $baseCurrency) ?></td>
-                        <td class="px-6 py-4 text-right dash-pl <?= $inv['gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
+                        <td class="px-4 py-4 text-right text-gray-300 dash-bp"><?= format_price_dual($inv['buy_price'] ?? 0, $currency, $baseCurrency) ?></td>
+                        <td class="px-4 py-4 text-right text-gray-300 dash-cp"><?= format_price_dual($inv['current_price'] ?? 0, $currency, $baseCurrency) ?></td>
+                        <td class="px-4 py-4 text-right text-gray-300"><?= (int) $inv['shares'] ?></td>
+                        <td class="px-4 py-4 text-right text-gray-300 dash-invested"><?= format_price_dual($inv['total_invested'] ?? 0, $currency, $baseCurrency) ?></td>
+                        <td class="px-4 py-4 text-right text-gray-300 dash-value"><?= format_price_dual($inv['current_value'] ?? 0, $currency, $baseCurrency) ?></td>
+                        <td class="px-4 py-4 text-right dash-pl <?= $inv['gross_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?>">
                             <span class="dash-gross"><?= $inv['gross_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($inv['gross_profit'] ?? 0, $currency, $baseCurrency) ?></span>
                             <div class="text-xs dash-gpct <?= $inv['gross_profit_pct'] >= 0 ? 'text-green-500' : 'text-red-500' ?>">
                                 <?= $inv['gross_profit_pct'] >= 0 ? '+' : '' ?><?= $inv['gross_profit_pct'] ?>%
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-right text-orange-400 text-sm dash-fees-tax"><?= format_price_dual(($inv['total_fees'] ?? 0) + ($inv['total_tax'] ?? 0), $currency, $baseCurrency) ?></td>
-                        <td class="px-6 py-4 text-right dash-net <?= $inv['net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?> font-semibold">
+                        <td class="px-4 py-4 text-right text-orange-400 text-sm dash-fees-tax"><?= format_price_dual(($inv['total_fees'] ?? 0) + ($inv['total_tax'] ?? 0), $currency, $baseCurrency) ?></td>
+                        <td class="px-4 py-4 text-right dash-net <?= $inv['net_profit'] >= 0 ? 'text-green-400' : 'text-red-400' ?> font-semibold">
                             <span class="dash-net-val"><?= $inv['net_profit'] >= 0 ? '+' : '' ?><?= format_price_dual($inv['net_profit'] ?? 0, $currency, $baseCurrency) ?></span>
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-4 py-4 text-center">
                             <a href="/investments/<?= $inv['id'] ?>/sell" onclick="event.stopPropagation()" class="inline-flex items-center justify-center text-red-400 hover:text-red-300 text-xs font-semibold bg-red-900/20 px-3 py-1.5 rounded-lg border border-red-900/30 hover:bg-red-900/40 transition">
                                 <i class="fas fa-dollar-sign mr-1"></i>Sell
                             </a>

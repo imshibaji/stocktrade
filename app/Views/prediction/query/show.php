@@ -10,8 +10,11 @@
             </div>
             <p class="text-gray-400 mt-1">Prediction query details and latest forecast results.</p>
         </div>
-        <div class="flex items-center space-x-2 mt-4 md:mt-0">
+        <div class="flex flex-wrap items-center gap-2 mt-4 md:mt-0">
             <?php if ($query['user_id'] == current_user_id()): ?>
+            <a href="/predictions" class="border border-gray-600 text-gray-300 hover:border-accent hover:text-white px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-arrow-left mr-1"></i>Back to list
+            </a>
             <button onclick="runQuery(<?= (int) $query['id'] ?>)" class="bg-green-900/40 hover:bg-green-800/50 text-green-300 border border-green-700 font-semibold px-4 py-2.5 rounded-lg transition text-sm">
                 <i class="fas fa-play mr-1"></i>Run Now
             </button>
@@ -58,11 +61,42 @@
         </div>
     </div>
 
-    <div class="flex items-center justify-between mb-3">
+    <h2 class="text-lg font-semibold text-white mb-3">Query Logic</h2>
+
+    <?php
+    $logicText = trim((string) ($query['query_text'] ?? ''));
+    if ($logicText === '') {
+        $logicText = prediction_criteria_to_query_text($query['criteria'] ?? null, $query['technical_criteria'] ?? null);
+    }
+    $matchModeLabel = ($query['match_mode'] ?? 'all') === 'any' ? 'Any condition matches' : 'All conditions must match';
+    ?>
+    <div class="bg-surface rounded-xl border border-gray-700 p-6 mb-6">
+        <div class="flex flex-wrap items-start justify-between gap-4 mb-3">
+            <div>
+                <p class="text-white font-semibold text-sm mb-0.5">How matched stocks are picked</p>
+                <p class="text-gray-400 text-sm">The screening conditions used to select stocks for this forecast.</p>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded-full border bg-purple-900/30 text-purple-300 border-purple-700 whitespace-nowrap">
+                <i class="fas fa-list-check mr-1"></i><?= esc($matchModeLabel) ?>
+            </span>
+        </div>
+        <code class="block w-full bg-page border border-gray-700 rounded-lg px-4 py-3 text-sm font-mono text-white whitespace-pre-wrap"><?= esc($logicText !== '' ? $logicText : 'No conditions specified.') ?></code>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
         <h2 class="text-lg font-semibold text-white">Forecast Results</h2>
-        <a href="/predictions/<?= (int) $query['id'] ?>/results" class="text-sm text-accent hover:text-accent-2">
-            View all results <i class="fas fa-arrow-right ml-1"></i>
-        </a>
+        <?php if (!empty($query['results'])): ?>
+        <form method="get" class="flex items-center gap-3" aria-label="Items per page">
+            <label for="resultsPerPage" class="text-sm text-gray-400">Show</label>
+            <select name="per_page" id="resultsPerPage"
+                    class="px-3 py-2 bg-page border border-gray-600 rounded-lg text-white text-sm focus:outline-hidden focus:border-accent"
+                    onchange="this.form.submit()">
+                <?php foreach ([10, 25, 50, 100] as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ((int) ($perPage ?? 10) === (int) $opt) ? 'selected' : '' ?>><?= $opt ?></option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+        <?php endif; ?>
     </div>
 
     <?php if (empty($query['results'])): ?>
@@ -82,6 +116,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-page text-left text-xs uppercase tracking-wide text-gray-500">
+                        <th class="px-4 py-3 font-semibold">#</th>
                         <th class="px-4 py-3 font-semibold">Symbol</th>
                         <th class="px-4 py-3 font-semibold">Name</th>
                         <th class="px-4 py-3 font-semibold text-right">Predicted Price</th>
@@ -92,10 +127,11 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700/50">
-                    <?php foreach (array_slice($query['results'], 0, 10) as $result): ?>
+                    <?php foreach ($query['results'] as $i => $result): ?>
                     <?php $signal = prediction_signal_meta($result['signal']); ?>
                     <?php $change = (float) $result['predicted_change_pct']; ?>
                     <tr class="hover:bg-page/40 transition">
+                        <td class="px-4 py-3 text-gray-600"><?= $i + 1 ?></td>
                         <td class="px-4 py-3">
                             <a href="/stocks/<?= (int) $result['stock_id'] ?>" class="text-white font-mono font-semibold hover:text-accent"><?= esc($result['stock_symbol']) ?></a>
                         </td>
@@ -123,14 +159,8 @@
                 </tbody>
             </table>
         </div>
-        <?php if (count($query['results']) > 10): ?>
-        <div class="border-t border-gray-700 p-3 text-center">
-            <a href="/predictions/<?= (int) $query['id'] ?>/results" class="text-sm text-accent hover:text-accent-2">
-                Show all <?= count($query['results']) ?> results <i class="fas fa-arrow-right ml-1"></i>
-            </a>
-        </div>
-        <?php endif; ?>
     </div>
+    <?= view('partials/pagination', ['pager' => $pager, 'label' => 'results']) ?>
     <?php endif; ?>
 </section>
 
@@ -142,7 +172,7 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.success) {
-                    window.location.href = '/predictions/' + id + '/results';
+                    window.location.href = '/predictions/' + id;
                 } else {
                     alert('Error: ' + (data.message || 'Could not run query'));
                 }

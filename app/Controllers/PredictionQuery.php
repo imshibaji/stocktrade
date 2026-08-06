@@ -25,11 +25,20 @@ class PredictionQuery extends BaseController
     {
         $userId = current_user_id();
         $model = new PredictionQueryModel();
-        $queries = $userId ? $model->getUserWithResults($userId) : [];
+        $perPage = $this->validPerPage();
+        $pager = null;
+        $queries = [];
+
+        if ($userId) {
+            $queries = $model->getUserWithResults($userId, $perPage);
+            $pager = $model->pager;
+        }
 
         $data = [
             'title' => 'Prediction Queries',
             'queries' => $queries,
+            'pager' => $pager,
+            'perPage' => $perPage,
         ];
         return view('templates/header', $data)
             . view('prediction/query/index', $data)
@@ -111,13 +120,16 @@ class PredictionQuery extends BaseController
                 . view('templates/footer');
         }
 
-        $results = $resultModel->getByQueryId($id);
+        $perPage = $this->validResultsPerPage();
+        $results = $resultModel->getByQueryIdPaginated($id, $perPage);
         $query['results'] = $results;
-        $query['total_results'] = count($results);
+        $query['total_results'] = $query['results_count'] ?? count($results);
 
         $data = [
             'title' => $query['name'] . ' - Prediction Query',
             'query' => $query,
+            'pager' => $resultModel->pager,
+            'perPage' => $perPage,
         ];
         return view('templates/header', $data)
             . view('prediction/query/show', $data)
@@ -253,40 +265,22 @@ class PredictionQuery extends BaseController
         }
     }
 
-    public function results(int $id): string
+    public function results(int $id)
     {
-        $userId = current_user_id();
-        $queryModel = new PredictionQueryModel();
-        $resultsModel = new PredictionQueryResultModel();
-
-        $query = $queryModel->getWithResults($id);
-        if (!$query || $query['user_id'] != $userId) {
-            return view('templates/header')
-                . view('errors/html/error_404')
-                . view('templates/footer');
-        }
-
-        $results = $resultsModel->getByQueryId($id);
-        $query['results'] = $results;
-        $query['total_results'] = count($results);
-
-        $data = [
-            'title' => $query['name'] . ' - Results',
-            'query' => $query,
-        ];
-        return view('templates/header', $data)
-            . view('prediction/query/results', $data)
-            . view('templates/footer');
+        return redirect()->to('/predictions/' . $id);
     }
 
     public function publicList(): string
     {
         $queryModel = new PredictionQueryModel();
-        $queries = $queryModel->getPublic();
+        $perPage = $this->validPerPage();
+        $queries = $queryModel->getPublic($perPage);
 
         $data = [
             'title' => 'Public Prediction Queries',
             'queries' => $queries,
+            'pager' => $queryModel->pager,
+            'perPage' => $perPage,
         ];
         return view('templates/header', $data)
             . view('prediction/query/public_list', $data)
@@ -305,13 +299,16 @@ class PredictionQuery extends BaseController
                 . view('templates/footer');
         }
 
-        $results = $resultModel->getByQueryId($id);
+        $perPage = $this->validResultsPerPage();
+        $results = $resultModel->getByQueryIdPaginated($id, $perPage);
         $query['results'] = $results;
-        $query['total_results'] = count($results);
+        $query['total_results'] = $query['results_count'] ?? count($results);
 
         $data = [
             'title' => $query['name'] . ' - Public Prediction',
             'query' => $query,
+            'pager' => $resultModel->pager,
+            'perPage' => $perPage,
         ];
         return view('templates/header', $data)
             . view('prediction/query/public_show', $data)
@@ -337,6 +334,20 @@ class PredictionQuery extends BaseController
         $updated = $queryModel->getById($id);
 
         return $this->response->setJSON(['success' => true, 'is_public' => $updated['is_public']]);
+    }
+
+    private function validPerPage(): int
+    {
+        $perPage = (int) ($this->request->getGet('per_page') ?? 6);
+
+        return in_array($perPage, [6, 12, 24, 48], true) ? $perPage : 6;
+    }
+
+    private function validResultsPerPage(): int
+    {
+        $perPage = (int) ($this->request->getGet('per_page') ?? 10);
+
+        return in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
     }
 
     private function normalizeLegacyFilters(array $filters): array

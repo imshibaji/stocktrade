@@ -36,6 +36,21 @@ class PredictionQueryResultModel extends Model
             ->getResultArray();
     }
 
+    public function getByQueryIdPaginated(int $queryId, ?int $perPage = null): array
+    {
+        $this->select('prediction_query_results.*')
+            ->select('stocks.symbol as stock_symbol, stocks.name as stock_name')
+            ->join('stocks', 'stocks.id = prediction_query_results.stock_id', 'left')
+            ->where('prediction_query_results.query_id', $queryId)
+            ->orderBy('prediction_query_results.generated_at', 'DESC');
+
+        if ($perPage) {
+            return $this->paginate($perPage);
+        }
+
+        return $this->findAll();
+    }
+
     public function getByStockId(int $stockId): array
     {
         return $this->db->table('prediction_query_results')

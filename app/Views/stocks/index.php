@@ -20,10 +20,10 @@
                 </button>
             </div>
             <?php if (is_logged_in()): ?>
-            <button onclick="toggleAddForm()" class="bg-surface hover:bg-accent text-accent dark:hover:text-white border border-accent font-semibold px-4 py-2.5 rounded-lg transition text-sm whitespace-nowrap">
+            <button onclick="toggleAddForm()" class="bg-surface hover:bg-accent text-accent hover:text-on-accent border border-accent font-semibold px-4 py-2.5 rounded-lg transition text-sm whitespace-nowrap">
                 <i class="fas fa-plus mr-1"></i>New
             </button>
-            <button id="bulkToggleBtn" onclick="toggleBulkForm()" class="bg-surface hover:bg-accent text-accent dark:hover:text-white border border-accent font-semibold px-4 py-2.5 rounded-lg transition text-sm whitespace-nowrap">
+            <button id="bulkToggleBtn" onclick="toggleBulkForm()" class="bg-surface hover:bg-accent text-accent hover:text-on-accent border border-accent font-semibold px-4 py-2.5 rounded-lg transition text-sm whitespace-nowrap">
                 <i class="fas fa-cloud-upload-alt mr-1"></i>Bulk
             </button>
             <?php endif; ?>
