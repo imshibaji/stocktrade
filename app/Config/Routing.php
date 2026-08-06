@@ -29,7 +29,16 @@ class Routing extends BaseRouting
      * @var list<string>
      */
     public array $routeFiles = [
-        APPPATH . 'Config/Routes.php',
+        APPPATH . 'Routes/App.php',
+        APPPATH . 'Routes/Auth.php',
+        APPPATH . 'Routes/Admin.php',
+        APPPATH . 'Routes/Api.php',
+        APPPATH . 'Routes/Stocks.php',
+        APPPATH . 'Routes/Watchlist.php',
+        APPPATH . 'Routes/Screener.php',
+        APPPATH . 'Routes/Dashboard.php',
+        APPPATH . 'Routes/Investments.php',
+        APPPATH . 'Routes/Predictions.php',
     ];
 
     /**

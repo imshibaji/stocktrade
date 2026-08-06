@@ -474,6 +474,50 @@ class Api extends BaseController
         ]);
     }
 
+    public function marketStatus($identifier = null)
+    {
+        $this->setApiCache(30);
+        if (!$identifier) {
+            $identifier = (string) $this->request->getGet('stock');
+        }
+        $identifier = trim((string) $identifier);
+        if ($identifier === '') {
+            return $this->response->setJSON(['error' => 'Stock id or symbol required'])->setStatusCode(400);
+        }
+
+        $stockModel = new StockModel();
+        $symbol = null;
+        $exchange = 'NSE';
+
+        if (ctype_digit($identifier)) {
+            $stock = $stockModel->find((int) $identifier);
+            if (!$stock) {
+                return $this->response->setJSON(['error' => 'Stock not found'])->setStatusCode(404);
+            }
+            $symbol   = $stock['symbol'];
+            $exchange = $stock['exchange'] ?? 'NSE';
+        } else {
+            $symbol = strtoupper($identifier);
+            $exchange = strtoupper(trim((string) $this->request->getGet('exchange')));
+            if ($exchange === '') {
+                $exchange = YahooFinanceService::detectExchange($symbol);
+            }
+        }
+
+        $yahoo = new YahooFinanceService();
+        $quote = $yahoo->getQuote($symbol, $exchange);
+        $d = $quote ? $yahoo->quoteToArray($quote) : [];
+
+        return $this->response->setJSON([
+            'symbol'               => $symbol,
+            'exchange'             => $exchange,
+            'market'               => $d['market'] ?? null,
+            'marketState'          => $d['marketState'] ?? null,
+            'exchangeTimezoneName' => $d['exchangeTimezoneName'] ?? null,
+            'status'               => api_market_status($d['marketState'] ?? null, $exchange),
+        ]);
+    }
+
     public function lookup($symbol = null)
     {
         $this->setApiCache(60);

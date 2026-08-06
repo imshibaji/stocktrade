@@ -3,9 +3,7 @@
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
                 <h1 class="text-2xl font-bold text-white">Sell Investment</h1>
-                <span id="marketBadge" class="text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400">
-                    <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>
-                </span>
+                <?= market_badge('NSE') ?>
             </div>
             <a href="/investments" class="text-gray-400 hover:text-accent text-sm">
                 <i class="fas fa-arrow-left mr-1"></i>Back

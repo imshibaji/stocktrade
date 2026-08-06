@@ -13,9 +13,7 @@ $methodDesc = $selectedMethod ? ($methods[$selectedMethod]['description'] ?? '')
         <div>
             <div class="flex items-center space-x-3">
                 <h1 class="text-3xl font-bold text-white"><?= esc($stock['symbol']) ?> <span class="text-accent">Predictions</span></h1>
-                <span id="marketBadge" class="text-xs px-3 py-1 rounded-full border border-gray-600 text-gray-400">
-                    <i class="fas fa-circle text-gray-500 text-[8px] mr-1"></i>
-                </span>
+                <?= market_badge($stock['exchange'] ?? 'NSE', (int) ($stock['id'] ?? 0)) ?>
             </div>
             <p class="text-gray-400 mt-1"><?= esc($methodDesc) ?></p>
         </div>
