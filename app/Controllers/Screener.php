@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Analysis\StockTechnicalAnalysisEngine;
+use App\Libraries\ForecastEngine;
 use App\Models\StockListModel;
 use App\Models\StockModel;
 use App\Models\StockPriceModel;
@@ -101,6 +102,8 @@ class Screener extends BaseController
             $results = $this->applyTechnicalFilters($results, $techFilters, $matchMode);
         }
 
+        $results = $this->attachForecasts($results);
+
         return $this->response->setJSON([
             'total'  => count($results),
             'stocks' => array_values($results),
@@ -181,6 +184,8 @@ class Screener extends BaseController
          } else {
              $results = $fundResults;
          }
+
+        $results = $this->attachForecasts($results);
 
         $response = [
             'success'  => true,
@@ -925,6 +930,55 @@ class Screener extends BaseController
         }
 
         return $mode === 'any' ? in_array(true, $results, true) : !in_array(false, $results, true);
+    }
+
+    /**
+     * Attach a forecast to each matched stock when a forecast method was requested.
+     */
+    private function attachForecasts(array $stocks): array
+    {
+        $method = (string) $this->request->getGet('method');
+        if ($method === '' && (string) $this->request->getPost('method') !== '') {
+            $method = (string) $this->request->getPost('method');
+        }
+
+        if ($method === '' || empty($stocks)) {
+            return $stocks;
+        }
+
+        $supported = (new ForecastEngine())->supportedMethods();
+        if (!in_array($method, $supported, true)) {
+            return $stocks;
+        }
+
+        $horizon = (int) ($this->request->getGet('horizon_days') ?: $this->request->getPost('horizon_days'));
+        $horizon = max(1, min((int) $horizon > 0 ? (int) $horizon : 7, 60));
+
+        $priceModel = new StockPriceModel();
+        $ids = array_column($stocks, 'id');
+        $prices = $priceModel
+            ->whereIn('stock_id', $ids)
+            ->orderBy('stock_id', 'ASC')
+            ->orderBy('price_date', 'ASC')
+            ->findAll();
+        $byStock = [];
+        foreach ($prices as $p) {
+            $byStock[(int) $p['stock_id']][] = $p;
+        }
+
+        $engine = new ForecastEngine();
+        foreach ($stocks as &$s) {
+            $sid = (int) $s['id'];
+            $ohlcv = $byStock[$sid] ?? [];
+            if (empty($ohlcv)) {
+                $s['forecast'] = null;
+                continue;
+            }
+            $s['forecast'] = $engine->loadData($ohlcv)->predict($method, $horizon);
+        }
+        unset($s);
+
+        return $stocks;
     }
 
     private function calculateIndicator(array $ohlcv, string $indicator, int $period): ?float

@@ -46,6 +46,14 @@ class ForecastEngine
             'macd_divergence'    => $this->predictMacdDivergence($horizonDays, $lastPrice),
             'vwap_reversion'     => $this->predictVwapReversion($horizonDays, $lastPrice),
             'supertrend_follow'  => $this->predictSupertrendFollow($horizonDays, $lastPrice),
+            'monte_carlo'        => $this->predictMonteCarlo($horizonDays, $lastPrice),
+            'sma_follow'         => $this->predictSmaFollow($horizonDays, $lastPrice),
+            'wma_follow'         => $this->predictWmaFollow($horizonDays, $lastPrice),
+            'holt_linear'        => $this->predictHoltLinear($horizonDays, $lastPrice),
+            'roc_follow'         => $this->predictRocFollow($horizonDays, $lastPrice),
+            'donchian_breakout'  => $this->predictDonchianBreakout($horizonDays, $lastPrice),
+            'fibonacci_projection' => $this->predictFibonacciProjection($horizonDays, $lastPrice),
+            'stochastic_reversion' => $this->predictStochasticReversion($horizonDays, $lastPrice),
             default              => null,
         };
     }
@@ -61,6 +69,14 @@ class ForecastEngine
             'macd_divergence',
             'vwap_reversion',
             'supertrend_follow',
+            'monte_carlo',
+            'sma_follow',
+            'wma_follow',
+            'holt_linear',
+            'roc_follow',
+            'donchian_breakout',
+            'fibonacci_projection',
+            'stochastic_reversion',
         ];
     }
 
@@ -324,6 +340,311 @@ class ForecastEngine
             'supertrend'           => round($st['supertrend'], 2),
             'trend'                => $st['trend'],
         ];
+    }
+
+    private function predictMonteCarlo(int $horizon, float $lastPrice): ?array
+    {
+        $n = count($this->prices);
+        if ($n < 30) return null;
+
+        $returns = [];
+        for ($i = 1; $i < $n; $i++) {
+            $prev = $this->prices[$i - 1];
+            if ($prev > 0) $returns[] = log($this->prices[$i] / $prev);
+        }
+        $count = count($returns);
+        if ($count < 20) return null;
+
+        $mean = array_sum($returns) / $count;
+        $var = 0.0;
+        foreach ($returns as $r) {
+            $var += ($r - $mean) ** 2;
+        }
+        $var /= ($count - 1);
+        $std = sqrt($var);
+
+        mt_srand(crc32(implode(',', array_slice($this->prices, -30))));
+        $paths = [];
+        for ($sim = 0; $sim < 1500; $sim++) {
+            $price = $lastPrice;
+            for ($d = 0; $d < $horizon; $d++) {
+                $price *= exp(($mean - 0.5 * $std * $std) + $std * $this->gaussian());
+            }
+            $paths[] = $price;
+        }
+        sort($paths);
+
+        $median = $paths[(int) floor($count * 0.5)];
+        $p10 = $paths[(int) floor($count * 0.1)];
+        $p90 = $paths[(int) floor($count * 0.9)];
+
+        $changePct = $lastPrice > 0 ? (($median - $lastPrice) / $lastPrice) * 100 : 0;
+        $confidence = $this->clampConfidence(50 - (($p90 - $p10) / $lastPrice) * 100);
+        $signal = $median > $lastPrice ? 'BULLISH' : ($median < $lastPrice ? 'BEARISH' : 'NEUTRAL');
+
+        return [
+            'predicted_price'      => round($median, 2),
+            'predicted_change_pct' => round($changePct, 2),
+            'signal'               => $signal,
+            'confidence_score'     => $confidence,
+            'method'               => 'monte_carlo',
+            'horizon_days'         => $horizon,
+            'simulations'          => 1500,
+            'lower_bound'          => round($p10, 2),
+            'upper_bound'          => round($p90, 2),
+            'volatility'           => round($std * 100, 2),
+        ];
+    }
+
+    private function predictSmaFollow(int $horizon, float $lastPrice): ?array
+    {
+        $fast = $this->engine->calculateSMA($this->prices, 10);
+        $slow = $this->engine->calculateSMA($this->prices, 30);
+        if ($fast === null || $slow === null || $slow <= 0) return null;
+
+        $trendRate = ($fast - $slow) / $slow;
+        $converge = min(abs($trendRate) * 2, 0.9);
+        $predictedPrice = $lastPrice + ($fast - $lastPrice) * ($converge * $horizon / 30);
+        if ($predictedPrice <= 0) return null;
+
+        $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
+        $confidence = $this->clampConfidence(abs($trendRate) * 400 + 10);
+        $signal = $trendRate > 0 ? 'BULLISH' : ($trendRate < 0 ? 'BEARISH' : 'NEUTRAL');
+
+        return [
+            'predicted_price'      => round($predictedPrice, 2),
+            'predicted_change_pct' => round($changePct, 2),
+            'signal'               => $signal,
+            'confidence_score'     => $confidence,
+            'method'               => 'sma_follow',
+            'horizon_days'         => $horizon,
+            'fast_sma'             => round($fast, 2),
+            'slow_sma'             => round($slow, 2),
+        ];
+    }
+
+    private function predictWmaFollow(int $horizon, float $lastPrice): ?array
+    {
+        $period = 20;
+        $recent = array_slice($this->prices, -$period);
+        if (count($recent) < $period) return null;
+
+        $wma = 0.0;
+        $weightSum = 0;
+        $w = $period;
+        foreach ($recent as $p) {
+            $wma += $p * $w;
+            $weightSum += $w;
+            $w--;
+        }
+        $wma /= $weightSum;
+
+        $slow = $this->engine->calculateSMA($this->prices, 50);
+        $drift = $slow !== null && $slow > 0 ? ($wma - $slow) / $slow : 0;
+        $predictedPrice = $lastPrice + ($wma - $lastPrice) * (min(abs($drift) * 2 + 0.05, 1.0) * $horizon / 20);
+        if ($predictedPrice <= 0) return null;
+
+        $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
+        $confidence = $this->clampConfidence(abs($drift) * 400 + 10);
+        $signal = $wma > $lastPrice ? 'BULLISH' : ($wma < $lastPrice ? 'BEARISH' : 'NEUTRAL');
+
+        return [
+            'predicted_price'      => round($predictedPrice, 2),
+            'predicted_change_pct' => round($changePct, 2),
+            'signal'               => $signal,
+            'confidence_score'     => $confidence,
+            'method'               => 'wma_follow',
+            'horizon_days'         => $horizon,
+            'wma'                  => round($wma, 2),
+        ];
+    }
+
+    private function predictHoltLinear(int $horizon, float $lastPrice): ?array
+    {
+        $alpha = 0.5;
+        $beta = 0.3;
+        $level = $this->prices[0];
+        $trend = 0.0;
+
+        for ($i = 1; $i < count($this->prices); $i++) {
+            $prevLevel = $level;
+            $level = $alpha * $this->prices[$i] + (1 - $alpha) * ($level + $trend);
+            $trend = $beta * ($level - $prevLevel) + (1 - $beta) * $trend;
+        }
+
+        if ($level <= 0) return null;
+        $predictedPrice = $level + $trend * $horizon;
+        if ($predictedPrice <= 0) return null;
+
+        $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
+        $confidence = $this->clampConfidence(abs($trend) / $level * 500 + 10);
+        $signal = $trend > 0 ? 'BULLISH' : ($trend < 0 ? 'BEARISH' : 'NEUTRAL');
+
+        return [
+            'predicted_price'      => round($predictedPrice, 2),
+            'predicted_change_pct' => round($changePct, 2),
+            'signal'               => $signal,
+            'confidence_score'     => $confidence,
+            'method'               => 'holt_linear',
+            'horizon_days'         => $horizon,
+            'trend'                => round($trend, 4),
+        ];
+    }
+
+    private function predictRocFollow(int $horizon, float $lastPrice): ?array
+    {
+        $period = 20;
+        $roc = $this->engine->calculateROC($this->prices, $period);
+        if ($roc === null || $lastPrice <= 0) return null;
+
+        $dailyGrowth = $roc / 100 / $period;
+        $predictedPrice = $lastPrice * pow(1 + $dailyGrowth, $horizon);
+        if ($predictedPrice <= 0) return null;
+
+        $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
+        $confidence = $this->clampConfidence(abs($roc) * 2 + 10);
+        $signal = $roc > 0 ? 'BULLISH' : ($roc < 0 ? 'BEARISH' : 'NEUTRAL');
+
+        return [
+            'predicted_price'      => round($predictedPrice, 2),
+            'predicted_change_pct' => round($changePct, 2),
+            'signal'               => $signal,
+            'confidence_score'     => $confidence,
+            'method'               => 'roc_follow',
+            'horizon_days'         => $horizon,
+            'roc'                  => round($roc, 2),
+        ];
+    }
+
+    private function predictDonchianBreakout(int $horizon, float $lastPrice): ?array
+    {
+        $dc = $this->engine->calculateDonchianChannels(20);
+        if ($dc['upper'] === null || $dc['lower'] === null || $dc['middle'] === null) return null;
+
+        $upper = $dc['upper'];
+        $lower = $dc['lower'];
+        $middle = $dc['middle'];
+        $range = $upper - $lower;
+        if ($range <= 0) return null;
+
+        $position = ($lastPrice - $lower) / $range;
+        $signal = 'NEUTRAL';
+        $confidence = 10;
+
+        if ($lastPrice > $upper) {
+            $signal = 'BULLISH';
+            $confidence = $this->clampConfidence($position * 60 + 15);
+        } elseif ($lastPrice < $lower) {
+            $signal = 'BEARISH';
+            $confidence = $this->clampConfidence((1 - $position) * 60 + 15);
+        } elseif ($position > 0.8) {
+            $signal = 'BULLISH';
+            $confidence = $this->clampConfidence($position * 50 + 10);
+        } elseif ($position < 0.2) {
+            $signal = 'BEARISH';
+            $confidence = $this->clampConfidence((1 - $position) * 50 + 10);
+        }
+
+        $direction = $signal === 'BULLISH' ? 1 : ($signal === 'BEARISH' ? -1 : 0);
+        $move = $lastPrice > 0 ? ($lastPrice - $middle) / $lastPrice : 0;
+        $predictedPrice = $lastPrice * (1 + $direction * abs($move) * 0.5 * ($horizon / 20));
+        if ($predictedPrice <= 0) return null;
+
+        $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
+
+        return [
+            'predicted_price'      => round($predictedPrice, 2),
+            'predicted_change_pct' => round($changePct, 2),
+            'signal'               => $signal,
+            'confidence_score'     => $confidence,
+            'method'               => 'donchian_breakout',
+            'horizon_days'         => $horizon,
+            'donchian_upper'       => round($upper, 2),
+            'donchian_lower'       => round($lower, 2),
+            'band_position'        => round($position, 3),
+        ];
+    }
+
+    private function predictFibonacciProjection(int $horizon, float $lastPrice): ?array
+    {
+        $lookback = min(count($this->prices), 60);
+        $window = array_slice($this->prices, -$lookback);
+        $swingHigh = max($window);
+        $swingLow = min($window);
+        $range = $swingHigh - $swingLow;
+        if ($range <= 0) return null;
+
+        $this->engine->calculateFibonacciRetracement($swingHigh, $swingLow);
+        $position = ($lastPrice - $swingLow) / $range;
+
+        if ($position >= 0.5) {
+            $target = $swingHigh + 0.618 * $range;
+            $signal = 'BULLISH';
+            $confidence = $this->clampConfidence($position * 50 + 10);
+        } else {
+            $target = $swingLow - 0.618 * $range;
+            $signal = 'BEARISH';
+            $confidence = $this->clampConfidence((1 - $position) * 50 + 10);
+        }
+
+        $predictedPrice = $lastPrice + ($target - $lastPrice) * ($horizon / 30);
+        if ($predictedPrice <= 0) return null;
+
+        $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
+
+        return [
+            'predicted_price'      => round($predictedPrice, 2),
+            'predicted_change_pct' => round($changePct, 2),
+            'signal'               => $signal,
+            'confidence_score'     => $confidence,
+            'method'               => 'fibonacci_projection',
+            'horizon_days'         => $horizon,
+            'swing_high'           => round($swingHigh, 2),
+            'swing_low'            => round($swingLow, 2),
+            'fib_target'           => round($target, 2),
+        ];
+    }
+
+    private function predictStochasticReversion(int $horizon, float $lastPrice): ?array
+    {
+        $stoch = $this->engine->calculateStochastic(14);
+        $k = $stoch['percent_k'] ?? null;
+        if ($k === null) return null;
+
+        $signal = 'NEUTRAL';
+        $confidence = 10;
+        $changePct = 0;
+
+        if ($k < 20) {
+            $signal = 'BULLISH';
+            $confidence = $this->clampConfidence(((20 - $k) / 20) * 60 + 10);
+            $changePct = ((20 - $k) / 20) * 4;
+        } elseif ($k > 80) {
+            $signal = 'BEARISH';
+            $confidence = $this->clampConfidence((($k - 80) / 20) * 60 + 10);
+            $changePct = -(($k - 80) / 20) * 4;
+        }
+
+        $predictedPrice = $lastPrice * (1 + $changePct / 100);
+        if ($predictedPrice <= 0) return null;
+
+        return [
+            'predicted_price'      => round($predictedPrice, 2),
+            'predicted_change_pct' => round($changePct, 2),
+            'signal'               => $signal,
+            'confidence_score'     => $confidence,
+            'method'               => 'stochastic_reversion',
+            'horizon_days'         => $horizon,
+            'stoch_k'              => round($k, 2),
+        ];
+    }
+
+    private function gaussian(): float
+    {
+        $u1 = mt_rand(1, 999999) / 1000000;
+        $u2 = mt_rand(1, 999999) / 1000000;
+
+        return sqrt(-2 * log($u1)) * cos(2 * M_PI * $u2);
     }
 
     private function clampConfidence(float $value): float

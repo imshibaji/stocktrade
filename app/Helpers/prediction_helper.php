@@ -49,6 +49,46 @@ if (!function_exists('prediction_methods')) {
                 'description' => 'Follows the Supertrend direction while it persists.',
                 'chip'        => 'bg-orange-900/40 text-orange-300 border-orange-700',
             ],
+            'monte_carlo' => [
+                'label'       => 'Monte Carlo',
+                'description' => 'Simulates thousands of price paths from historical volatility to find the most likely outcome.',
+                'chip'        => 'bg-emerald-900/40 text-emerald-300 border-emerald-700',
+            ],
+            'sma_follow' => [
+                'label'       => 'SMA Trend Pull',
+                'description' => 'Projects price toward its simple moving average as the trend pulls it along.',
+                'chip'        => 'bg-lime-900/40 text-lime-300 border-lime-700',
+            ],
+            'wma_follow' => [
+                'label'       => 'Weighted MA',
+                'description' => 'Reacts faster by weighting recent closes more heavily in a moving-average projection.',
+                'chip'        => 'bg-green-900/40 text-green-300 border-green-700',
+            ],
+            'holt_linear' => [
+                'label'       => 'Holt Linear Trend',
+                'description' => 'Extrapolates the level and smoothed trend with double exponential smoothing.',
+                'chip'        => 'bg-indigo-900/40 text-indigo-300 border-indigo-700',
+            ],
+            'roc_follow' => [
+                'label'       => 'Rate of Change',
+                'description' => 'Compounds the recent rate-of-change into a momentum-based price target.',
+                'chip'        => 'bg-pink-900/40 text-pink-300 border-pink-700',
+            ],
+            'donchian_breakout' => [
+                'label'       => 'Donchian Breakout',
+                'description' => 'Rides momentum after price breaks out of its Donchian channel extremes.',
+                'chip'        => 'bg-purple-900/40 text-purple-300 border-purple-700',
+            ],
+            'fibonacci_projection' => [
+                'label'       => 'Fibonacci Projection',
+                'description' => 'Projects the swing toward a 1.618 extension of the recent high-low range.',
+                'chip'        => 'bg-yellow-900/40 text-yellow-300 border-yellow-700',
+            ],
+            'stochastic_reversion' => [
+                'label'       => 'Stochastic Reversion',
+                'description' => 'Fades overbought / oversold Stochastic readings back toward 50.',
+                'chip'        => 'bg-slate-900/40 text-slate-300 border-slate-700',
+            ],
         ];
     }
 }

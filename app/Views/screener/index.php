@@ -240,12 +240,27 @@
                         <h2 class="text-white font-bold text-lg">
                             Results <span id="resultCount2" class="text-accent text-base font-normal"></span>
                         </h2>
-                        <div class="flex gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex items-center gap-2 mr-2">
+                                <label for="forecastMethod" class="text-gray-400 text-xs whitespace-nowrap">Forecast</label>
+                                <select id="forecastMethod" onchange="onForecastChange()" class="bg-page border border-gray-600 rounded px-2 py-1.5 text-xs text-white focus:border-accent focus:outline-hidden">
+                                    <option value="">No forecast</option>
+                                    <?php foreach (prediction_methods() as $methodKey => $methodMeta): ?>
+                                    <option value="<?= esc($methodKey) ?>"><?= esc($methodMeta['label']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <select id="forecastHorizon" onchange="onForecastChange()" class="bg-page border border-gray-600 rounded px-2 py-1.5 text-xs text-white focus:border-accent focus:outline-hidden">
+                                    <option value="7">7d</option>
+                                    <option value="14">14d</option>
+                                    <option value="30" selected>30d</option>
+                                </select>
+                            </div>
                             <button onclick="showSaveDialog()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
                                 <i class="fas fa-save mr-1"></i>Save as List
                             </button>
                         </div>
                     </div>
+                    <p class="text-gray-600 text-xs mt-2">Pick a forecast method and re-run to see a predicted price, forecast change % and confidence for every match.</p>
                 </div>
                 <div class="bg-surface rounded-xl border border-gray-700 overflow-hidden">
                     <div class="overflow-x-auto">
@@ -260,6 +275,9 @@
                                     <th class="text-right px-6 py-3">M Cap</th>
                                     <th class="text-right px-6 py-3">Div Yield</th>
                             <th class="text-right px-6 py-3">Volume</th>
+                            <th class="text-right px-6 py-3">Forecast</th>
+                            <th class="text-right px-6 py-3">Forecast Δ</th>
+                            <th class="text-right px-6 py-3">Conf.</th>
                             <th class="text-center px-6 py-3">Actions</th>
                         </tr>
                             </thead>
@@ -484,6 +502,67 @@
     function formatPrice(v) { return '\u20B9' + parseFloat(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
     function escHtml(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+    function forecastCells(s) {
+        var f = s.forecast;
+        if (!f || !f.predicted_price) {
+            return '<td class="px-6 py-4 text-right text-gray-600">\u2014</td>' +
+                   '<td class="px-6 py-4 text-right text-gray-600">\u2014</td>' +
+                   '<td class="px-6 py-4 text-right text-gray-600">\u2014</td>';
+        }
+        var fp = parseFloat(f.predicted_price) || 0;
+        var fc = parseFloat(f.predicted_change_pct) || 0;
+        var cs = f.confidence_score != null ? Math.round(f.confidence_score) + '%' : '\u2014';
+        return '<td class="px-6 py-4 text-right text-white font-medium">' + formatPrice(fp) + '</td>' +
+               '<td class="px-6 py-4 text-right ' + (fc >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (fc >= 0 ? '+' : '') + fc.toFixed(2) + '%</td>' +
+               '<td class="px-6 py-4 text-right text-gray-300">' + cs + '</td>';
+    }
+
+    function stockRowHtml(s) {
+        var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
+        var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
+        return '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
+            '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
+            '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
+            '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
+            '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
+            '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
+            '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
+            '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
+            forecastCells(s) +
+            '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
+                '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
+                '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
+                '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
+            '</div></td>';
+    }
+
+    function renderStockRows(stocks) {
+        var tbody = document.getElementById('resultsBody');
+        tbody.innerHTML = '';
+        if (!stocks || stocks.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="13" class="px-6 py-8 text-center text-gray-500">No stocks match your criteria.</td></tr>';
+            return;
+        }
+        stocks.forEach(function(s) {
+            var tr = document.createElement('tr');
+            tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
+            tr.style.cursor = 'pointer';
+            tr.onclick = function() { location.href = '/stocks/' + s.id; };
+            tr.innerHTML = stockRowHtml(s);
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.onForecastChange = function() {
+        if (lastResults.length === 0) return;
+        var manual = document.getElementById('manualPanel');
+        if (manual && !manual.classList.contains('hidden')) {
+            runManualQuery();
+        } else {
+            runScreener();
+        }
+    };
+
     window.switchScreenerTab = function(tab) {
         var fundamentalPanel = document.getElementById('fundamentalPanel');
         var technicalPanel = document.getElementById('technicalPanel');
@@ -535,6 +614,8 @@
         var params = new URLSearchParams();
         params.set('query', query);
         params.set('match_mode', matchMode);
+        var fMethod = document.getElementById('forecastMethod').value;
+        if (fMethod) { params.set('method', fMethod); params.set('horizon_days', document.getElementById('forecastHorizon').value); }
         params.set('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
         var btn = document.querySelector('button[onclick="runManualQuery()"]');
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Compiling...'; }
@@ -549,42 +630,14 @@
             if (!data.success) {
                 document.getElementById('manualResultCount').innerHTML = '<span class="text-red-400">' + escHtml(data.message) + '</span>';
                 var tbody = document.getElementById('resultsBody');
-                tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-8 text-center text-red-400">' + escHtml(data.message) + '</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="13" class="px-6 py-8 text-center text-red-400">' + escHtml(data.message) + '</td></tr>';
                 document.getElementById('resultsContainer').classList.remove('hidden');
                 return;
             }
             lastResults = data.stocks || [];
             var total = data.total ?? data.stocks?.length ?? 0;
             document.getElementById('manualResultCount').innerHTML = '<span class="text-green-400">' + total + ' stocks matched</span>';
-            var tbody = document.getElementById('resultsBody');
-            tbody.innerHTML = '';
-            if (data.stocks.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-8 text-center text-gray-500">No stocks match your query.</td></tr>';
-            } else {
-                data.stocks.forEach(function(s) {
-                    var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
-                    var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
-                    var tr = document.createElement('tr');
-                    tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
-                    tr.style.cursor = 'pointer';
-                    tr.onclick = function() { location.href = '/stocks/' + s.id; };
-                    tr.innerHTML =
-                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
-                        '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
-                        '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
-                        '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                         '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                             '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                             '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
-                             '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
-                         '</div></td>';
-                    tbody.appendChild(tr);
-                });
-            }
+            renderStockRows(lastResults);
             document.getElementById('resultsContainer').classList.remove('hidden');
             document.getElementById('resultCount2').textContent = '(' + total + ')';
             var sb = document.getElementById('manualSaveBtn');
@@ -838,6 +891,8 @@
         if (cf.techFilters.length > 0) params.set('tech_filters', JSON.stringify(cf.techFilters));
         if (cf.historicalFilters.length > 0) params.set('historical_filters', JSON.stringify(cf.historicalFilters));
         if (cf.summariesFilters.length > 0) params.set('summaries_filters', JSON.stringify(cf.summariesFilters));
+        var fMethod = document.getElementById('forecastMethod').value;
+        if (fMethod) { params.set('method', fMethod); params.set('horizon_days', document.getElementById('forecastHorizon').value); }
 
         var url = '/api/screener/run?' + params.toString();
         var btn = document.querySelector('button[onclick="runScreener()"]');
@@ -851,36 +906,8 @@
                 var total = data.total ?? data.stocks?.length ?? 0;
                 setResultCount(total + ' stocks found');
                 document.getElementById('resultCount2').textContent = '(' + total + ')';
-                var tbody = document.getElementById('resultsBody');
-                tbody.innerHTML = '';
-                if (data.stocks.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-8 text-center text-gray-500">No stocks match your criteria.</td></tr>';
-                } else {
-                    data.stocks.forEach(function(s) {
-                        var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
-                        var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
-                        var tr = document.createElement('tr');
-                        tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
-                        tr.style.cursor = 'pointer';
-                        tr.onclick = function() { location.href = '/stocks/' + s.id; };
-                        tr.innerHTML =
-                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
-                            '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
-                            '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
-                            '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
-                            '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
-                        '</div></td>';
-                    tbody.appendChild(tr);
-                });
-            }
-            document.getElementById('resultsContainer').classList.remove('hidden');
+                renderStockRows(lastResults);
+                document.getElementById('resultsContainer').classList.remove('hidden');
         })
         .catch(function() {
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-search mr-2"></i>Run Screener'; }
@@ -1024,31 +1051,7 @@
                     lastResults = data.stocks;
                     var total = data.stocks.length;
                     document.getElementById('manualResultCount').innerHTML = '<span class="text-green-400">' + total + ' stocks matched</span>';
-                    var tbody = document.getElementById('resultsBody');
-                    tbody.innerHTML = '';
-                    data.stocks.forEach(function(s) {
-                        var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
-                        var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
-                        var tr = document.createElement('tr');
-                        tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
-                        tr.style.cursor = 'pointer';
-                        tr.onclick = function() { location.href = '/stocks/' + s.id; };
-                        tr.innerHTML =
-                            '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
-                            '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
-                            '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
-                            '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
-                            '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                            '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                            '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
-                            '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
-                        '</div></td>';
-                    tbody.appendChild(tr);
-                    });
+                    renderStockRows(lastResults);
                     document.getElementById('resultsContainer').classList.remove('hidden');
                     document.getElementById('resultCount2').textContent = '(' + total + ')';
                     var sb = document.getElementById('manualSaveBtn');
@@ -1110,31 +1113,7 @@
                 lastResults = data.stocks;
                 setResultCount(data.stocks.length + ' stocks found');
                 document.getElementById('resultCount2').textContent = '(' + data.stocks.length + ')';
-                var tbody = document.getElementById('resultsBody');
-                tbody.innerHTML = '';
-                data.stocks.forEach(function(s) {
-                    var cp = parseFloat(s.current_price) || 0, pc = parseFloat(s.previous_close) || 0;
-                    var chg = cp - pc, pct = pc > 0 ? ((chg / pc) * 100).toFixed(2) : '0.00';
-                    var tr = document.createElement('tr');
-                    tr.className = 'border-b border-gray-700/50 hover:bg-page/50';
-                    tr.style.cursor = 'pointer';
-                    tr.onclick = function() { location.href = '/stocks/' + s.id; };
-                    tr.innerHTML =
-                        '<td class="px-6 py-4"><a href="/stocks/' + s.id + '" onclick="event.stopPropagation()" class="text-white font-semibold hover:text-accent">' + escHtml(s.symbol) + '</a></td>' +
-                        '<td class="px-6 py-4 text-gray-400 text-xs">' + escHtml(s.name) + '</td>' +
-                        '<td class="px-6 py-4 text-right text-white font-semibold">' + formatPrice(cp) + '</td>' +
-                        '<td class="px-6 py-4 text-right ' + (chg >= 0 ? 'text-green-400' : 'text-red-400') + '">' + (chg >= 0 ? '+' : '') + pct + '%</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.pe_ratio || '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.market_cap ? formatMCap(s.market_cap) : '\u2014') + '</td>' +
-                        '<td class="px-6 py-4 text-right text-gray-300">' + (s.dividend_yield ? (parseFloat(s.dividend_yield || 0) * 100).toFixed(2) + '%' : '\u2014') + '</td>' +
-                         '<td class="px-6 py-4 text-right text-gray-300">' + (s.avg_volume ? formatVol(s.avg_volume) : '\u2014') + '</td>' +
-                         '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center space-x-2">' +
-                             '<button onclick="event.stopPropagation(); toggleScreenerWatch(this, ' + s.id + ')" class="watch-action text-gray-400 hover:text-accent text-xs transition" title="Add to Watchlist"><i class="far fa-star"></i></button>' +
-                             '<a href="/stocks/' + s.id + '/predictions" onclick="event.stopPropagation()" class="text-gray-400 hover:text-accent text-xs transition" title="Show Predictions"><i class="fas fa-chart-simple"></i></a>' +
-                             '<a href="/investments?stock_id=' + s.id + '" onclick="event.stopPropagation()" class="text-gray-400 hover:text-green-400 text-xs transition" title="Add Investment"><i class="fas fa-plus-circle"></i></a>' +
-                         '</div></td>';
-                    tbody.appendChild(tr);
-                });
+                renderStockRows(lastResults);
                 document.getElementById('resultsContainer').classList.remove('hidden');
             }
             document.getElementById('savedListsPanel').classList.add('hidden');
