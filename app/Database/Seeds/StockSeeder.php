@@ -95,25 +95,13 @@ class StockSeeder extends Seeder
         foreach ($stocks as $data) {
             $data['created_at'] = date('Y-m-d H:i:s');
             $data['updated_at'] = date('Y-m-d H:i:s');
-            $data['from_yahoo'] = false;
             $data['last_fetched'] = null;
             $this->db->table('stocks')->insert($data);
 
             $stockId = $this->db->insertID();
             $basePrice = (float) $data['current_price'];
-            generate_price_history($stockId, $basePrice);
-            generate_predictions($stockId, $basePrice);
-        }
-
-        foreach ($stocks as $data) {
-            $data['created_at'] = date('Y-m-d H:i:s');
-            $data['updated_at'] = date('Y-m-d H:i:s');
-            $this->db->table('stocks')->insert($data);
-
-            $stockId = $this->db->insertID();
-            $basePrice = (float) $data['current_price'];
-            generate_price_history($stockId, $basePrice);
-            generate_predictions($stockId, $basePrice);
+            $this->generatePriceHistory($stockId, $basePrice);
+            $this->generatePredictions($stockId, $basePrice);
         }
     }
 

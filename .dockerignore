@@ -1,0 +1,37 @@
+# ---------------------------------------------------------------------------
+# Keep the build context small and the image reproducible.
+# Anything installed or generated inside the image is excluded here.
+# ---------------------------------------------------------------------------
+
+# Version control & editors
+.git
+.gitattributes
+.gitignore
+.github
+.idea
+.vscode
+*.iml
+.DS_Store
+*.swp
+
+# Local environment / secrets (never bake these into an image)
+.env
+.env.*
+!.env.example
+
+# Dependencies (installed in the image from the lock files)
+vendor/
+node_modules/
+
+# Generated assets (rebuilt in the "assets" stage)
+public/css/style.css
+
+# Test / coverage artifacts
+build/
+results/
+tests/coverage*
+phpunit.xml
+*.log
+
+# Mutable runtime state (created at container start)
+writable/

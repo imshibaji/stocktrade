@@ -1,0 +1,25 @@
+# ---------------------------------------------------------------------------
+# StockTrade — development override
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# Bind-mounts the source tree for live editing. `vendor/` and `writable/`
+# stay as named/anonymous volumes so the host does not need PHP or a database.
+#
+# Tailwind CSS is *not* recompiled inside the container — run the watcher on
+# the host alongside it:
+#
+#   npm install && npm run dev
+# ---------------------------------------------------------------------------
+
+services:
+  app:
+    environment:
+      CI_ENVIRONMENT: development
+      AUTO_MIGRATE: "true"
+    volumes:
+      # Source code (live)
+      - .:/var/www/html
+      # Keep dependencies and runtime state out of the bind mount
+      - /var/www/html/vendor
+      - stocktrade-writable:/var/www/html/writable

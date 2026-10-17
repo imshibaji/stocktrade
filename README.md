@@ -27,6 +27,23 @@ corresponding to the latest version of the framework.
 | `public/css/style.css` | Compiled CSS (`npx @tailwindcss/cli -i src/tailwind.css -o public/css/style.css`) |
 | `tests/` | PHPUnit feature tests (TDD red→green workflow) |
 | `docs/research/` | Research artifacts (e.g. competitor FAQ research) |
+| `Dockerfile`, `docker-compose.yml`, `docker/` | Container build & runtime configuration |
+
+## Docker
+
+The whole stack (Apache + PHP 8.2 + SQLite + compiled Tailwind CSS) runs in a
+single container — no PHP, Composer or Node needed on the host.
+
+```bash
+docker compose up --build -d     # build and start
+open http://localhost:8080       # the app
+docker compose down              # stop (keeps the data volume)
+```
+
+Configuration is via environment variables (`CI_ENVIRONMENT`, `app_baseURL`,
+`AUTO_MIGRATE`, `AUTO_SEED`, …). The SQLite database and all
+runtime state live in the `stocktrade-writable` volume. Full details, including
+the development workflow and troubleshooting, are in [docs/docker.md](docs/docker.md).
 
 ## Key Features
 

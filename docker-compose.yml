@@ -1,0 +1,49 @@
+# ---------------------------------------------------------------------------
+# StockTrade — Docker Compose (production-style, single service)
+#
+#   docker compose up --build -d      # build and start
+#   docker compose logs -f app        # follow logs
+#   docker compose down               # stop (keeps the data volume)
+#   docker compose down -v            # stop and delete the database volume
+#
+# The application runs on Apache + PHP-FPM-less mod_php and stores its SQLite
+# database inside the `stocktrade-writable` named volume.
+# ---------------------------------------------------------------------------
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: "8.2"
+    image: stocktrade:latest
+    container_name: stocktrade-app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      CI_ENVIRONMENT: production
+
+      # CodeIgniter config overrides.
+      # NOTE: use the underscore form (app_baseURL). Apache's mod_php drops
+      # environment variable names containing a dot, so `app.baseURL` would be
+      # silently ignored. Must match the host port below and end with a slash.
+      app_baseURL: "http://localhost:8080/"
+      app_forceGlobalSecureRequests: "false"
+
+      AUTO_MIGRATE: "true"
+      AUTO_SEED: "false"
+      SEEDER_CLASS: "StockSeeder"
+    volumes:
+      # Persists the SQLite database, sessions, logs, cache and uploads.
+      - stocktrade-writable:/var/www/html/writable
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 25s
+      retries: 3
+
+volumes:
+  stocktrade-writable:
