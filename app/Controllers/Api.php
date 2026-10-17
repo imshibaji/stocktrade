@@ -535,11 +535,39 @@ class Api extends BaseController
         }
         $yahoo = new YahooFinanceService();
 
-        $quote = $yahoo->getQuote($symbol, $exchange);
+        // Yahoo throws GuzzleHttp\Exception\ClientException (404/429) for
+        // symbols it cannot resolve — e.g. a bare ticker with no exchange
+        // suffix, or an unknown symbol. Catch both calls so the endpoint
+        // answers with JSON instead of an uncaught 500 + debug page.
+        try {
+            $quote = $yahoo->getQuote($symbol, $exchange);
+        } catch (\Throwable $e) {
+            log_message('error', "API lookup quote failed for {$symbol} [{$exchange}]: " . $e->getMessage());
+            $quote = null;
+        }
         $d = $quote ? $yahoo->quoteToArray($quote) : [];
 
-        $summary = $yahoo->getSummary($symbol, $exchange);
+        // Yahoo answers an unresolvable symbol with a placeholder quote
+        // (quoteType "NONE") instead of an error — treat that as no data.
+        if (($d['quoteType'] ?? null) === 'NONE') {
+            $d = [];
+        }
+
+        try {
+            $summary = $yahoo->getSummary($symbol, $exchange);
+        } catch (\Throwable $e) {
+            log_message('error', "API lookup summary failed for {$symbol} [{$exchange}]: " . $e->getMessage());
+            $summary = [];
+        }
         $summaryData = $summary['summaryProfile'] ?? [];
+
+        if (empty($d) && empty($summaryData)) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'error'    => "No data found for symbol: {$symbol}",
+                'symbol'   => $symbol,
+                'exchange' => $exchange,
+            ]);
+        }
 
         $rp = $d['regularMarketPrice'] ?? null;
         $pc = $d['regularMarketPreviousClose'] ?? null;
@@ -835,9 +863,10 @@ class Api extends BaseController
             $newsRecords = $payload['news'] ?? [];
 
             if (empty($newsRecords)) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    "error" => "No news streams found mapping to ticker: {$symbol}"
-                ]);
+                // A ticker with no coverage is an empty collection, not a
+                // missing resource — return 200 [] so callers can tell the
+                // endpoint worked from an actual failure.
+                return $this->response->setStatusCode(200)->setJSON([]);
             }
 
             $formattedNewsFeed = [];

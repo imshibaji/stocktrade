@@ -1197,7 +1197,10 @@
         if (existing) existing.remove();
     }
 
+    // e.target can be the document itself when the pointer enters/leaves the
+    // page, and Document has no .closest() — guard before using it.
     document.addEventListener('mouseenter', function(e) {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         var priceEl = e.target.closest('.price-value');
         if (priceEl && !e.target.closest('a')) {
             var price = parseFloat(priceEl.dataset.price);
@@ -1207,6 +1210,7 @@
     }, true);
 
     document.addEventListener('mouseleave', function(e) {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         var priceEl = e.target.closest('.price-value');
         if (priceEl) hideConversionTooltip();
     }, true);

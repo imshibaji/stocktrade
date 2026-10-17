@@ -1,0 +1,39 @@
+[    6365ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/9:1460:32)
+[    7398ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8080/login:0
+[   27271ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/18:1607:32)
+[   28037ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/18:1616:32)
+[   48482ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/18:1607:32)
+[  269640ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/97:1607:32)
+[  276095ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1607:32)
+[  276284ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1616:32)
+[  278960ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1607:32)
+[  279803ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1616:32)
+[  419066ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1607:32)
+[  419070ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1616:32)
+[  419195ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1607:32)
+[  419195ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1616:32)
+[  424289ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1607:32)
+[  424296ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1616:32)
+[  425937ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1607:32)
+[  425976ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/8:1616:32)
+[  563137ms] TypeError: e.target.closest is not a function
+    at HTMLDocument.<anonymous> (http://localhost:8080/stocks/9:1607:32)
+[  573191ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ :3
+[  728119ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ :3

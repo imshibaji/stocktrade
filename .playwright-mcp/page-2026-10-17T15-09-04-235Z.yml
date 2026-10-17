@@ -1,0 +1,232 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - link " TickMoss" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7]: 
+          - generic [ref=e8]: TickMoss
+        - generic [ref=e9]:
+          - link "Home" [ref=e10] [cursor=pointer]:
+            - /url: /
+          - link "Stocks" [ref=e11] [cursor=pointer]:
+            - /url: /stocks
+          - link "About" [ref=e12] [cursor=pointer]:
+            - /url: /about
+          - link "Pricing" [ref=e13] [cursor=pointer]:
+            - /url: /pricing
+          - link "Docs" [ref=e14] [cursor=pointer]:
+            - /url: /docs/user
+          - link "FAQ" [ref=e15] [cursor=pointer]:
+            - /url: /faq
+          - link "Contact" [ref=e16] [cursor=pointer]:
+            - /url: /contact
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - button "Switch to light theme" [ref=e19]:
+            - generic [ref=e20]: 
+            - text: 
+          - button "Switch to system theme" [pressed] [ref=e21]:
+            - text: 
+            - generic [ref=e22]: 
+          - button "Switch to dark theme" [ref=e23]:
+            - generic [ref=e24]: 
+            - text: 
+        - link "Login" [ref=e25] [cursor=pointer]:
+          - /url: /login
+        - link "Get Started" [ref=e26] [cursor=pointer]:
+          - /url: /register
+        - text: 
+    - text:         
+  - main [ref=e27]:
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - heading "SBIN" [level=1] [ref=e32]
+            - generic [ref=e33]: Financial Services
+            - generic "NSE market · Closed" [ref=e34]:
+              - generic [ref=e35]: 
+              - text: Closed
+          - paragraph [ref=e36]: State Bank of India
+        - generic [ref=e37]:
+          - link " Predictions" [ref=e38] [cursor=pointer]:
+            - /url: /stocks/9/predictions
+            - generic [ref=e39]: 
+            - text: Predictions
+          - link " Back to List" [ref=e40] [cursor=pointer]:
+            - /url: /stocks
+            - generic [ref=e41]: 
+            - text: Back to List
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - heading "Historical Data / Back-Tested Data" [level=3] [ref=e45]
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - paragraph [ref=e49] [cursor=pointer]: ₹962.60
+              - paragraph [ref=e50] [cursor=pointer]: +₹2.60 (+0.27%)
+            - tablist "Chart range" [ref=e51]:
+              - tab "1M" [ref=e52]
+              - tab "3M" [ref=e53]
+              - tab "6M" [selected] [ref=e54]
+              - tab "1Y" [ref=e55]
+              - tab "2Y" [ref=e56]
+              - tab "5Y" [ref=e57]
+          - generic [ref=e59]:
+            - generic "Candlestick price chart" [ref=e60]
+            - generic [ref=e61]: Fetching price data…
+        - generic [ref=e64]:
+          - heading "Key Metrics" [level=3] [ref=e65]
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]: Market Cap
+              - generic [ref=e69]: 964599.53 Cr
+            - generic [ref=e70]:
+              - generic [ref=e71]: Avg Volume
+              - generic [ref=e72]: 1.41 Cr
+            - generic [ref=e73]:
+              - generic [ref=e74]: Open
+              - generic [ref=e75] [cursor=pointer]: ₹961.10
+            - generic [ref=e76]:
+              - generic [ref=e77]: Day High
+              - generic [ref=e78] [cursor=pointer]: ₹965.90
+            - generic [ref=e79]:
+              - generic [ref=e80]: Day Low
+              - generic [ref=e81] [cursor=pointer]: ₹951.70
+            - generic [ref=e82]:
+              - generic [ref=e83]: Volume
+              - generic [ref=e84]: 78.42 L
+            - generic [ref=e85]:
+              - generic [ref=e86]: P/E Ratio
+              - generic [ref=e87]: "11.47"
+            - generic [ref=e88]:
+              - generic [ref=e89]: 52-Week High
+              - generic [ref=e90] [cursor=pointer]: ₹1,234.70
+            - generic [ref=e91]:
+              - generic [ref=e92]: 52-Week Low
+              - generic [ref=e93] [cursor=pointer]: ₹786.55
+            - generic [ref=e94]:
+              - generic [ref=e95]: Dividend Yield
+              - generic [ref=e96]: 0.02%
+            - generic [ref=e97]:
+              - generic [ref=e98]: Bid / Ask
+              - generic [ref=e99] [cursor=pointer]: N/A
+            - generic [ref=e100]:
+              - generic [ref=e101]: Beta
+              - generic [ref=e102]: N/A
+      - generic [ref=e103]:
+        - generic [ref=e104]:
+          - heading "Company" [level=2] [ref=e105]
+          - generic [ref=e106]: Fetching from the data feed…
+        - generic [ref=e107]:
+          - generic [ref=e108]: Reading company profile…
+          - generic [ref=e111]: Pulling the numbers…
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - heading "Earnings" [level=3] [ref=e116]
+            - generic [ref=e117]: – next
+          - generic [ref=e118]: Reading earnings…
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - heading "Analyst growth" [level=2] [ref=e123]
+          - generic [ref=e124]: Fetching analyst &amp; ownership trends…
+        - generic [ref=e125]: Reading analyst trends…
+      - generic [ref=e129]:
+        - generic [ref=e130]:
+          - heading "Institutional activity" [level=2] [ref=e131]
+          - generic [ref=e132]: Last 6 months
+        - generic [ref=e133]: Reading share activity…
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - heading "Corporate events" [level=2] [ref=e139]
+          - generic [ref=e140]: Last 5 years
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - generic [ref=e143]:
+              - heading "Dividends" [level=3] [ref=e144]
+              - generic [ref=e145]: – payouts
+            - generic [ref=e146]: Reading dividend ledger…
+          - generic [ref=e149]:
+            - generic [ref=e150]:
+              - heading "Splits" [level=3] [ref=e151]
+              - generic [ref=e152]: – events
+            - generic [ref=e153]: Reading split ledger…
+      - generic [ref=e156]:
+        - generic [ref=e157]:
+          - heading "Options chain" [level=2] [ref=e158]
+          - generic [ref=e159]: Fetching…
+        - generic [ref=e160]: Loading the option chain…
+  - contentinfo [ref=e165]:
+    - generic [ref=e166]:
+      - generic [ref=e167]:
+        - generic [ref=e168]:
+          - heading "Tick Moss" [level=3] [ref=e169]
+          - paragraph [ref=e170]: Your trusted platform for stock analysis, predictions, and investment tracking.
+        - generic [ref=e171]:
+          - heading "Quick Links" [level=4] [ref=e172]
+          - list [ref=e173]:
+            - listitem [ref=e174]:
+              - link "Home" [ref=e175] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e176]:
+              - link "About Us" [ref=e177] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e178]:
+              - link "Pricing" [ref=e179] [cursor=pointer]:
+                - /url: /pricing
+            - listitem [ref=e180]:
+              - link "Stocks" [ref=e181] [cursor=pointer]:
+                - /url: /stocks
+            - listitem [ref=e182]:
+              - link "Contact" [ref=e183] [cursor=pointer]:
+                - /url: /contact
+        - generic [ref=e184]:
+          - heading "Documentation" [level=4] [ref=e185]
+          - list [ref=e186]:
+            - listitem [ref=e187]:
+              - link "User Guide" [ref=e188] [cursor=pointer]:
+                - /url: /docs/user
+            - listitem [ref=e189]:
+              - link "Developer Docs" [ref=e190] [cursor=pointer]:
+                - /url: /docs/developer
+            - listitem [ref=e191]:
+              - link "API Playground" [ref=e192] [cursor=pointer]:
+                - /url: /api-playground
+        - generic [ref=e193]:
+          - heading "Legal" [level=4] [ref=e194]
+          - list [ref=e195]:
+            - listitem [ref=e196]:
+              - link "Terms and Conditions" [ref=e197] [cursor=pointer]:
+                - /url: /terms
+            - listitem [ref=e198]:
+              - link "Privacy Policy" [ref=e199] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e200]:
+              - link "FAQ" [ref=e201] [cursor=pointer]:
+                - /url: /faq
+            - listitem [ref=e202]:
+              - link "Pricing" [ref=e203] [cursor=pointer]:
+                - /url: /pricing
+        - generic [ref=e204]:
+          - heading "Features" [level=4] [ref=e205]
+          - list [ref=e206]:
+            - listitem [ref=e207]:
+              - generic [ref=e208]: 
+              - text: Stock Analysis
+            - listitem [ref=e209]:
+              - generic [ref=e210]: 
+              - text: Future Predictions
+            - listitem [ref=e211]:
+              - generic [ref=e212]: 
+              - text: Portfolio Tracking
+            - listitem [ref=e213]:
+              - generic [ref=e214]: 
+              - text: Tax Calculations
+        - generic [ref=e215]:
+          - heading "Disclaimer" [level=4] [ref=e216]
+          - paragraph [ref=e217]: Stock market investments are subject to market risks. Past performance is not indicative of future results. Predictions are AI-generated and should not be considered as financial advice.
+      - generic [ref=e218]:
+        - text: © 2026 Tick Moss. All rights reserved. Built with CodeIgniter 4. Developed by
+        - link "Shibaji Debnath" [ref=e219] [cursor=pointer]:
+          - /url: https://www.shibajidebnath.com
+        - text: .

@@ -93,8 +93,10 @@ class ForecastEngine
         $predictedPrice = $lastPrice + ($slope * $horizon);
         $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
 
-        $confidence = $this->clampConfidence(
-            ($rSquared * 50) + min(abs($slope) / $lastPrice * 100, 30)
+        // Fit quality dominates; a steeper daily slope adds conviction.
+        $dailySlopePct = $lastPrice > 0 ? abs($slope) / $lastPrice * 100 : 0;
+        $confidence = $this->confidenceFromStrength(
+            0.7 * $rSquared + 0.3 * min($dailySlopePct / 1.0, 1.0)
         );
 
         $signal = $slope > 0 ? 'BULLISH' : ($slope < 0 ? 'BEARISH' : 'NEUTRAL');
@@ -127,8 +129,10 @@ class ForecastEngine
         $predictedPrice = $lastPrice + ($emaSlope * $horizon * 0.5);
         $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
 
-        $confidence = $this->clampConfidence(
-            abs($diff) / $lastPrice * 200 + ($crossover !== 'continuation' ? 20 : 0)
+        // Fast/slow EMA separation drives conviction; a fresh cross adds a bump.
+        $separation = $lastPrice > 0 ? abs($diff) / $lastPrice : 0;
+        $confidence = $this->confidenceFromStrength(
+            min($separation / 0.028, 1.0) * 0.75 + ($crossover !== 'continuation' ? 0.25 : 0)
         );
 
         $signal = $diff > 0 ? 'BULLISH' : ($diff < 0 ? 'BEARISH' : 'NEUTRAL');
@@ -158,9 +162,8 @@ class ForecastEngine
         $predictedPrice = $lastPrice - ($distance * $lastPrice * $reversionSpeed * ($horizon / 7));
         $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
 
-        $confidence = $this->clampConfidence(
-            abs($distance) * 100 + 10
-        );
+        // The further price sits from its mean, the stronger the reversion case.
+        $confidence = $this->confidenceFromStrength(min(abs($distance) / 0.15, 1.0));
 
         $signal = $distance < -0.02 ? 'BULLISH' : ($distance > 0.02 ? 'BEARISH' : 'NEUTRAL');
 
@@ -188,15 +191,15 @@ class ForecastEngine
         if ($rsi < 30) {
             $signal = 'BULLISH';
             $oversoldDegree = (30 - $rsi) / 30;
-            $confidence = $this->clampConfidence($oversoldDegree * 80 + 10);
+            $confidence = $this->confidenceFromStrength($oversoldDegree);
             $changePct = $oversoldDegree * 5;
         } elseif ($rsi > 70) {
             $signal = 'BEARISH';
             $overboughtDegree = ($rsi - 70) / 30;
-            $confidence = $this->clampConfidence($overboughtDegree * 80 + 10);
+            $confidence = $this->confidenceFromStrength($overboughtDegree);
             $changePct = -($overboughtDegree * 5);
         } else {
-            $confidence = 10;
+            $confidence = $this->confidenceFromStrength(0.2);
             $changePct = 0;
         }
 
@@ -233,15 +236,15 @@ class ForecastEngine
         if ($position < 0.2) {
             $signal = 'BULLISH';
             $distanceToMiddle = ($middle - $lastPrice) / $lastPrice;
-            $confidence = $this->clampConfidence((1 - $position) * 60 + 10);
+            $confidence = $this->confidenceFromStrength((0.2 - $position) / 0.2);
             $changePct = $distanceToMiddle * 100 * 0.5;
         } elseif ($position > 0.8) {
             $signal = 'BEARISH';
             $distanceToMiddle = ($lastPrice - $middle) / $lastPrice;
-            $confidence = $this->clampConfidence($position * 60 + 10);
+            $confidence = $this->confidenceFromStrength(($position - 0.8) / 0.2);
             $changePct = -($distanceToMiddle * 100 * 0.5);
         } else {
-            $confidence = 10;
+            $confidence = $this->confidenceFromStrength(0.2);
         }
 
         $predictedPrice = $lastPrice * (1 + $changePct / 100);
@@ -271,7 +274,7 @@ class ForecastEngine
         $histStrength = abs($histogram) / max(abs($lastPrice), 1);
 
         $signal = $histogram > 0 ? 'BULLISH' : ($histogram < 0 ? 'BEARISH' : 'NEUTRAL');
-        $confidence = $this->clampConfidence(min($histStrength * 500 + 10, 60));
+        $confidence = $this->confidenceFromStrength(min($histStrength / 0.009, 1.0));
 
         $trendFactor = $histogram * 0.01;
         $predictedPrice = $lastPrice * (1 + $trendFactor * ($horizon / 7));
@@ -301,7 +304,7 @@ class ForecastEngine
         $predictedPrice = $lastPrice - ($distance * $lastPrice * $reversionSpeed * ($horizon / 7));
         $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
 
-        $confidence = $this->clampConfidence(abs($distance) * 150 + 5);
+        $confidence = $this->confidenceFromStrength(min(abs($distance) / 0.15, 1.0));
 
         return [
             'predicted_price'      => round($predictedPrice, 2),
@@ -323,8 +326,11 @@ class ForecastEngine
         $atr = $this->engine->calculateATR(10);
         $signal = $st['trend'] === 'BULLISH' ? 'BULLISH' : ($st['trend'] === 'BEARISH' ? 'BEARISH' : 'NEUTRAL');
 
-        $atrPct = $atr != 0 ? $atr / $lastPrice : 0;
-        $confidence = $this->clampConfidence(min($atrPct * 200 + 10, 50));
+        // Trend-following conviction comes from how "efficient" (clean and
+        // directional) recent price action is; the distance to the supertrend
+        // line is ~3x ATR by construction, so it carries no information.
+        $efficiency = $this->engine->calculateEfficiencyRatio($this->prices, 14) ?? 0.0;
+        $confidence = $this->confidenceFromStrength(min($efficiency / 0.5, 1.0));
 
         $direction = $signal === 'BULLISH' ? 1 : ($signal === 'BEARISH' ? -1 : 0);
         $predictedPrice = $lastPrice + ($direction * $atr * 1.5 * ($horizon / 7));
@@ -363,9 +369,11 @@ class ForecastEngine
         $var /= ($count - 1);
         $std = sqrt($var);
 
+        $simulations = 1500;
+
         mt_srand(crc32(implode(',', array_slice($this->prices, -30))));
         $paths = [];
-        for ($sim = 0; $sim < 1500; $sim++) {
+        for ($sim = 0; $sim < $simulations; $sim++) {
             $price = $lastPrice;
             for ($d = 0; $d < $horizon; $d++) {
                 $price *= exp(($mean - 0.5 * $std * $std) + $std * $this->gaussian());
@@ -374,12 +382,22 @@ class ForecastEngine
         }
         sort($paths);
 
-        $median = $paths[(int) floor($count * 0.5)];
-        $p10 = $paths[(int) floor($count * 0.1)];
-        $p90 = $paths[(int) floor($count * 0.9)];
+        // Percentiles must index into the simulated paths, not the number of
+        // observed returns. The last usable index is count($paths) - 1.
+        $simCount = count($paths);
+        $percentile = static function (float $q) use ($simCount): int {
+            return max(0, min($simCount - 1, (int) floor($simCount * $q)));
+        };
+
+        $median = $paths[$percentile(0.5)];
+        $p10 = $paths[$percentile(0.1)];
+        $p90 = $paths[$percentile(0.9)];
 
         $changePct = $lastPrice > 0 ? (($median - $lastPrice) / $lastPrice) * 100 : 0;
-        $confidence = $this->clampConfidence(50 - (($p90 - $p10) / $lastPrice) * 100);
+        // Confidence falls as the 10th-90th percentile band widens: a tight
+        // band (low dispersion) means a more reliable point forecast.
+        $bandPct = $lastPrice > 0 ? (($p90 - $p10) / $lastPrice) * 100 : 0;
+        $confidence = $this->confidenceFromStrength(1 - min($bandPct / 55, 1.0));
         $signal = $median > $lastPrice ? 'BULLISH' : ($median < $lastPrice ? 'BEARISH' : 'NEUTRAL');
 
         return [
@@ -389,7 +407,7 @@ class ForecastEngine
             'confidence_score'     => $confidence,
             'method'               => 'monte_carlo',
             'horizon_days'         => $horizon,
-            'simulations'          => 1500,
+            'simulations'          => $simulations,
             'lower_bound'          => round($p10, 2),
             'upper_bound'          => round($p90, 2),
             'volatility'           => round($std * 100, 2),
@@ -408,7 +426,7 @@ class ForecastEngine
         if ($predictedPrice <= 0) return null;
 
         $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
-        $confidence = $this->clampConfidence(abs($trendRate) * 400 + 10);
+        $confidence = $this->confidenceFromStrength(min(abs($trendRate) / 0.05, 1.0));
         $signal = $trendRate > 0 ? 'BULLISH' : ($trendRate < 0 ? 'BEARISH' : 'NEUTRAL');
 
         return [
@@ -445,7 +463,7 @@ class ForecastEngine
         if ($predictedPrice <= 0) return null;
 
         $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
-        $confidence = $this->clampConfidence(abs($drift) * 400 + 10);
+        $confidence = $this->confidenceFromStrength(min(abs($drift) / 0.05, 1.0));
         $signal = $wma > $lastPrice ? 'BULLISH' : ($wma < $lastPrice ? 'BEARISH' : 'NEUTRAL');
 
         return [
@@ -477,7 +495,8 @@ class ForecastEngine
         if ($predictedPrice <= 0) return null;
 
         $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
-        $confidence = $this->clampConfidence(abs($trend) / $level * 500 + 10);
+        $dailyTrendPct = $level > 0 ? abs($trend) / $level : 0;
+        $confidence = $this->confidenceFromStrength(min($dailyTrendPct / 0.008, 1.0));
         $signal = $trend > 0 ? 'BULLISH' : ($trend < 0 ? 'BEARISH' : 'NEUTRAL');
 
         return [
@@ -502,7 +521,7 @@ class ForecastEngine
         if ($predictedPrice <= 0) return null;
 
         $changePct = $lastPrice != 0 ? (($predictedPrice - $lastPrice) / $lastPrice) * 100 : 0;
-        $confidence = $this->clampConfidence(abs($roc) * 2 + 10);
+        $confidence = $this->confidenceFromStrength(min(abs($roc) / 12, 1.0));
         $signal = $roc > 0 ? 'BULLISH' : ($roc < 0 ? 'BEARISH' : 'NEUTRAL');
 
         return [
@@ -529,21 +548,25 @@ class ForecastEngine
 
         $position = ($lastPrice - $lower) / $range;
         $signal = 'NEUTRAL';
-        $confidence = 10;
+        $strength = 0.2;
 
         if ($lastPrice > $upper) {
             $signal = 'BULLISH';
-            $confidence = $this->clampConfidence($position * 60 + 15);
+            $breakout = $upper > 0 ? ($lastPrice - $upper) / $upper : 0;
+            $strength = 0.6 + min($breakout / 0.05, 1.0) * 0.4;
         } elseif ($lastPrice < $lower) {
             $signal = 'BEARISH';
-            $confidence = $this->clampConfidence((1 - $position) * 60 + 15);
+            $breakout = $lower > 0 ? ($lower - $lastPrice) / $lower : 0;
+            $strength = 0.6 + min($breakout / 0.05, 1.0) * 0.4;
         } elseif ($position > 0.8) {
             $signal = 'BULLISH';
-            $confidence = $this->clampConfidence($position * 50 + 10);
+            $strength = 0.3 + ($position - 0.8) / 0.2 * 0.3;
         } elseif ($position < 0.2) {
             $signal = 'BEARISH';
-            $confidence = $this->clampConfidence((1 - $position) * 50 + 10);
+            $strength = 0.3 + (0.2 - $position) / 0.2 * 0.3;
         }
+
+        $confidence = $this->confidenceFromStrength($strength);
 
         $direction = $signal === 'BULLISH' ? 1 : ($signal === 'BEARISH' ? -1 : 0);
         $move = $lastPrice > 0 ? ($lastPrice - $middle) / $lastPrice : 0;
@@ -580,12 +603,14 @@ class ForecastEngine
         if ($position >= 0.5) {
             $target = $swingHigh + 0.618 * $range;
             $signal = 'BULLISH';
-            $confidence = $this->clampConfidence($position * 50 + 10);
+            $strength = 0.1 + ($position - 0.5) / 0.5 * 0.75;
         } else {
             $target = $swingLow - 0.618 * $range;
             $signal = 'BEARISH';
-            $confidence = $this->clampConfidence((1 - $position) * 50 + 10);
+            $strength = 0.1 + (0.5 - $position) / 0.5 * 0.75;
         }
+
+        $confidence = $this->confidenceFromStrength($strength);
 
         $predictedPrice = $lastPrice + ($target - $lastPrice) * ($horizon / 30);
         if ($predictedPrice <= 0) return null;
@@ -612,18 +637,20 @@ class ForecastEngine
         if ($k === null) return null;
 
         $signal = 'NEUTRAL';
-        $confidence = 10;
+        $strength = 0.2;
         $changePct = 0;
 
         if ($k < 20) {
             $signal = 'BULLISH';
-            $confidence = $this->clampConfidence(((20 - $k) / 20) * 60 + 10);
+            $strength = (20 - $k) / 20;
             $changePct = ((20 - $k) / 20) * 4;
         } elseif ($k > 80) {
             $signal = 'BEARISH';
-            $confidence = $this->clampConfidence((($k - 80) / 20) * 60 + 10);
+            $strength = ($k - 80) / 20;
             $changePct = -(($k - 80) / 20) * 4;
         }
+
+        $confidence = $this->confidenceFromStrength($strength);
 
         $predictedPrice = $lastPrice * (1 + $changePct / 100);
         if ($predictedPrice <= 0) return null;
@@ -650,5 +677,21 @@ class ForecastEngine
     private function clampConfidence(float $value): float
     {
         return max(5, min(95, round($value, 1)));
+    }
+
+    /**
+     * Map a normalised signal strength (0..1) onto the display confidence band.
+     *
+     * 0.0 = no/weak signal  -> ~40%  (a real forecast, but little conviction)
+     * 1.0 = strong signal   -> ~95%
+     *
+     * Keeping every method on one band means confidence is comparable across
+     * methods and lines up with the UI thresholds (65 = yellow, 80 = green).
+     */
+    private function confidenceFromStrength(float $strength): float
+    {
+        $strength = max(0.0, min(1.0, $strength));
+
+        return $this->clampConfidence(40 + $strength * 55);
     }
 }

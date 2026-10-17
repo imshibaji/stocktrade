@@ -393,7 +393,10 @@ class Stocks extends BaseController
             $forecast[] = [
                 'predicted_date'    => date('Y-m-d', strtotime("+{$day} days")),
                 'predicted_price'   => round(($monteCarlo['predicted_price'] + $ema['predicted_price']) / 2, 2),
-                'confidence_score'  => round(($monteCarlo['confidence_score'] + $ema['confidence_score']) / 2, 2),
+                // EMA's score is a signal-strength reading that floors at 5%,
+                // so averaging it in would drag the blended default down to
+                // ~25%. Report the Monte Carlo band-based confidence instead.
+                'confidence_score'  => $monteCarlo['confidence_score'],
                 'method'            => 'Monte Carlo + EMA',
             ];
         }

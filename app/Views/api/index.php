@@ -103,21 +103,20 @@
             ],
             'app_search' => [
                 'method' => 'GET',
-                'path' => '/api/search?q={query}',
+                'path' => '/api/search',
                 'desc' => 'App stock search (local DB + Yahoo)',
                 'params' => [
                     ['name' => 'q', 'label' => 'Query', 'default' => 'PFC', 'in' => 'query']
-                ],
-                'auth' => true
+                ]
             ],
             'quote_lookup' => [
                 'method' => 'GET',
                 'path' => '/api/quote/{symbol}',
                 'desc' => 'Extended lookup (quote + summary merged)',
                 'params' => [
-                    ['name' => 'symbol', 'label' => 'Symbol', 'default' => 'PFC', 'in' => 'path']
-                ],
-                'auth' => true
+                    ['name' => 'symbol', 'label' => 'Symbol', 'default' => 'PFC', 'in' => 'path'],
+                    ['name' => 'exchange', 'label' => 'Exchange', 'default' => 'NSE', 'in' => 'query']
+                ]
             ],
         ];
         ?>
@@ -135,8 +134,11 @@
                     <span class="px-1.5 py-0.5 rounded text-[10px] bg-blue-900/50 text-blue-400 font-mono">AUTH</span>
                     <?php endif; ?>
                 </div>
-                <button onclick="toggleApiCard('<?= $key ?>')" class="text-gray-500 hover:text-accent transition">
-                    <i class="fas fa-chevron-down"></i>
+                <button type="button" onclick="toggleApiCard('<?= $key ?>')" aria-expanded="false"
+                    aria-controls="apiBody_<?= $key ?>"
+                    aria-label="Toggle details for <?= esc($ep['path']) ?>"
+                    class="text-gray-500 hover:text-accent transition">
+                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
                 </button>
             </div>
             <div class="px-5 py-3 bg-page/30">
@@ -181,28 +183,59 @@
 <script>
 function toggleApiCard(key) {
     var body = document.getElementById('apiBody_' + key);
-    body.classList.toggle('hidden');
-    var icon = body.closest('.api-card').querySelector('.fa-chevron-down');
-    if (icon) icon.classList.toggle('rotate-180');
+    var card = body.closest('.api-card');
+    var isHidden = body.classList.toggle('hidden');
+    var btn = card.querySelector('button[aria-expanded]');
+    if (btn) btn.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+    var icon = card.querySelector('.fa-chevron-down');
+    if (icon) icon.classList.toggle('rotate-180', !isHidden);
 }
 
 function buildUrl(key) {
     var card = document.querySelector('.api-card[data-key="' + key + '"]');
     var path = card.querySelector('code').textContent.trim();
     var params = card.querySelectorAll('.api-param');
-    var url = path;
+
+    // Split the declared path into its path part and any inline query
+    // template (e.g. "/api/search?q={query}") so a template is substituted
+    // rather than appended a second time.
+    var qIdx = path.indexOf('?');
+    var url = qIdx >= 0 ? path.slice(0, qIdx) : path;
     var qs = [];
+    if (qIdx >= 0) {
+        path.slice(qIdx + 1).split('&').forEach(function(pair) {
+            if (!pair) return;
+            var eq = pair.indexOf('=');
+            if (eq < 0) { qs.push([pair, '']); return; }
+            qs.push([pair.slice(0, eq), pair.slice(eq + 1)]);
+        });
+    }
+
     params.forEach(function(p) {
         var val = encodeURIComponent(p.value.trim());
         var loc = p.getAttribute('data-in');
         var name = p.getAttribute('data-name');
         if (loc === 'query') {
-            qs.push(name + '=' + val);
+            var substituted = false;
+            qs.forEach(function(pair) {
+                if (pair[0] === name && /\{[^}]*\}/.test(pair[1])) {
+                    pair[1] = val;
+                    substituted = true;
+                }
+            });
+            if (!substituted) qs.push([name, val]);
         } else {
             url = url.replace('{' + name + '}', val);
         }
     });
-    if (qs.length > 0) url += '?' + qs.join('&');
+
+    // Never send a literal "{name}" placeholder.
+    url = url.replace(/\{[^}]*\}/g, '');
+    qs = qs.filter(function(pair) { return !/\{[^}]*\}/.test(pair[1]); });
+
+    if (qs.length > 0) {
+        url += '?' + qs.map(function(pair) { return pair[0] + '=' + pair[1]; }).join('&');
+    }
     return url;
 }
 

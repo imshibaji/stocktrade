@@ -6,6 +6,8 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+.openchamber
+.playwright-mcp
 
 # OS X Thumbnails
 ._*
