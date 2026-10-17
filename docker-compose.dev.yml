@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# StockTrade — development override
+# Tickmoss — development override
 #
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 #
@@ -22,4 +22,4 @@ services:
       - .:/var/www/html
       # Keep dependencies and runtime state out of the bind mount
       - /var/www/html/vendor
-      - stocktrade-writable:/var/www/html/writable
+      - tickmoss-writable:/var/www/html/writable

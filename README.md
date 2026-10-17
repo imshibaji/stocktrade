@@ -1,4 +1,4 @@
-# StockTradeMonitor — Stock Analysis & Prediction Platform
+# Tickmoss — Stock Analysis & Prediction Platform
 
 A CodeIgniter 4 web application for stock market analysis, AI-driven predictions, portfolio tracking, and investment management. Built with PHP 8.2+, Tailwind CSS v4, daisyUI 5, and Yahoo Finance data.
 
@@ -42,7 +42,7 @@ docker compose down              # stop (keeps the data volume)
 
 Configuration is via environment variables (`CI_ENVIRONMENT`, `app_baseURL`,
 `AUTO_MIGRATE`, `AUTO_SEED`, …). The SQLite database and all
-runtime state live in the `stocktrade-writable` volume. Full details, including
+runtime state live in the `tickmoss-writable` volume. Full details, including
 the development workflow and troubleshooting, are in [docs/docker.md](docs/docker.md).
 
 ## Key Features

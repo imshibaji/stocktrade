@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# Container entrypoint for the StockTrade (CodeIgniter 4) application.
+# Container entrypoint for the Tickmoss (CodeIgniter 4) application.
 #
 # 1. Prepares the writable/ tree
 # 2. Optionally runs database migrations  (AUTO_MIGRATE, default: true)

@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# StockTrade — Docker Compose (production-style, single service)
+# Tickmoss — Docker Compose (production-style, single service)
 #
 #   docker compose up --build -d      # build and start
 #   docker compose logs -f app        # follow logs
@@ -7,7 +7,7 @@
 #   docker compose down -v            # stop and delete the database volume
 #
 # The application runs on Apache + PHP-FPM-less mod_php and stores its SQLite
-# database inside the `stocktrade-writable` named volume.
+# database inside the `tickmoss-writable` named volume.
 # ---------------------------------------------------------------------------
 
 services:
@@ -17,8 +17,8 @@ services:
       dockerfile: Dockerfile
       args:
         PHP_VERSION: "8.2"
-    image: stocktrade:latest
-    container_name: stocktrade-app
+    image: tickmoss:latest
+    container_name: tickmoss-app
     restart: unless-stopped
     ports:
       - "8080:80"
@@ -37,7 +37,7 @@ services:
       SEEDER_CLASS: "StockSeeder"
     volumes:
       # Persists the SQLite database, sessions, logs, cache and uploads.
-      - stocktrade-writable:/var/www/html/writable
+      - tickmoss-writable:/var/www/html/writable
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1/"]
       interval: 30s
@@ -46,4 +46,4 @@ services:
       retries: 3
 
 volumes:
-  stocktrade-writable:
+  tickmoss-writable:

@@ -1,6 +1,6 @@
 # Docker
 
-Run **StockTrade** (CodeIgniter 4 + SQLite + Tailwind CSS) in a container without
+Run **Tickmoss** (CodeIgniter 4 + SQLite + Tailwind CSS) in a container without
 installing PHP, Composer or Node on the host.
 
 ## What's included
@@ -39,8 +39,8 @@ docker compose down -v
 Without Compose:
 
 ```bash
-docker build -t stocktrade .
-docker run --rm -p 8080:80 --name stocktrade stocktrade
+docker build -t tickmoss .
+docker run --rm -p 8080:80 --name tickmoss tickmoss
 ```
 
 ## Configuration
@@ -86,7 +86,7 @@ To seed automatically on every boot (useful for a demo image), set
 
 The container writes only to `/var/www/html/writable` (cache, logs, sessions,
 uploads, debugbar and the SQLite database at `writable/database/stocktrade.db`).
-Compose mounts the named volume `stocktrade-writable` there, so data survives
+Compose mounts the named volume `tickmoss-writable` there, so data survives
 `docker compose down` and image rebuilds. `docker compose down -v` deletes it.
 
 To use an existing SQLite file from the host:
@@ -94,7 +94,7 @@ To use an existing SQLite file from the host:
 ```bash
 docker run --rm -p 8080:80 \
   -v "$PWD/writable:/var/www/html/writable" \
-  stocktrade
+  tickmoss
 ```
 
 ## Development (live editing)

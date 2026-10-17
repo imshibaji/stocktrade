@@ -1,6 +1,6 @@
-# StockTrade — 30 Screener Sample Queries
+# Tickmoss — 30 Screener Sample Queries
 
-A curated collection of ready-to-use screener queries for the StockTrade stock screening application. Each query targets a specific investment strategy or market condition.
+A curated collection of ready-to-use screener queries for the Tickmoss stock screening application. Each query targets a specific investment strategy or market condition.
 
 ---
 

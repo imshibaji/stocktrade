@@ -1,7 +1,7 @@
 {
-  "name": "stocktrade",
+  "name": "tickmoss",
   "version": "1.0.0",
-  "description": "CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure. More information can be found at the [official site](https://codeigniter.com).",
+  "description": "Tailwind CSS + daisyUI front-end build for Tickmoss — a self-hosted, open-source stock analysis, AI price prediction and portfolio tracking app.",
   "main": "index.js",
   "directories": {
     "test": "tests"
@@ -14,7 +14,15 @@
     "type": "git",
     "url": "git+https://github.com/imshibaji/stocktrade.git"
   },
-  "keywords": [],
+  "keywords": [
+    "tailwindcss",
+    "daisyui",
+    "stock-analysis",
+    "stock-screener",
+    "portfolio-tracker",
+    "self-hosted",
+    "open-source"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------------------------------------------------------------------------
-# StockTrade — CodeIgniter 4 (PHP 8.2+, SQLite, Tailwind CSS v4)
+# Tickmoss — CodeIgniter 4 (PHP 8.2+, SQLite, Tailwind CSS v4)
 #
 # Multi-stage build:
 #   1. assets  — compile Tailwind CSS with Node
@@ -9,8 +9,8 @@
 #   3. vendor  — install Composer production dependencies
 #   4. runtime — final image (app + vendor + compiled CSS)
 #
-# Build:  docker build -t stocktrade .
-# Run:    docker run --rm -p 8080:80 stocktrade
+# Build:  docker build -t tickmoss .
+# Run:    docker run --rm -p 8080:80 tickmoss
 # ---------------------------------------------------------------------------
 
 ARG PHP_VERSION=8.2
@@ -58,7 +58,7 @@ RUN apt-get update \
 COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 
 # Production PHP settings (opcache, limits, timezone)
-COPY docker/php.ini /usr/local/etc/php/conf.d/zz-stocktrade.ini
+COPY docker/php.ini /usr/local/etc/php/conf.d/zz-tickmoss.ini
 
 # Composer binary (reused by the vendor stage)
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
