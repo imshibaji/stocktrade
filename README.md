@@ -1,4 +1,4 @@
-# StockTrade — Stock Analysis & Prediction Platform
+# StockTradeMonitor — Stock Analysis & Prediction Platform
 
 A CodeIgniter 4 web application for stock market analysis, AI-driven predictions, portfolio tracking, and investment management. Built with PHP 8.2+, Tailwind CSS v4, daisyUI 5, and Yahoo Finance data.
 
