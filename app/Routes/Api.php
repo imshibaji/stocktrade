@@ -4,7 +4,7 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 
-$routes->group('api', ['filter' => 'auth'], static function ($routes) {
+$routes->group('api', ['filter' => 'guest'], static function ($routes) {
     $routes->get('quote/(:any)/(:any)', 'Api::getQuote/$1/$2');
     $routes->get('quote/(:any)', 'Api::lookup/$1');
     $routes->get('market-status/(:any)', 'Api::marketStatus/$1');

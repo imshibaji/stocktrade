@@ -265,25 +265,25 @@ class Stocks extends BaseController
         $isCustom = false;
 
         if ($requestedMethod !== '' && array_key_exists($requestedMethod, $methods)) {
-            $engine = new \App\Libraries\ForecastEngine();
-            $engine->loadData($stock['price_history']);
+            $custom = $this->buildForecast($stock['price_history'], $requestedMethod);
 
-            $custom = [];
-            for ($day = 1; $day <= 30; $day++) {
-                $forecast = $engine->predict($requestedMethod, $day);
-                if ($forecast === null) break;
-                $custom[] = [
-                    'predicted_date'    => date('Y-m-d', strtotime("+{$day} days")),
-                    'predicted_price'   => $forecast['predicted_price'],
-                    'confidence_score'  => $forecast['confidence_score'],
-                    'method'            => $requestedMethod,
-                ];
-            }
-
-            if (!empty($custom) && count($custom) === 30) {
+            if (count($custom) === 30) {
                 $selectedMethod = $requestedMethod;
                 $isCustom = true;
                 $stock['predictions'] = $custom;
+            }
+        }
+
+        // Stored predictions are generated against a fixed window at seed /
+        // ingestion time and expire as days pass, which left the page with an
+        // empty table and no predicted line on the chart. When fewer than a
+        // full 30 days remain in the future, rebuild the default forecast on
+        // the fly so the page always shows fresh data.
+        if (!$isCustom && count($stock['predictions']) < 30) {
+            $default = $this->buildDefaultForecast($stock['price_history']);
+
+            if (count($default) === 30) {
+                $stock['predictions'] = $default;
             }
         }
 
@@ -328,6 +328,77 @@ class Stocks extends BaseController
         return view('templates/header', $data)
             . view('stocks/predictions', $data)
             . view('templates/footer');
+    }
+
+    /**
+     * Build a 30-day forecast for a single method using the price history.
+     *
+     * @param array<int, array<string, mixed>> $priceHistory
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildForecast(array $priceHistory, string $method, int $days = 30): array
+    {
+        if (empty($priceHistory)) {
+            return [];
+        }
+
+        $engine = new \App\Libraries\ForecastEngine();
+        $engine->loadData($priceHistory);
+
+        $forecast = [];
+        for ($day = 1; $day <= $days; $day++) {
+            $result = $engine->predict($method, $day);
+            if ($result === null) {
+                break;
+            }
+
+            $forecast[] = [
+                'predicted_date'    => date('Y-m-d', strtotime("+{$day} days")),
+                'predicted_price'   => $result['predicted_price'],
+                'confidence_score'  => $result['confidence_score'],
+                'method'            => $method,
+            ];
+        }
+
+        return $forecast;
+    }
+
+    /**
+     * Build the default 30-day forecast, blending Monte Carlo and EMA.
+     *
+     * @param array<int, array<string, mixed>> $priceHistory
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildDefaultForecast(array $priceHistory, int $days = 30): array
+    {
+        if (empty($priceHistory)) {
+            return [];
+        }
+
+        $engine = new \App\Libraries\ForecastEngine();
+        $engine->loadData($priceHistory);
+
+        $forecast = [];
+        for ($day = 1; $day <= $days; $day++) {
+            $monteCarlo = $engine->predict('monte_carlo', $day);
+            $ema        = $engine->predict('ema_crossover', $day);
+
+            if ($monteCarlo === null && $ema === null) {
+                break;
+            }
+
+            $monteCarlo = $monteCarlo ?? $ema;
+            $ema        = $ema ?? $monteCarlo;
+
+            $forecast[] = [
+                'predicted_date'    => date('Y-m-d', strtotime("+{$day} days")),
+                'predicted_price'   => round(($monteCarlo['predicted_price'] + $ema['predicted_price']) / 2, 2),
+                'confidence_score'  => round(($monteCarlo['confidence_score'] + $ema['confidence_score']) / 2, 2),
+                'method'            => 'Monte Carlo + EMA',
+            ];
+        }
+
+        return $forecast;
     }
 
     public function search()
